@@ -1,0 +1,42 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- ── SCHEMAS ──────────────────────────────────────────── -->
+    <include file="db/changelog/tables/schema.xml"/>
+
+    <!-- ── ADMIN TABLES ─────────────────────────────────────── -->
+    <include file="db/changelog/tables/table_admin_address.xml"/>
+    <include file="db/changelog/tables/table_admin_profils.xml"/>
+    <include file="db/changelog/tables/table_admin_privileges.xml"/>
+    <include file="db/changelog/tables/table_admin_users.xml"/>
+    <include file="db/changelog/tables/table_admin_profil_privileges.xml"/>
+    <include file="db/changelog/tables/table_admin_user_profils.xml"/>
+    <include file="db/changelog/tables/column_active_user.xml"/>
+    <include file="db/changelog/tables/admin_update_audit_columns_admin.xml"/>
+    <include file="db/changelog/tables/column_admin_privilege_name_length.xml"/>
+
+    <!-- ── BUSINESS TABLES ──────────────────────────────────── -->
+    <include file="db/changelog/sql/V2000_initial_business_tables.sql"/>
+
+    <!-- ── MIGRATIONS ───────────────────────────────────────── -->
+    <!-- Add wholesale_price and retail_price to data_product -->
+    <include file="db/changelog/sql/V2027_product_price_columns.sql"/>
+    <!-- Create admin_stores, add store_fk to admin_users -->
+    <include file="db/changelog/sql/V2032_admin_stores_table.sql"/>
+    <!-- Insert store management privileges -->
+    <include file="db/changelog/sql/V2033_insert_store_privileges.sql"/>
+    <!-- Add super_admin column to admin_users -->
+    <include file="db/changelog/sql/V2034_add_super_admin_column.sql"/>
+    <!-- Fix audit columns in admin_stores -->
+    <include file="db/changelog/sql/V2035_fix_admin_stores_audit_columns.sql"/>
+    <!-- Add store_fk to business tables for multi-tenancy -->
+    <include file="db/changelog/sql/V2036_add_store_fk_to_business_tables.sql"/>
+    <!-- Add composite unique constraints (code, store_fk) -->
+    <include file="db/changelog/sql/V2037_composite_unique_constraints.sql"/>
+    <!-- Remove legacy category/type/unit columns from data_product -->
+    <include file="db/changelog/sql/V2041_remove_product_category_columns.sql"/>
+
+</databaseChangeLog>
+    

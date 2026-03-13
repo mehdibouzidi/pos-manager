@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from the branch that triggered this build
+                checkout scm
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "Pipeline succeeded on branch: ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "Pipeline failed on branch: ${env.BRANCH_NAME}"
+        }
+        always {
+            echo "Pipeline finished on branch: ${env.BRANCH_NAME}"
+        }
+    }
+}

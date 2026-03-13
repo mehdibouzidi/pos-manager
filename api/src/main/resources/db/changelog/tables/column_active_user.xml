@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="ADMIN_SCRIPT_007" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/table/column_active_user.sql" splitStatements="false"/>
+        <comment>
+            Add active to admin_users table.
+        </comment>
+    </changeSet>
+
+
+</databaseChangeLog>

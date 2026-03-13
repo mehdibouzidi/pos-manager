@@ -1,0 +1,12 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="ADMIN_SCRIPT_001" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/table/table_admin_address.sql" splitStatements="false"/>
+        <comment>
+            Create "data_address" table owned by user catering-admin.
+        </comment>
+    </changeSet>
+</databaseChangeLog>

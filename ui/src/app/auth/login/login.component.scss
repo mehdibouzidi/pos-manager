@@ -1,0 +1,264 @@
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 0;
+  background: #fff;
+}
+
+/* ── LEFT PANEL ─────────────────────────────── */
+.left-panel {
+  position: relative;
+  width: 45%;
+  min-width: 320px;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 10% center;
+  }
+
+  .left-overlay {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 36px;
+    background: linear-gradient(
+      145deg,
+      rgba(249, 115, 22, 0.60) 0%,
+      rgba(234, 88, 12, 0.45) 60%,
+      rgba(251, 146, 60, 0.30) 100%
+    );
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+
+    .brand-icon {
+      font-size: 2rem;
+    }
+
+    .brand-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .left-footer {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.8rem;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+}
+
+/* ── RIGHT PANEL ────────────────────────────── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 40px;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 380px;
+}
+
+.greeting {
+  margin-bottom: 4px;
+
+  .hello {
+    font-size: 1.1rem;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .time-greeting {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #f97316, #ea580c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.form-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 32px;
+
+  .highlight {
+    color: #f97316;
+  }
+}
+
+/* ── FIELDS ─────────────────────────────────── */
+.field-group {
+  margin-bottom: 22px;
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #fed7aa;
+    padding: 8px 0;
+    font-size: 0.95rem;
+    font-family: 'Poppins', sans-serif;
+    color: #1f2937;
+    background: transparent;
+    outline: none;
+    transition: border-color 0.25s;
+
+    &::placeholder {
+      color: #d1d5db;
+    }
+
+    &:focus {
+      border-bottom-color: #f97316;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+.password-wrapper {
+  position: relative;
+
+  input {
+    padding-right: 32px;
+  }
+
+  .toggle-pwd {
+    position: absolute;
+    right: 0;
+    top: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+/* ── ERROR ──────────────────────────────────── */
+.error-msg {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+  color: #dc2626;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+/* ── OPTIONS ────────────────────────────────── */
+.form-options {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+
+  .remember-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #6b7280;
+
+    input[type='checkbox'] {
+      width: 15px;
+      height: 15px;
+      accent-color: #f97316;
+      cursor: pointer;
+    }
+  }
+}
+
+/* ── SUBMIT BUTTON ──────────────────────────── */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f97316, #ea580c);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ── SPINNER ────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 768px) {
+  .left-panel {
+    display: none;
+  }
+
+  .right-panel {
+    padding: 24px;
+  }
+}

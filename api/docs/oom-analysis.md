@@ -1,0 +1,18 @@
+# Production Need Generation OOM Analysis
+
+## Summary of Observed Logs
+The application logs show repeated `AsyncRequestNotUsableException` and JSON parsing warnings, followed by the execution of `ProductionNeedService.generateProductionNeeds` for prevision `0000003`. Shortly after this process completes successfully, the pod is OOMKilled.
+
+## Root Cause
+The `ProductionNeedService` builds the production needs by first loading every requested commercial prevision entity via `CommercialPrevisionParentRepository.findAllByCodeIn`. The `CommercialPrevisionParentEntity` model eagerly fetches both its `previsions` and `setups` collections, and each `ProductionSetupEntity` eagerly fetches back the `CommercialPrevisionParentEntity`. While traversing the previsions, the service accesses the associated menus and recipes. Those domain models in turn eagerly fetch large graphs (menu recipes, recipe ingredients, sub-recipes, utensils, allergens, instructions, etc.). Because all these relations are marked `FetchType.EAGER`, a single call loads the entire object graph for each prevision into memory at once.
+
+When the dataset behind a prevision is large (many menus, recipes, ingredients, and products), this eager loading materializes tens of thousands of entities along with their nested associations in memory simultaneously. This dramatically increases the heap footprint during the request until the JVM exhausts the container memory limit, triggering the pod's OOM killer.
+
+## Evidence in Code
+- `CommercialPrevisionParentEntity` eagerly loads its `previsions`, while the associated `ProductionSetupParentEntity` aggregates every `ProductionSetupEntity`, and each setup still eagerly references the parent. This keeps a large bidirectional graph in memory. 【F:src/main/java/com/catering/manager/api/business/model/CommercialPrevisionParentEntity.java†L20-L44】【F:src/main/java/com/catering/manager/api/business/model/ProductionSetupParentEntity.java†L20-L31】【F:src/main/java/com/catering/manager/api/business/model/ProductionSetupEntity.java†L17-L29】
+- Each `MenuEntity` eagerly loads all `MenuRecipesEntity` children, and every menu recipe eagerly loads its `RecipeEntity`. Recipes themselves eagerly pull in sub-recipes, ingredients, utensils, and instructions. 【F:src/main/java/com/catering/manager/api/business/model/MenuEntity.java†L28-L36】【F:src/main/java/com/catering/manager/api/business/model/MenuRecipesEntity.java†L20-L31】【F:src/main/java/com/catering/manager/api/business/model/RecipeEntity.java†L38-L69】
+- Every recipe ingredient references a `ProductEntity`, which eagerly loads its `SubCategoryEntity`; the subsequent mappers convert these to payloads including nested category metadata. 【F:src/main/java/com/catering/manager/api/business/model/ProductEntity.java†L18-L40】【F:src/main/java/com/catering/manager/api/business/common/mapper/ProductMapper.java†L49-L68】
+- `ProductionNeedService.generateProductionNeeds` traverses this entire graph in memory to compute needs, so the eager fetch plan causes the full object graph to be present concurrently for all selected previsions. 【F:src/main/java/com/catering/manager/api/business/service/impl/ProductionNeedService.java†L45-L210】
+
+## Recommendation
+Change the eager relationships in the commercial prevision and recipe graph to `FetchType.LAZY` where possible (especially large collections), and tailor repository queries with explicit `JOIN FETCH` clauses only for the data required by the production need computation. This will avoid materializing the complete object graph in memory and prevent OOM situations when processing large previsions.

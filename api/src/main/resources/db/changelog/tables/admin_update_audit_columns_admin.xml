@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="ADMIN_SCRIPT_009" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/table/admin_update_audit_columns_admin.sql" splitStatements="false"/>
+        <comment>
+            Update created_by and updated_by columns in all business tables and add foreign key to admin.admin_users table.
+        </comment>
+    </changeSet>
+
+
+</databaseChangeLog>

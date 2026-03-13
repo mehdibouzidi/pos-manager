@@ -1,0 +1,18 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="SCHEMA_01" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/schema/business.sql" splitStatements="false"/>
+        <comment>
+            Creates a business owned by user catering-admin.
+        </comment>
+    </changeSet>
+    <changeSet id="SCHEMA_02" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/schema/admin.sql" splitStatements="false"/>
+        <comment>
+            Creates an admin owned by user catering-admin.
+        </comment>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="ADMIN_SCRIPT_010" author="cateringadmin">
+        <sqlFile path="db/changelog/sql/table/column_admin_privilege_name_length.sql" splitStatements="false"/>
+        <comment>
+            Update name of admin privilege.
+        </comment>
+    </changeSet>
+
+
+</databaseChangeLog>

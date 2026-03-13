@@ -1,0 +1,79 @@
+<div class="login-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <img src="assets/img/poslogin.png" alt="" class="bg-image" />
+    <div class="left-overlay"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="form-container">
+
+      <div class="greeting">
+        <p class="hello">Hello !</p>
+        <p class="time-greeting">{{ currentHour }}</p>
+      </div>
+
+      <h2 class="form-title">
+        <span class="highlight">Connexion</span> à votre compte
+      </h2>
+
+      <form (ngSubmit)="onSubmit()" autocomplete="off">
+
+        <div class="field-group">
+          <label for="username">Identifiant</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="Identifiant ou adresse email"
+            [(ngModel)]="usernameOrEmail"
+            name="usernameOrEmail"
+            autocomplete="username"
+            [disabled]="loading()"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="password">Mot de passe</label>
+          <div class="password-wrapper">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="Mot de passe"
+              [(ngModel)]="password"
+              name="password"
+              autocomplete="current-password"
+              [disabled]="loading()"
+            />
+            <button type="button" class="toggle-pwd" (click)="togglePassword()">
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="error-msg">{{ errorMessage() }}</div>
+        }
+
+        <div class="form-options">
+          <label class="remember-label">
+            <input type="checkbox" [(ngModel)]="remember" name="remember" />
+            <span>Se souvenir</span>
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span>
+          } @else {
+            CONNEXION
+          }
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
