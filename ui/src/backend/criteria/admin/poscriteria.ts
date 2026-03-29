@@ -1,6 +1,6 @@
 import { CommonCriteria } from "../commoncriteria";
 
-export class StoreCriteria extends CommonCriteria {
+export class PosCriteria extends CommonCriteria {
     id: number;
     code: string;
     name: string;

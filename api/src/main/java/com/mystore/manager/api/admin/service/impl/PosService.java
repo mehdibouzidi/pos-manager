@@ -1,11 +1,11 @@
 package com.mystore.manager.api.admin.service.impl;
 
-import com.mystore.manager.api.admin.criteria.StoreCriteria;
-import com.mystore.manager.api.admin.mapper.StoreMapper;
-import com.mystore.manager.api.admin.model.StoreEntity;
-import com.mystore.manager.api.admin.payload.StorePayload;
-import com.mystore.manager.api.admin.repository.StoreRepository;
-import com.mystore.manager.api.admin.service.inter.IStoreService;
+import com.mystore.manager.api.admin.criteria.PosCriteria;
+import com.mystore.manager.api.admin.mapper.PosMapper;
+import com.mystore.manager.api.admin.model.PosEntity;
+import com.mystore.manager.api.admin.payload.PosPayload;
+import com.mystore.manager.api.admin.repository.PosRepository;
+import com.mystore.manager.api.admin.service.inter.IPosService;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,72 +21,72 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class StoreService implements IStoreService {
+public class PosService implements IPosService {
 
-    private final StoreRepository storeRepository;
-    private final StoreMapper mapper;
+    private final PosRepository posRepository;
+    private final PosMapper mapper;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public StoreService(StoreRepository storeRepository, StoreMapper mapper) {
-        this.storeRepository = storeRepository;
+    public PosService(PosRepository posRepository, PosMapper mapper) {
+        this.posRepository = posRepository;
         this.mapper = mapper;
     }
 
     @Override
-    public StorePayload save(StorePayload payload) {
-        StoreEntity entity = mapper.payloadToEntity(payload, new StoreEntity());
-        return mapper.entityToPayload(storeRepository.save(entity));
+    public PosPayload save(PosPayload payload) {
+        PosEntity entity = mapper.payloadToEntity(payload, new PosEntity());
+        return mapper.entityToPayload(posRepository.save(entity));
     }
 
     @Override
-    public StorePayload edit(StorePayload payload) {
-        Optional<StoreEntity> entityOpt = storeRepository.findById(payload.getId());
+    public PosPayload edit(PosPayload payload) {
+        Optional<PosEntity> entityOpt = posRepository.findById(payload.getId());
         if (entityOpt.isPresent()) {
-            StoreEntity entity = entityOpt.get();
+            PosEntity entity = entityOpt.get();
             entity = mapper.payloadToEntity(payload, entity);
-            return mapper.entityToPayload(storeRepository.save(entity));
+            return mapper.entityToPayload(posRepository.save(entity));
         }
         return null;
     }
 
     @Override
     public boolean deleteById(Integer id) {
-        if (storeRepository.existsById(id)) {
-            storeRepository.deleteById(id);
+        if (posRepository.existsById(id)) {
+            posRepository.deleteById(id);
             return true;
         }
         return false;
     }
 
     @Override
-    public List<StorePayload> findAll() {
-        return storeRepository.findAll().stream()
+    public List<PosPayload> findAll() {
+        return posRepository.findAll().stream()
                 .map(mapper::entityToPayload)
                 .toList();
     }
 
     @Override
-    public StorePayload findById(Integer id) {
-        return storeRepository.findById(id)
+    public PosPayload findById(Integer id) {
+        return posRepository.findById(id)
                 .map(mapper::entityToPayload)
                 .orElse(null);
     }
 
     @Override
-    public StorePayload findByCode(String code) {
-        return storeRepository.findByCode(code)
+    public PosPayload findByCode(String code) {
+        return posRepository.findByCode(code)
                 .map(mapper::entityToPayload)
                 .orElse(null);
     }
 
     @Override
-    public GlobalPayload<StorePayload> findByCriteria(StoreCriteria criteria) {
+    public GlobalPayload<PosPayload> findByCriteria(PosCriteria criteria) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<StoreEntity> cq = cb.createQuery(StoreEntity.class);
-        Root<StoreEntity> root = cq.from(StoreEntity.class);
+        CriteriaQuery<PosEntity> cq = cb.createQuery(PosEntity.class);
+        Root<PosEntity> root = cq.from(PosEntity.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
@@ -107,22 +107,22 @@ public class StoreService implements IStoreService {
 
         // Count query
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<StoreEntity> countRoot = countQuery.from(StoreEntity.class);
+        Root<PosEntity> countRoot = countQuery.from(PosEntity.class);
         countQuery.select(cb.count(countRoot));
         countQuery.where(predicates.toArray(new Predicate[0]));
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
         // Apply pagination
-        List<StoreEntity> entities = entityManager.createQuery(cq)
+        List<PosEntity> entities = entityManager.createQuery(cq)
                 .setFirstResult(criteria.getPages() * criteria.getSize())
                 .setMaxResults(criteria.getSize())
                 .getResultList();
 
-        List<StorePayload> payloads = entities.stream()
+        List<PosPayload> payloads = entities.stream()
                 .map(mapper::entityToPayload)
                 .toList();
 
-        GlobalPayload<StorePayload> result = new GlobalPayload<>();
+        GlobalPayload<PosPayload> result = new GlobalPayload<>();
         result.setElements(payloads);
         result.setTotalNumberOfElements(total.intValue());
         return result;

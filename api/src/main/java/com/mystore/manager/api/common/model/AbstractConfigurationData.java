@@ -1,6 +1,5 @@
 package com.mystore.manager.api.common.model;
 
-import com.mystore.manager.api.admin.model.StoreEntity;
 import com.mystore.manager.api.admin.model.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.FetchType;

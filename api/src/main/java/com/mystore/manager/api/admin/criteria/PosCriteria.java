@@ -12,7 +12,7 @@ import java.util.Objects;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoreCriteria extends PaginationCriteria {
+public class PosCriteria extends PaginationCriteria {
     private Integer id;
     private String code;
     private String name;

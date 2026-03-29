@@ -1,8 +1,8 @@
 package com.mystore.manager.api.common.mapper;
 
-import com.mystore.manager.api.admin.model.StoreEntity;
-import com.mystore.manager.api.admin.repository.StoreRepository;
-import com.mystore.manager.api.common.context.StoreContext;
+import com.mystore.manager.api.admin.model.PosEntity;
+import com.mystore.manager.api.admin.repository.PosRepository;
+import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.model.AbstractBusinessGlobalData;
 import com.mystore.manager.api.common.payload.GlobalDataPayload;
 import com.mystore.manager.api.common.util.CommonUtil;
@@ -21,11 +21,11 @@ import java.util.Objects;
 @Component
 public class BusinessGlobalDataMapper {
     
-    private static StoreRepository storeRepository;
+    private static PosRepository posRepository;
     
     @Autowired
-    public void setStoreRepository(StoreRepository storeRepository) {
-        BusinessGlobalDataMapper.storeRepository = storeRepository;
+    public void setPosRepository(PosRepository posRepository) {
+        BusinessGlobalDataMapper.posRepository = posRepository;
     }
     
     /**
@@ -37,12 +37,12 @@ public class BusinessGlobalDataMapper {
         if(Objects.nonNull(payload.getCode())) entity.setCode(payload.getCode());
         if(Objects.nonNull(payload.getName())) entity.setName(payload.getName());
         
-        // Automatically assign store from JWT context if not already set
-        if (entity.getStore() == null) {
-            Integer storeId = StoreContext.getStoreId();
-            if (storeId != null && storeRepository != null) {
-                StoreEntity store = storeRepository.getReferenceById(storeId);
-                entity.setStore(store);
+        // Automatically assign POS from JWT context if not already set
+        if (entity.getPos() == null) {
+            Integer posId = PosContext.getPosId();
+            if (posId != null && posRepository != null) {
+                PosEntity pos = posRepository.getReferenceById(posId);
+                entity.setPos(pos);
             }
         }
         
@@ -66,11 +66,11 @@ public class BusinessGlobalDataMapper {
             payload.setUpdatedByFullName(CommonUtil.composeFullName(entity.getUpdatedBy().getFirstName(),
                     entity.getUpdatedBy().getLastName()));
         }
-        // Map store fields (specific to business entities)
-        if(Objects.nonNull(entity.getStore())) {
-            payload.setStoreId(entity.getStore().getId());
-            payload.setStoreCode(entity.getStore().getCode());
-            payload.setStoreName(entity.getStore().getName());
+        // Map POS fields (specific to business entities)
+        if(Objects.nonNull(entity.getPos())) {
+            payload.setPosId(entity.getPos().getId());
+            payload.setPosCode(entity.getPos().getCode());
+            payload.setPosName(entity.getPos().getName());
         }
         if(Objects.nonNull(entity.getCreatedAt())) payload.setCreatedAt(CommonUtil.instantToDateTime(entity.getCreatedAt()));
         if(Objects.nonNull(entity.getUpdatedAt())) payload.setUpdatedAt(CommonUtil.instantToDateTime(entity.getUpdatedAt()));

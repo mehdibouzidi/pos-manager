@@ -1,6 +1,6 @@
 package com.mystore.manager.api.common.model;
 
-import com.mystore.manager.api.admin.model.StoreEntity;
+import com.mystore.manager.api.admin.model.PosEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -18,15 +18,15 @@ import lombok.EqualsAndHashCode;
  */
 @MappedSuperclass
 @JsonIgnoreProperties(
-        value = {"createdBy", "updatedBy", "store"},
+        value = {"createdBy", "updatedBy", "pos"},
         allowGetters = true
 )
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = {"store"})
+@EqualsAndHashCode(callSuper = true, exclude = {"pos"})
 public abstract class AbstractBusinessAudit extends AbstractUserDateAudit {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_fk")
-    private StoreEntity store;
+    @JoinColumn(name = "pos_fk")
+    private PosEntity pos;
 
 }

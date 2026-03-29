@@ -1,6 +1,6 @@
 package com.mystore.manager.api.admin.controller;
 
-import com.mystore.manager.api.admin.model.StoreEntity;
+import com.mystore.manager.api.admin.model.PosEntity;
 import com.mystore.manager.api.admin.model.UserEntity;
 import com.mystore.manager.api.admin.payload.LoginPayload;
 import com.mystore.manager.api.admin.payload.UserPayload;
@@ -62,14 +62,14 @@ public class AuthController {
         
         UserEntity userEntity = userEntityOpt.get();
         
-        // Determine the store to use for login
-        StoreEntity store = null;
+        // Determine the POS to use for login
+        PosEntity pos = null;
         
         if (!userEntity.isSuperAdmin()) {
-            // Non-superAdmin: use the store assigned to the user
-            store = userEntity.getStore();
+            // Non-superAdmin: use the POS assigned to the user
+            pos = userEntity.getPos();
         }
-        // SuperAdmin logs in without store context (can access everything)
+        // SuperAdmin logs in without POS context (can access everything)
         
         // Check if user is active
         if (!userEntity.isActive()) {
@@ -91,10 +91,10 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(payload.getUsernameOrEmail());
 
-        // Pass store info to JWT generation (null for superAdmin without store)
-        Integer storeId = store != null ? store.getId() : null;
-        String storeCode = store != null ? store.getCode() : null;
-        final String jwt = jwtService.generateToken(userDetails, storeId, storeCode, userEntity.isSuperAdmin());
+        // Pass POS info to JWT generation (null for superAdmin without POS)
+        Integer posId = pos != null ? pos.getId() : null;
+        String posCode = pos != null ? pos.getCode() : null;
+        final String jwt = jwtService.generateToken(userDetails, posId, posCode, userEntity.isSuperAdmin());
 
         UserPayload user = userService.findByUsernameOrEmail(userDetails.getUsername());
 
@@ -106,11 +106,11 @@ public class AuthController {
         result.setActive(user.isActive());
         result.setSuperAdmin(userEntity.isSuperAdmin());
         
-        // Set store info in response (if user has a store)
-        if (store != null) {
-            result.setStoreId(store.getId());
-            result.setStoreCode(store.getCode());
-            result.setStoreName(store.getName());
+        // Set POS info in response (if user has a POS)
+        if (pos != null) {
+            result.setPosId(pos.getId());
+            result.setPosCode(pos.getCode());
+            result.setPosName(pos.getName());
         }
 
         if(result.isActive()) result.setToken(jwt);

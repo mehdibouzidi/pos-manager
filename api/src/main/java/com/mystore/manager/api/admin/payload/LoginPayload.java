@@ -30,10 +30,10 @@ public class LoginPayload {
 
     private Set<String> privileges;
     
-    // Store info
-    private Integer storeId;
-    private String storeCode;
-    private String storeName;
+    // POS info
+    private Integer posId;
+    private String posCode;
+    private String posName;
     
     // Error handling
     private String errorCode;

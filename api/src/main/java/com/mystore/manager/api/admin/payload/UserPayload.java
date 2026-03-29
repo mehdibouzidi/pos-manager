@@ -26,10 +26,10 @@ public class UserPayload extends GlobalDatePayload {
     private boolean superAdmin;
     private List<ProfilPayload> profils;
     
-    // Store info
-    private Integer storeId;
-    private String storeCode;
-    private String storeName;
+    // POS info
+    private Integer posId;
+    private String posCode;
+    private String posName;
 
     public Set<String> getPrivilegesCodes() {
         if(profils == null || profils.isEmpty()) {

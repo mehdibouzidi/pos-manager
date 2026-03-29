@@ -13,8 +13,8 @@ public class GlobalUserDatePayload extends GlobalDatePayload {
     private String updatedByUsername;
     private String updatedByFullName;
     
-    // Store information for multi-tenancy
-    private Integer storeId;
-    private String storeCode;
-    private String storeName;
+    // POS information for multi-tenancy
+    private Integer posId;
+    private String posCode;
+    private String posName;
 }

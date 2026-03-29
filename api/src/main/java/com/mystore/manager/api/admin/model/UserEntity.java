@@ -15,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Data
-@lombok.EqualsAndHashCode(callSuper = true, exclude = {"store", "address", "profils", "picture"})
+@lombok.EqualsAndHashCode(callSuper = true, exclude = {"pos", "address", "profils", "picture"})
 @Table(schema = AdminConstants.ADMIN_SCH, name = AdminConstants.USERS_TABLE)
 public class UserEntity extends AbstractDateAudit implements UserDetails {
 
@@ -61,8 +61,8 @@ public class UserEntity extends AbstractDateAudit implements UserDetails {
     private boolean superAdmin = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_fk", referencedColumnName = "id")
-    private StoreEntity store;
+    @JoinColumn(name = "pos_fk", referencedColumnName = "id")
+    private PosEntity pos;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

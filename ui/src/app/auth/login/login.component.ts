@@ -62,10 +62,10 @@ export class LoginComponent {
           this.ls.setItem(UtilStatic.LASTNAME, res.lastName);
           this.ls.setItem(UtilStatic.PRIVILEGES, res.privileges);
           this.ls.setItem(UtilStatic.SUPER_ADMIN, res.superAdmin);
-          if (res.storeId) {
-            this.ls.setItem(UtilStatic.STORE_ID, res.storeId);
-            this.ls.setItem(UtilStatic.STORE_CODE, res.storeCode);
-            this.ls.setItem(UtilStatic.STORE_NAME, res.storeName);
+          if (res.posId) {
+            this.ls.setItem(UtilStatic.POS_ID, res.posId);
+            this.ls.setItem(UtilStatic.POS_CODE, res.posCode);
+            this.ls.setItem(UtilStatic.POS_NAME, res.posName);
           }
           this.router.navigate(['/pos']);
         } else {

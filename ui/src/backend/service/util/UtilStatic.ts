@@ -25,9 +25,9 @@ export class UtilStatic {
   static readonly PRIVILEGES = 'privileges';
   static readonly FIRSTNAME = 'firstname';
   static readonly LASTNAME = 'lastname';
-  static readonly STORE_ID = 'storeId';
-  static readonly STORE_CODE = 'storeCode';
-  static readonly STORE_NAME = 'storeName';
+  static readonly POS_ID = 'posId';
+  static readonly POS_CODE = 'posCode';
+  static readonly POS_NAME = 'posName';
   static readonly SUPER_ADMIN = 'superAdmin';
 
   static isMobile() {

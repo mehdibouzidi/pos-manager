@@ -50,12 +50,12 @@ export class RequestsConstants{
      static readonly USER_FINDALL_REQ = RequestsConstants.USER_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
      static readonly USER_FINDALL_CRITERIA_REQ = RequestsConstants.USER_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
 
-     //Store
-     static readonly STORE_REQ = RequestsConstants.API_SOURCE + AdminConstants.STORE;
-     static readonly STORE_ADD_REQ = RequestsConstants.STORE_REQ + UtilStatic.SLASH + UtilStatic.ADD;
-     static readonly STORE_UPDATE_REQ = RequestsConstants.STORE_REQ + UtilStatic.SLASH + UtilStatic.UPDATE;
-     static readonly STORE_DELETE_REQ = RequestsConstants.STORE_REQ;
-     static readonly STORE_FINDALL_REQ = RequestsConstants.STORE_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
-     static readonly STORE_FINDALL_CRITERIA_REQ = RequestsConstants.STORE_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+     //POS
+     static readonly POS_REQ = RequestsConstants.API_SOURCE + AdminConstants.POS;
+     static readonly POS_ADD_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+     static readonly POS_UPDATE_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.UPDATE;
+     static readonly POS_DELETE_REQ = RequestsConstants.POS_REQ;
+     static readonly POS_FINDALL_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+     static readonly POS_FINDALL_CRITERIA_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
 }
 

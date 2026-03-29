@@ -19,10 +19,10 @@ export class UserPayload {
 
   profils: Array<ProfilPayload> | null;
   
-  // Store info
-  storeId: number | null;
-  storeCode: string | null;
-  storeName: string | null;
+  // POS info
+  posId: number | null;
+  posCode: string | null;
+  posName: string | null;
   
   // Super admin flag
   superAdmin: boolean = false;
@@ -43,9 +43,9 @@ export class UserPayload {
     this.disableDisplay = false;
     this.profils = null;
     
-    this.storeId = null;
-    this.storeCode = null;
-    this.storeName = null;
+    this.posId = null;
+    this.posCode = null;
+    this.posName = null;
     this.superAdmin = false;
   }
 }

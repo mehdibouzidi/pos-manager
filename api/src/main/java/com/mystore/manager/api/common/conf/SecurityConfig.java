@@ -85,13 +85,13 @@ public class SecurityConfig {
             auth.requestMatchers(HttpMethod.GET, SLASH + USER_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + USER_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(ADMIN);
 
-            //Store
-            auth.requestMatchers(HttpMethod.POST, SLASH + STORE_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.PUT, SLASH + STORE_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.DELETE, SLASH + STORE_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.GET, SLASH + STORE_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.GET, SLASH + STORE_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.POST, SLASH + STORE_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(ADMIN);
+            //POS
+            auth.requestMatchers(HttpMethod.POST, SLASH + POS_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(ADMIN);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + POS_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(ADMIN);
+            auth.requestMatchers(HttpMethod.DELETE, SLASH + POS_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + POS_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + POS_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + POS_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(ADMIN);
         };
     }
 

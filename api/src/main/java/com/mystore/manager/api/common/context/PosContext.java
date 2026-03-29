@@ -5,26 +5,26 @@ package com.mystore.manager.api.common.context;
  * This is set from the JWT token during authentication and used
  * to automatically assign store to business entities.
  */
-public class StoreContext {
+public class PosContext {
     
-    private static final ThreadLocal<Integer> currentStoreId = new ThreadLocal<>();
-    private static final ThreadLocal<String> currentStoreCode = new ThreadLocal<>();
+    private static final ThreadLocal<Integer> currentPosId = new ThreadLocal<>();
+    private static final ThreadLocal<String> currentPosCode = new ThreadLocal<>();
     private static final ThreadLocal<Boolean> isSuperAdmin = new ThreadLocal<>();
     
-    public static void setStoreId(Integer storeId) {
-        currentStoreId.set(storeId);
+    public static void setPosId(Integer posId) {
+        currentPosId.set(posId);
     }
     
-    public static Integer getStoreId() {
-        return currentStoreId.get();
+    public static Integer getPosId() {
+        return currentPosId.get();
     }
     
-    public static void setStoreCode(String storeCode) {
-        currentStoreCode.set(storeCode);
+    public static void setPosCode(String posCode) {
+        currentPosCode.set(posCode);
     }
     
-    public static String getStoreCode() {
-        return currentStoreCode.get();
+    public static String getPosCode() {
+        return currentPosCode.get();
     }
     
     public static void setSuperAdmin(Boolean superAdmin) {
@@ -37,11 +37,11 @@ public class StoreContext {
     }
     
     /**
-     * Clear the store context. Should be called after request processing.
+     * Clear the POS context. Should be called after request processing.
      */
     public static void clear() {
-        currentStoreId.remove();
-        currentStoreCode.remove();
+        currentPosId.remove();
+        currentPosCode.remove();
         isSuperAdmin.remove();
     }
 }

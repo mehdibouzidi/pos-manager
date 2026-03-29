@@ -12,9 +12,9 @@ export class LoginPayload{
     superAdmin: boolean = false;
     
     // Store info
-    storeId: number | null;
-    storeCode: string | null;
-    storeName: string | null;
+    posId: number | null;
+    posCode: string | null;
+    posName: string | null;
     
     // Error handling
     errorCode: string | null;
@@ -27,9 +27,9 @@ export class LoginPayload{
         this.password = null;
         this.token = null;
         this.superAdmin = false;
-        this.storeId = null;
-        this.storeCode = null;
-        this.storeName = null;
+        this.posId = null;
+        this.posCode = null;
+        this.posName = null;
         this.errorCode = null;
         this.errorMessage = null;
     }

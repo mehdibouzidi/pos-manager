@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Table(
         schema = BusinessConstants.BUSINESS_SCH, 
         name = BusinessConstants.PRODUCT_TABLE,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"code", "store_fk"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"code", "pos_fk"})
 )
 @XmlRootElement
 @Data

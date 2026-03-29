@@ -1,12 +1,12 @@
 package com.mystore.manager.api.admin.mapper;
 
 import com.mystore.manager.api.admin.model.ProfilEntity;
-import com.mystore.manager.api.admin.model.StoreEntity;
+import com.mystore.manager.api.admin.model.PosEntity;
 import com.mystore.manager.api.admin.model.UserEntity;
 import com.mystore.manager.api.admin.payload.MainUserPayload;
 import com.mystore.manager.api.admin.payload.UserPayload;
 import com.mystore.manager.api.admin.repository.ProfilRepository;
-import com.mystore.manager.api.admin.repository.StoreRepository;
+import com.mystore.manager.api.admin.repository.PosRepository;
 import com.mystore.manager.api.common.mapper.GlobalDateAuditMapper;
 import com.mystore.manager.api.common.mapper.IMapper;
 import com.mystore.manager.api.common.util.CommonUtil;
@@ -26,17 +26,17 @@ public class UserMapper implements IMapper<UserPayload, UserEntity> {
     
     private ProfilRepository profilRepository;
     private ProfilMapper profilMapper;
-    private StoreRepository storeRepository;
+    private PosRepository posRepository;
 
     private AdminAddressMapper addressMapper;
 
 
     @Autowired
-    public UserMapper(ProfilRepository profilRepository, ProfilMapper profilMapper, AdminAddressMapper addressMapper, StoreRepository storeRepository) {
+    public UserMapper(ProfilRepository profilRepository, ProfilMapper profilMapper, AdminAddressMapper addressMapper, PosRepository posRepository) {
         this.profilRepository = profilRepository;
         this.profilMapper = profilMapper;
         this.addressMapper = addressMapper;
-        this.storeRepository = storeRepository;
+        this.posRepository = posRepository;
     }
 
     public UserEntity payloadToEntity(UserPayload payload, UserEntity entity) {
@@ -56,11 +56,11 @@ public class UserMapper implements IMapper<UserPayload, UserEntity> {
             entity.setProfils(profils);
         }
         
-        // Map store
-        if(Objects.nonNull(payload.getStoreId())) {
-            storeRepository.findById(payload.getStoreId()).ifPresent(entity::setStore);
-        } else if(!Strings.isEmpty(payload.getStoreCode())) {
-            storeRepository.findByCode(payload.getStoreCode()).ifPresent(entity::setStore);
+        // Map pos
+        if(Objects.nonNull(payload.getPosId())) {
+            posRepository.findById(payload.getPosId()).ifPresent(entity::setPos);
+        } else if(!Strings.isEmpty(payload.getPosCode())) {
+            posRepository.findByCode(payload.getPosCode()).ifPresent(entity::setPos);
         }
 
         return entity;
@@ -82,12 +82,12 @@ public class UserMapper implements IMapper<UserPayload, UserEntity> {
             payload.setSuperAdmin(entity.isSuperAdmin());
             payload.setProfils(profilMapper.entityListToPayload(entity.getProfils(), detailed));
             
-            // Map store info
-            if(Objects.nonNull(entity.getStore())) {
-                StoreEntity store = entity.getStore();
-                payload.setStoreId(store.getId());
-                payload.setStoreCode(store.getCode());
-                payload.setStoreName(store.getName());
+            // Map pos info
+            if(Objects.nonNull(entity.getPos())) {
+                PosEntity pos = entity.getPos();
+                payload.setPosId(pos.getId());
+                payload.setPosCode(pos.getCode());
+                payload.setPosName(pos.getName());
             }
         }
         return payload;

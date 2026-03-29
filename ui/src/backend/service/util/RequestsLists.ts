@@ -53,13 +53,13 @@ export class RequestsLists{
         new Request(RequestsLists.POST, RequestsConstants.USER_FINDALL_REQ),
         new Request(RequestsLists.POST, RequestsConstants.USER_FINDALL_CRITERIA_REQ),
 
-        //STORE
-        new Request(RequestsLists.GET, RequestsConstants.STORE_REQ),
-        new Request(RequestsLists.POST, RequestsConstants.STORE_ADD_REQ),
-        new Request(RequestsLists.PUT, RequestsConstants.STORE_UPDATE_REQ),
-        new Request(RequestsLists.DELETE, RequestsConstants.STORE_DELETE_REQ),
-        new Request(RequestsLists.GET, RequestsConstants.STORE_FINDALL_REQ),
-        new Request(RequestsLists.POST, RequestsConstants.STORE_FINDALL_CRITERIA_REQ),
+        //POS
+        new Request(RequestsLists.GET, RequestsConstants.POS_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.POS_ADD_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.POS_UPDATE_REQ),
+        new Request(RequestsLists.DELETE, RequestsConstants.POS_DELETE_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.POS_FINDALL_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.POS_FINDALL_CRITERIA_REQ),
     ];
 
 

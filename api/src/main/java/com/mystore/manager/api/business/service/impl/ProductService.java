@@ -4,7 +4,7 @@ import com.mystore.manager.api.business.common.criteria.ProductCriteria;
 import com.mystore.manager.api.business.common.mapper.ProductMapper;
 import com.mystore.manager.api.business.model.ProductEntity;
 import com.mystore.manager.api.business.payload.ProductPayload;
-import com.mystore.manager.api.common.context.StoreContext;
+import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import com.mystore.manager.api.business.repository.ProductRepository;
 import com.mystore.manager.api.common.util.CommonUtil;
@@ -126,11 +126,11 @@ public class ProductService implements com.mystore.manager.api.business.service.
     @Override
     public List<ProductPayload> findAll() {
         List<ProductEntity> entities;
-        if (StoreContext.isSuperAdmin()) {
+        if (PosContext.isSuperAdmin()) {
             entities = repository.findAll();
         } else {
-            Integer storeId = StoreContext.getStoreId();
-            entities = storeId != null ? repository.findAllByStore_Id(storeId) : List.of();
+            Integer posId = PosContext.getPosId();
+            entities = posId != null ? repository.findAllByPos_Id(posId) : List.of();
         }
         return mapper.entityListToPayload(entities, false);
     }

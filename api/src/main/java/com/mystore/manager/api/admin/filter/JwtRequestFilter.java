@@ -3,7 +3,7 @@ package com.mystore.manager.api.admin.filter;
 import com.mystore.manager.api.admin.service.impl.JWTService;
 import com.mystore.manager.api.admin.service.impl.MainUserService;
 import com.mystore.manager.api.admin.util.AdminConstants;
-import com.mystore.manager.api.common.context.StoreContext;
+import com.mystore.manager.api.common.context.PosContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +42,8 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        // Clear store context at the start of each request
-        StoreContext.clear();
+        // Clear POS context at the start of each request
+        PosContext.clear();
 
         final String authorizationHeader = request.getHeader(Constants.AUTHORIZATION_HEADER_NAME);
 
@@ -54,17 +54,17 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
             jwt = authorizationHeader.substring(7);
             username = jwtService.extractUsername(jwt);
             
-            // Extract store info from JWT and set in context
+            // Extract POS info from JWT and set in context
             try {
-                Integer storeId = jwtService.extractStoreId(jwt);
-                String storeCode = jwtService.extractStoreCode(jwt);
+                Integer posId = jwtService.extractPosId(jwt);
+                String posCode = jwtService.extractPosCode(jwt);
                 Boolean superAdmin = jwtService.extractSuperAdmin(jwt);
                 
-                StoreContext.setStoreId(storeId);
-                StoreContext.setStoreCode(storeCode);
-                StoreContext.setSuperAdmin(superAdmin != null ? superAdmin : false);
+                PosContext.setPosId(posId);
+                PosContext.setPosCode(posCode);
+                PosContext.setSuperAdmin(superAdmin != null ? superAdmin : false);
             } catch (Exception e) {
-                // Log but don't fail - store context will be null
+                // Log but don't fail - POS context will be null
             }
         }
 
@@ -86,8 +86,8 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
         try {
             chain.doFilter(request, response);
         } finally {
-            // Clear store context after request processing
-            StoreContext.clear();
+            // Clear POS context after request processing
+            PosContext.clear();
         }
     }
 

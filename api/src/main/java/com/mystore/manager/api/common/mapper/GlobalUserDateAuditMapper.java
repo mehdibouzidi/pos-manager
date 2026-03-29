@@ -1,8 +1,8 @@
 package com.mystore.manager.api.common.mapper;
 
-import com.mystore.manager.api.admin.model.StoreEntity;
-import com.mystore.manager.api.admin.repository.StoreRepository;
-import com.mystore.manager.api.common.context.StoreContext;
+import com.mystore.manager.api.admin.model.PosEntity;
+import com.mystore.manager.api.admin.repository.PosRepository;
+import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.model.AbstractBusinessAudit;
 import com.mystore.manager.api.common.model.AbstractUserDateAudit;
 import com.mystore.manager.api.common.payload.GlobalUserDatePayload;
@@ -17,16 +17,16 @@ import java.util.Objects;
  * - For business entities (AbstractBusinessAudit): use payloadToEntity/entityToPayload
  * - For admin entities (AbstractUserDateAudit without store): use payloadToEntityAdmin/entityToPayloadAdmin
  * 
- * Business entities get the store automatically assigned from the JWT context.
+ * Business entities get the pos automatically assigned from the JWT context.
  */
 @Component
 public class GlobalUserDateAuditMapper {
     
-    private static StoreRepository storeRepository;
+    private static PosRepository posRepository;
     
     @Autowired
-    public void setStoreRepository(StoreRepository storeRepository) {
-        GlobalUserDateAuditMapper.storeRepository = storeRepository;
+    public void setPosRepository(PosRepository posRepository) {
+        GlobalUserDateAuditMapper.posRepository = posRepository;
     }
     
     // ================== BUSINESS ENTITIES (with store) ==================
@@ -38,13 +38,13 @@ public class GlobalUserDateAuditMapper {
     public static <T extends GlobalUserDatePayload, E extends AbstractBusinessAudit> E payloadToEntity(T payload, E entity) {
         if(Objects.nonNull(payload.getId())) entity.setId(payload.getId());
         
-        // Automatically assign store from JWT context if not already set
-        // For updates, the existing entity should already have a store
-        if (entity.getStore() == null) {
-            Integer storeId = StoreContext.getStoreId();
-            if (storeId != null && storeRepository != null) {
-                StoreEntity store = storeRepository.getReferenceById(storeId);
-                entity.setStore(store);
+        // Automatically assign pos from JWT context if not already set
+        // For updates, the existing entity should already have a pos
+        if (entity.getPos() == null) {
+            Integer posId = PosContext.getPosId();
+            if (posId != null && posRepository != null) {
+                PosEntity pos = posRepository.getReferenceById(posId);
+                entity.setPos(pos);
             }
         }
         
@@ -59,11 +59,11 @@ public class GlobalUserDateAuditMapper {
         // Map base audit fields
         mapBaseAuditFields(entity, payload);
         
-        // Map store fields (specific to business entities)
-        if(Objects.nonNull(entity.getStore())) {
-            payload.setStoreId(entity.getStore().getId());
-            payload.setStoreCode(entity.getStore().getCode());
-            payload.setStoreName(entity.getStore().getName());
+        // Map pos fields (specific to business entities)
+        if(Objects.nonNull(entity.getPos())) {
+            payload.setPosId(entity.getPos().getId());
+            payload.setPosCode(entity.getPos().getCode());
+            payload.setPosName(entity.getPos().getName());
         }
         return payload;
     }

@@ -19,10 +19,10 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
 
       <div class="topbar-right" #menuAnchor>
         <div class="user-info">
-          @if (storeName) {
+          @if (posName) {
             <span class="store-badge">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              {{ storeName }}
+              {{ posName }}
             </span>
             <span class="separator"></span>
           }
@@ -43,6 +43,15 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
               Modifier le mot de passe
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item dropdown-item--danger" (click)="logout()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Se déconnecter
             </button>
           </div>
         }
@@ -242,6 +251,21 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
       color: var(--primary-orange-dark);
     }
 
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 4px 0;
+    }
+
+    .dropdown-item--danger {
+      color: #dc2626;
+    }
+
+    .dropdown-item--danger:hover {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
     /* ── Modal ───────────────────────────────────────── */
     .modal-backdrop {
       position: fixed;
@@ -413,8 +437,8 @@ export class TopbarComponent {
   showNew = false;
   showConfirm = false;
 
-  get storeName(): string | null {
-    return this.ls.getItem(UtilStatic.STORE_NAME) || null;
+  get posName(): string | null {
+    return this.ls.getItem(UtilStatic.POS_NAME) || null;
   }
 
   get fullName(): string {
@@ -476,6 +500,11 @@ export class TopbarComponent {
         this.modalError.set(err?.error ?? 'Erreur lors de la modification du mot de passe.');
       }
     });
+  }
+
+  logout() {
+    this.menuOpen.set(false);
+    this.authService.logout();
   }
 
   @HostListener('document:click', ['$event'])

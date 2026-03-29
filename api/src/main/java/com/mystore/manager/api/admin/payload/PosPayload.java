@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StorePayload extends GlobalDataPayload {
+public class PosPayload extends GlobalDataPayload {
     private String address;
     private String phone;
     private String email;

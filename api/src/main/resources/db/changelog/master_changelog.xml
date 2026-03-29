@@ -37,6 +37,8 @@
     <include file="db/changelog/sql/V2037_composite_unique_constraints.sql"/>
     <!-- Remove legacy category/type/unit columns from data_product -->
     <include file="db/changelog/sql/V2041_remove_product_category_columns.sql"/>
+    <!-- Rename Store → POS: table admin_pos, column pos_fk, privileges POS_* -->
+    <include file="db/changelog/sql/V2042_rename_store_to_pos.sql"/>
 
 </databaseChangeLog>
     

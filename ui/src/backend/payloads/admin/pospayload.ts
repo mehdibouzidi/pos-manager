@@ -1,4 +1,4 @@
-export class StorePayload {
+export class PosPayload {
     id: number;
     code: string;
     name: string;

@@ -1,7 +1,7 @@
 package com.mystore.manager.api.common.util;
 
 import com.mystore.manager.api.common.constant.CommonConstants;
-import com.mystore.manager.api.common.context.StoreContext;
+import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.criteria.PaginationCriteria;
 import com.mystore.manager.api.common.mapper.IMapper;
 import com.mystore.manager.api.common.payload.GlobalPayload;
@@ -164,10 +164,10 @@ public class CommonUtil {
         boolean hasWhereClause = false;
         
         // Add store filter for business entities (non-superAdmin users)
-        if (filterByStore && !StoreContext.isSuperAdmin()) {
-            Integer storeId = StoreContext.getStoreId();
-            if (storeId != null) {
-                queryStr += " WHERE en.store.id = " + storeId;
+        if (filterByStore && !PosContext.isSuperAdmin()) {
+            Integer posId = PosContext.getPosId();
+            if (posId != null) {
+                queryStr += " WHERE en.pos.id = " + posId;
                 hasWhereClause = true;
             }
         }

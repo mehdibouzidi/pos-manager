@@ -47,9 +47,9 @@ public class SecurityService {
         if (principal instanceof UserEntity) {
             UserEntity user = (UserEntity) principal;
             if (user.isSuperAdmin()) {
-                return null; // SuperAdmin can access all stores
+                return null; // SuperAdmin can access all pos
             }
-            return user.getStore() != null ? user.getStore().getId() : null;
+            return user.getPos() != null ? user.getPos().getId() : null;
         }
         
         return null;
@@ -96,9 +96,9 @@ public class SecurityService {
         if (principal instanceof UserEntity) {
             UserEntity user = (UserEntity) principal;
             if (user.isSuperAdmin()) {
-                return true; // SuperAdmin can access all stores
+                return true; // SuperAdmin can access all pos
             }
-            return user.getStore() != null && user.getStore().getId().equals(storeId);
+            return user.getPos() != null && user.getPos().getId().equals(storeId);
         }
         
         return false;

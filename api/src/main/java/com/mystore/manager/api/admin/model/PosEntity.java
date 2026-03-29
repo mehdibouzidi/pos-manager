@@ -9,8 +9,8 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(schema = AdminConstants.ADMIN_SCH, name = AdminConstants.STORES_TABLE)
-public class StoreEntity extends AbstractGlobalData {
+@Table(schema = AdminConstants.ADMIN_SCH, name = AdminConstants.POS_TABLE)
+public class PosEntity extends AbstractGlobalData {
 
     @Column(name = "address")
     private String address;

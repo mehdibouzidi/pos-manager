@@ -35,12 +35,12 @@ public class JWTService {
         return extractClaim(token, Claims::getExpiration);
     }
     
-    public Integer extractStoreId(String token) {
-        return extractClaim(token, claims -> claims.get("storeId", Integer.class));
+    public Integer extractPosId(String token) {
+        return extractClaim(token, claims -> claims.get("posId", Integer.class));
     }
     
-    public String extractStoreCode(String token) {
-        return extractClaim(token, claims -> claims.get("storeCode", String.class));
+    public String extractPosCode(String token) {
+        return extractClaim(token, claims -> claims.get("posCode", String.class));
     }
     
     public Boolean extractSuperAdmin(String token) {
@@ -67,7 +67,7 @@ public class JWTService {
         return generateToken(userDetails, null, null, false);
     }
     
-    public String generateToken(UserDetails userDetails, Integer storeId, String storeCode, boolean superAdmin) {
+    public String generateToken(UserDetails userDetails, Integer posId, String posCode, boolean superAdmin) {
         Map<String, Object> claims = new HashMap<>();
         boolean isAdmin = false;
         boolean isActive = userDetails.isEnabled();
@@ -84,12 +84,12 @@ public class JWTService {
         claims.put("isActive", isActive);
         claims.put("superAdmin", superAdmin);
         
-        // Add store info to token
-        if (storeId != null) {
-            claims.put("storeId", storeId);
+        // Add POS info to token
+        if (posId != null) {
+            claims.put("posId", posId);
         }
-        if (storeCode != null) {
-            claims.put("storeCode", storeCode);
+        if (posCode != null) {
+            claims.put("posCode", posCode);
         }
 
         return createToken(claims, userDetails.getUsername());
