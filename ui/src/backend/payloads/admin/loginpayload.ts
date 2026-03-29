@@ -4,7 +4,6 @@ export class LoginPayload{
     lastName: string | null;
     usernameOrEmail: string | null;
     password: string | null;
-    storeCodeInput: string | null;
     token: string | null;
     active: boolean | null = null;
     privileges: Array<string> = new Array<string>();
@@ -26,7 +25,6 @@ export class LoginPayload{
         this.lastName = null;
         this.usernameOrEmail = null;
         this.password = null;
-        this.storeCodeInput = null;
         this.token = null;
         this.superAdmin = false;
         this.storeId = null;

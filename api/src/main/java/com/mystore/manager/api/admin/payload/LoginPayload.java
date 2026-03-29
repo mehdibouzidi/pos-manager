@@ -21,9 +21,6 @@ public class LoginPayload {
 
     @NotBlank
     private String password;
-    
-    // Store code entered by user at login (for non-superadmin users)
-    private String storeCodeInput;
 
     private String token;
 
