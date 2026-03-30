@@ -12,10 +12,15 @@ ui/dist
 ui/tmp
 ui/out-tsc
 ui/bazel-out
+ui-admin/dist
+ui-admin/tmp
+ui-admin/out-tsc
+ui-admin/bazel-out
 
 # Node
 /node_modules
 ui/node_modules
+ui-admin/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -37,12 +42,14 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
-ui/.angular/cache
+/.angular/
+ui/.angular/
+ui-admin/.angular/
 .sass-cache/
 /connect.lock
 /coverage
 ui/coverage
+ui-admin/coverage
 /libpeerconnection.log
 testem.log
 /typings

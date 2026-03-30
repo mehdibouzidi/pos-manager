@@ -1,0 +1,8 @@
+<span [ngClass]="{
+    'alert-success': data.type === 'success',
+    'alert-error': data.type === 'error',
+    'alert-warning': data.type === 'warning'
+  }">
+  {{ getMessage() }}
+  </span>
+  

@@ -1,0 +1,43 @@
+<div class="card overflow-hidden">
+  <div
+    class="p-4 text-center hover:bg-hover transition duration-400 ease-out-swift cursor-pointer relative"
+    matRipple>
+    <img *ngIf="contact.picture" [src]="picture" class="avatar h-24 w-24 mx-auto" />
+    <img *ngIf="!contact.picture" class="avatar h-24 w-24 mx-auto" src="assets/img/avatars/person.png" />
+
+    <h2 class="title mb-1 mt-3">{{ contact.name }}</h2>
+    <div class="body-2 text-secondary flex items-center justify-center">
+
+      <span>{{ contact.firstName }} {{ contact.lastName }}</span>
+    </div>
+    <div *ngIf="contact.position" class="body-2 text-secondary flex items-center justify-center">
+      <mat-icon
+        class="ltr:mr-1 rtl:ml-1 icon-xs"
+        svgIcon="mat:person"></mat-icon>
+      <span>{{ contact.position.name }}</span>
+    </div>
+
+    <div *ngIf="contact.phoneNumber" class="body-2 text-secondary flex items-center justify-center">
+      <mat-icon
+        class="ltr:mr-1 rtl:ml-1 icon-xs"
+        svgIcon="mat:phone"></mat-icon>
+      <span>{{ contact.phoneNumber }}</span>
+    </div>
+
+  </div>
+
+  <div class="bg-app-bar p-2 flex items-center justify-around">
+
+    <button class="text-secondary" mat-icon-button (click)="goToShow()" type="button">
+      <mat-icon svgIcon="mat:remove_red_eye"></mat-icon>
+    </button>
+
+    <button *ngIf="canUpdate" class="text-secondary" mat-icon-button (click)="goToEdit()" type="button">
+      <mat-icon svgIcon="mat:edit"></mat-icon>
+    </button>
+
+    <button *ngIf="canDelete" class="text-secondary" mat-icon-button (click)="delete()" type="button">
+      <mat-icon svgIcon="mat:delete"></mat-icon>
+    </button>
+  </div>
+</div>

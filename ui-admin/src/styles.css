@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Arial, Roboto, "Helvetica Neue", sans-serif; }
+table {
+    width: 100%;
+}
+
+.component-header h1{
+  margin-left:  1%; 
+}
+
+.component-header p{
+  margin-left:  1%; 
+}
+
+.component-header p strong{
+  margin-right:  5px; 
+}
+.component-filters{
+  width: 100%;
+  margin: 20px;
+}
+
+.component-filters .input, .component-filters .button{
+  margin-right: 25px;
+}
+
+.action-btn{
+  margin-right: 15px;
+}
+
+.mat-elevation-z8{
+  width: 95%;
+  margin: 2%;
+}

@@ -1,0 +1,57 @@
+<vex-secondary-toolbar current="Détails du magasin">
+    <vex-breadcrumbs [crumbs]="['Administration', 'Magasins', 'Détails']" class="flex-auto"></vex-breadcrumbs>
+</vex-secondary-toolbar>
+
+<div class="container py-6">
+    <div class="card p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="title m-0">{{ payload.name }}</h2>
+            <div class="flex gap-2">
+                <button mat-button (click)="goBack()">
+                    <mat-icon svgIcon="mat:arrow_back" class="mr-2"></mat-icon>
+                    Retour
+                </button>
+                <button *ngIf="canEdit()" mat-raised-button color="primary" (click)="goToEdit()">
+                    <mat-icon svgIcon="mat:edit" class="mr-2"></mat-icon>
+                    Modifier
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Code</span>
+                <span class="font-medium">{{ payload.code }}</span>
+            </div>
+
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Nom</span>
+                <span class="font-medium">{{ payload.name }}</span>
+            </div>
+
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Adresse</span>
+                <span class="font-medium">{{ payload.address || '-' }}</span>
+            </div>
+
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Téléphone</span>
+                <span class="font-medium">{{ payload.phone || '-' }}</span>
+            </div>
+
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Email</span>
+                <span class="font-medium">{{ payload.email || '-' }}</span>
+            </div>
+
+            <div class="flex flex-col">
+                <span class="text-secondary text-sm">Statut</span>
+                <span class="font-medium flex items-center gap-2">
+                    <mat-icon *ngIf="payload.active" class="text-green-500" svgIcon="mat:check_circle"></mat-icon>
+                    <mat-icon *ngIf="!payload.active" class="text-red-500" svgIcon="mat:cancel"></mat-icon>
+                    {{ payload.active ? 'Actif' : 'Inactif' }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

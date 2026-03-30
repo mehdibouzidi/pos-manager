@@ -1,0 +1,16 @@
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full width */
+  }
+  
+  .responsive-img {
+    max-width: 40%;
+    max-height: 40%;
+    width: auto;
+    height: auto;
+    opacity: 0.6;
+    transform: translateY(-40%); /* Adjust the value as needed to move the image higher */
+  }

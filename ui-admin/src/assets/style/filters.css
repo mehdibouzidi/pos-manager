@@ -1,0 +1,3 @@
+::ng-deep .component-filters .mat-autocomplete {
+    width: 20% !important;
+}

@@ -1,0 +1,80 @@
+<div class="w-full h-full bg-pattern flex flex-col items-center justify-center">
+    <div @fadeInUp class="card overflow-hidden w-full max-w-md">
+      <div class="p-6 pb-0 flex flex-col items-center justify-center">
+        <div class="fill-current text-center">
+          <img class="w-16" src="assets/img/logo/logo.svg" />
+        </div>
+      </div>
+  
+      <div class="text-center mt-4">
+        <h2 class="title m-0">Welcome back</h2>
+        <h4 class="body-2 text-secondary m-0">
+            Connectez-vous avec vos identifiants ci-dessous.
+        </h4>
+      </div>
+  
+      <div [formGroup]="form" class="p-6 flex flex-col gap-4">
+        <div class="flex flex-col">
+          <mat-form-field class="flex-1">
+            <mat-label>Nom d'Utilisateur</mat-label>
+            <input formControlName="username" matInput required (blur)="onUsernameBlur()" />
+            <mat-error *ngIf="form.controls.username.hasError('required')"
+            >Nous avons besoin d'un nom d'utilisateur pour vous connecter
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="flex-1">
+            <mat-label>Mot de Passe</mat-label>
+            <input
+              [type]="inputType"
+              formControlName="password"
+              matInput
+              required />
+            <button
+              (click)="toggleVisibility()"
+              mat-icon-button
+              matIconSuffix
+              matTooltip="Toggle Visibility"
+              type="button">
+              <mat-icon *ngIf="visible" svgIcon="mat:visibility"></mat-icon>
+              <mat-icon *ngIf="!visible" svgIcon="mat:visibility_off"></mat-icon>
+            </button>
+            <mat-hint>Cliquez sur l'œil pour basculer la visibilité</mat-hint>
+            <mat-error *ngIf="form.controls.password.hasError('required')"
+            >Nous avons besoin d'un mot de passe pour vous connecter
+            </mat-error>
+          </mat-form-field>
+          <!-- Store code field - hidden for superadmins -->
+          <mat-form-field class="flex-1" *ngIf="!isSuperAdmin">
+            <mat-label>Code Magasin</mat-label>
+            <input formControlName="storeCode" matInput [required]="!isSuperAdmin" />
+            <mat-icon matIconPrefix svgIcon="mat:store"></mat-icon>
+            <mat-hint>Le code unique de votre magasin</mat-hint>
+            <mat-error *ngIf="form.controls.storeCode.hasError('required')"
+            >Le code magasin est obligatoire
+            </mat-error>
+          </mat-form-field>
+          <p *ngIf="isSuperAdmin" class="text-green-600 text-sm mb-2">
+            <mat-icon svgIcon="mat:admin_panel_settings" class="align-middle mr-1" style="font-size: 18px; width: 18px; height: 18px;"></mat-icon>
+            Super administrateur - connexion sans code magasin
+          </p>
+        </div>
+  
+        <!--<div class="flex items-center justify-between">
+          <mat-checkbox class="caption" color="primary">Remember Me</mat-checkbox>
+          <a [routerLink]="['/forgot-password']" class="caption"
+          >Mot de passe oublié ?</a
+          >
+        </div>-->
+  
+        <button (click)="send()" color="primary" mat-raised-button type="button">
+          Se Connecter
+        </button>
+  
+        <!--<p class="text-secondary text-center">
+          Don't have an account?<br />
+          <a [routerLink]="['/register']">Click here to create one</a>
+        </p>-->
+      </div>
+    </div>
+  </div>
+  

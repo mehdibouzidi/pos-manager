@@ -1,0 +1,20 @@
+::ng-deep .mat-snack-bar-container.alert-success {
+  color: #FFFFFF !important;
+  background-color: green !important;
+}
+
+::ng-deep .mat-snack-bar-container.alert-error {
+  color: #FFFFFF !important;
+  background-color: red !important;
+}
+
+::ng-deep .mat-snack-bar-container.alert-warning {
+  color: #FFFFFF !important;
+  background-color: orange !important;
+}
+
+/* Ensure text itself does not have a background */
+::ng-deep .mat-snack-bar-container span {
+  color: #FFFFFF !important;
+  background-color: transparent !important;
+}

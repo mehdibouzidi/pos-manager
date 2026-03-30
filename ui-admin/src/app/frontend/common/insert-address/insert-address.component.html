@@ -1,0 +1,34 @@
+<div [formGroup]="addressForm">
+    <div class="component-header">
+        <h5>Adresse</h5>
+    </div>
+    <div mat-dialog-content>
+
+        <div class="px-6 py-4 flex flex-col">
+            <div class="flex flex-col sm:flex-row sm:gap-4">
+                <mat-form-field class="flex-auto">
+                    <mat-label>Adresse</mat-label>
+                    <input matInput id="address" formControlName="address">
+                </mat-form-field>
+
+                <mat-form-field class="flex-auto">
+                    <mat-label>Daira</mat-label>
+                    <input matInput id="city" formControlName="city">
+                </mat-form-field>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:gap-4">
+                <mat-form-field class="flex-auto">
+                    <mat-label>Wilaya</mat-label>
+                    <input matInput id="town" formControlName="town">
+                </mat-form-field>
+
+                <mat-form-field class="flex-auto">
+                    <mat-label>Code Postal</mat-label>
+                    <input matInput id="postalCode" formControlName="postalCode">
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+
+</div>

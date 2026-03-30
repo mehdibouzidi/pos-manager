@@ -1,0 +1,55 @@
+<vex-secondary-toolbar current="Modifier un magasin">
+    <vex-breadcrumbs [crumbs]="['Administration', 'Magasins', 'Modifier']" class="flex-auto"></vex-breadcrumbs>
+</vex-secondary-toolbar>
+
+<div class="container py-6">
+    <div class="card p-6">
+        <h2 class="title mb-4">Modifier le Magasin</h2>
+        
+        <form [formGroup]="generalForm" class="flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <mat-form-field class="flex-1">
+                    <mat-label>Code</mat-label>
+                    <input matInput formControlName="code" placeholder="Ex: STORE001">
+                    <mat-error *ngIf="f['code'].hasError('required')">Le code est obligatoire</mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="flex-1">
+                    <mat-label>Nom</mat-label>
+                    <input matInput formControlName="name" placeholder="Ex: Magasin Central">
+                    <mat-error *ngIf="f['name'].hasError('required')">Le nom est obligatoire</mat-error>
+                </mat-form-field>
+            </div>
+
+            <mat-form-field class="w-full">
+                <mat-label>Adresse</mat-label>
+                <input matInput formControlName="address" placeholder="Ex: 123 Rue Principale">
+            </mat-form-field>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <mat-form-field class="flex-1">
+                    <mat-label>Téléphone</mat-label>
+                    <input matInput formControlName="phone" placeholder="Ex: +213 555 123 456">
+                </mat-form-field>
+
+                <mat-form-field class="flex-1">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" placeholder="Ex: store@example.com">
+                    <mat-error *ngIf="f['email'].hasError('email')">Email invalide</mat-error>
+                </mat-form-field>
+            </div>
+
+            <mat-slide-toggle formControlName="active" color="primary">
+                Actif
+            </mat-slide-toggle>
+
+            <div class="flex justify-end gap-4 mt-4">
+                <button mat-button type="button" (click)="cancel()">Annuler</button>
+                <button mat-raised-button color="primary" type="button" (click)="update()">
+                    <mat-icon svgIcon="mat:save" class="mr-2"></mat-icon>
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

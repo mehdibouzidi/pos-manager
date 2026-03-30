@@ -1,0 +1,124 @@
+import { CommonModule, NgIf } from '@angular/common';
+import { Component, Inject, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCommonModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef
+} from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { Observable } from 'rxjs';
+import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
+import { ProductService } from 'src/app/backend/service/business/product.service';
+
+@Component({
+  selector: 'vex-edit-product',
+  standalone: true,
+  templateUrl: './edit-product.component.html',
+  styleUrl: './edit-product.component.scss',
+  imports: [
+    ReactiveFormsModule,
+    MatAutocompleteModule,
+    MatDialogModule,
+    NgIf,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatCommonModule,
+    CommonModule
+  ]
+})
+export class EditProductComponent {
+  generalForm: FormGroup;
+
+  payload = new ProductPayload();
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<EditProductComponent>,
+    @Inject(MAT_DIALOG_DATA) public data,
+    private service: ProductService
+  ) {
+    this.payload = this.data.element;
+    this.service.get(this.payload.id).subscribe({
+      next: (response: ProductPayload) => {
+      if (response != null) {
+      this.payload = response;
+      }
+      }
+    });
+  }
+
+  close(): void {
+    this.dialogRef.close();
+  }
+
+  edit(): void {
+    this.payload.name = this.f['name'].value;
+    this.payload.code = this.f['code'].value;
+    this.payload.maxStock = this.f['maxStock'].value;
+    this.payload.minStock = this.f['minStock'].value;
+    this.payload.wholesalePrice = this.f['wholesalePrice'].value;
+    this.payload.retailPrice = this.f['retailPrice'].value;
+
+    this.service.update(this.payload).subscribe({
+      next: (response: ProductPayload) => {
+        if (response != null) {
+          this.dialogRef.close();
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  initData() {
+    // No external data needed
+  }
+
+  initForm() {
+    this.generalForm = this.fb.group({
+      name: [
+        this.payload.name,
+        [Validators.required, Validators.maxLength(30)]
+      ],
+      code: [
+        this.payload.code,
+        [Validators.required, Validators.maxLength(30)]
+      ],
+      maxStock: [this.payload.maxStock],
+      minStock: [this.payload.minStock],
+      wholesalePrice: [this.payload.wholesalePrice],
+      retailPrice: [this.payload.retailPrice]
+    });
+  }
+
+  initObservables() {}
+
+  ngOnInit(): void {
+    this.initData();
+    this.initForm();
+    this.initObservables();
+  }
+
+  get f() {
+    return this.generalForm.controls;
+  }
+}

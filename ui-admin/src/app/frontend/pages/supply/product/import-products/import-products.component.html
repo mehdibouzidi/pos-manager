@@ -1,0 +1,27 @@
+<vex-secondary-toolbar current="Importer des Recettes">
+    <vex-breadcrumbs [crumbs]="['Unité de Production', 'Base', 'Recettes', 'Importer des Recettes']"
+        class="flex-auto"></vex-breadcrumbs>
+
+    <button class="ml-2" color="primary" mat-icon-button type="button">
+        <mat-icon svgIcon="mat:more_vert"></mat-icon>
+    </button>
+</vex-secondary-toolbar>
+<div [@stagger]="true" class="p-6 container">
+    <div class="flex flex-col sm:flex-row gap-4">
+        <div @fadeInUp class="card flex-auto">
+            <div class="px-6 py-4 border-b flex items-center">
+                <h2 class="title m-0">Importer des Produits</h2>
+            </div>
+            <div class="mt-12">
+                <drag-and-drop #dragDrop></drag-and-drop>
+            </div>
+            <div class="px-6 py-4 flex flex-col flex-auto">
+                <div class=" mb-8 import-button">
+                    <button mat-raised-button color="primary" (click)="import()">Importer</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,192 @@
+<vex-page-layout>
+    <vex-page-layout-header class="pb-16 flex flex-col items-start justify-center">
+        <div [class.container]="layoutCtrl.value === 'boxed'" [class.px-6]="layoutCtrl.value === 'fullwidth'"
+            class="w-full flex flex-col sm:flex-row justify-between">
+            <div>
+                <h1 class="title mt-0 mb-1">Produits</h1>
+
+                <vex-breadcrumbs [crumbs]="['Approvisionnement', 'Base', 'Produits']"></vex-breadcrumbs>
+            </div>
+
+        </div>
+    </vex-page-layout-header>
+
+    <vex-page-layout-content [class.container]="layoutCtrl.value === 'boxed'"
+        [class.px-6]="layoutCtrl.value === 'fullwidth'" class="-mt-6">
+
+
+
+        <vex-page-layout-content [class.container]="layoutCtrl.value === 'boxed'"
+            [class.px-6]="layoutCtrl.value === 'fullwidth'" class="-mt-6">
+            <div class="card overflow-auto -mt-16">
+                <!--  TABLE HEADER Filters -->
+                <div class="bg-app-bar px-6 h-18 border-b sticky left-0 flex items-center table-filter">
+                    <mat-form-field class="input">
+                        <mat-label>Code</mat-label>
+                        <input matInput placeholder="Ex. 001" name="f.code" [(ngModel)]="criteria.code"  (keydown.enter)="search()" >
+                      </mat-form-field>
+
+                      <mat-form-field class="input">
+                          <mat-label>Nom</mat-label>
+                          <input matInput placeholder="Ex. Poulet" name="f.name" [(ngModel)]="criteria.name"  (keydown.enter)="search()" >
+                      </mat-form-field>
+                </div>
+
+                <!--  TABLE HEADER Actions -->
+                <div class="bg-app-bar px-6 h-16 border-b sticky left-0 flex items-center">
+
+                    <span class="flex-1"></span>
+
+                    <button [matMenuTriggerFor]="columnFilterMenu" class="ml-4 flex-none" mat-icon-button
+                        matTooltip="Filter Columns" type="button">
+                        <mat-icon svgIcon="mat:filter_list"></mat-icon>
+                    </button>
+                    <button (click)="search()" class="ml-4 flex-none" color="primary" mat-mini-fab
+                        matTooltip="Rechercher" type="button">
+                        <mat-icon svgIcon="mat:search"></mat-icon>
+                    </button>
+
+                    <button  *ngIf="canCreate()" (click)="goToAdd()" class="ml-4 flex-none" color="primary" mat-mini-fab matTooltip="Ajouter"
+                        type="button">
+                        <mat-icon svgIcon="mat:add"></mat-icon>
+                    </button>
+                    <button  *ngIf="canCreate()" (click)="goToImport()" class="ml-4 flex-none" color="primary" mat-mini-fab
+                        matTooltip="Importer" type="button">
+                        <mat-icon svgIcon="mat:upload_file"></mat-icon>
+                    </button>
+
+                </div>
+
+                <table [dataSource]="dataSource" class="w-full" mat-table matSort
+                    (matSortChange)="announceSortChange($event)">
+                    <!--- Note that these columns can be defined in any order.
+              The actual rendered columns are set as a property on the row definition" -->
+
+
+                    <!-- Text Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'text'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>
+                                {{ row[column.property] }}
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- Date Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'date'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>
+                                {{ row[column.property] && (row[column.property] | date:'yyyy') !== '1970'
+                                ? (row[column.property] | date:'dd/MM/yyyy') : '' }}
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- Child Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'child'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>
+                                <span *ngIf="row[column.property]?.code">{{ row[column.property].code }}</span>
+                                <span *ngIf="row[column.property]?.name"> - {{ row[column.property].name }}</span>
+
+                                <span *ngIf="row[column.property]?.firstName">{{ row[column.property].firstName
+                                    }}</span>
+                                <span *ngIf="row[column.property]?.lastName"> {{ row[column.property].lastName }}</span>
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
+
+                    <!-- SubChild Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'subChild'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>
+                                <span *ngIf="row[column.parentProperty][column.property]?.code">{{
+                                    row[column.parentProperty][column.property].code}}</span>
+                                <span *ngIf="row[column.parentProperty][column.property]?.name"> - {{
+                                    row[column.parentProperty][column.property].name }}</span>
+
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
+
+
+                    <!-- SubProperty Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'subProperty'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>
+
+                                {{row[column.parentProperty][column.property]}}
+
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
+                        <td *matCellDef="let row" mat-cell>
+                            <div class="flex">
+                                <button *ngIf="!row['isApproved'] && canEdit()"
+                                    class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    matTooltip="Détails" (click)="goToShow(row)" mat-mini-fab>
+                                    <mat-icon svgIcon="mat:remove_red_eye">edit</mat-icon>
+                                </button>
+                                <button
+                                    class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    matTooltip="Modifier" (click)="goToEdit(row)"
+                                    mat-mini-fab>
+                                    <mat-icon svgIcon="mat:edit">edit</mat-icon>
+                                </button>
+                                <button *ngIf="!row['isApproved'] && canDelete()"
+                                    class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    (click)="delete(row['id'])" mat-mini-fab
+                                    matTooltip="Supprimer" type="button">
+                                    <mat-icon svgIcon="mat:delete"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+
+
+                    <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+                    <tr *matRowDef="let row; columns: visibleColumns" @fadeInUp
+                        class="hover:bg-hover transition duration-400 ease-out-swift cursor-pointer" mat-row></tr>
+                </table>
+
+                <mat-paginator [pageSizeOptions]="pageSizeOptions" [pageSize]="pageSize"
+                    [length]="globalPayload.totalNumberOfElements" (page)="onPaginationChange($event)"
+                    class="sticky left-0"></mat-paginator>
+            </div>
+        </vex-page-layout-content>
+
+        <mat-menu #columnFilterMenu="matMenu" xPosition="before" yPosition="below">
+            <button (click)="toggleColumnVisibility(column, $event)" *ngFor="let column of columns"
+                class="mat-menu-item block">
+                <mat-checkbox (click)="$event.stopPropagation()" [(ngModel)]="column.visible" color="primary">
+                    {{ column.label }}
+                </mat-checkbox>
+            </button>
+        </mat-menu>
+
+
+
+    </vex-page-layout-content>
+
+</vex-page-layout>

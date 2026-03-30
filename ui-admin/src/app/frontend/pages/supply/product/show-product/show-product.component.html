@@ -1,0 +1,53 @@
+<form [formGroup]="generalForm">
+    <div class="flex items-center" mat-dialog-title>
+        <h2 class="headline m-0 flex-auto">
+            Détail Produit
+        </h2>
+
+        <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+            <mat-icon svgIcon="mat:close"></mat-icon>
+        </button>
+    </div>
+
+    <mat-divider class="text-border"></mat-divider>
+
+    <mat-dialog-content class="flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Code</mat-label>
+                <input matInput required formControlName="code">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Nom</mat-label>
+                <input matInput required formControlName="name">
+            </mat-form-field>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Durée de Vie(jr)</mat-label>
+                <input matInput formControlName="lifeDuration">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Max Stock</mat-label>
+                <input matInput formControlName="maxStock">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Min Stock</mat-label>
+                <input matInput formControlName="minStock">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>TVA(%)</mat-label>
+                <input matInput formControlName="vat">
+            </mat-form-field>
+        </div>
+
+
+
+
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button">Fermer</button>
+    </mat-dialog-actions>
+</form>

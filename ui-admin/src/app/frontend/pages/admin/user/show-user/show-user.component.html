@@ -1,0 +1,89 @@
+<vex-secondary-toolbar current="Détail Utilisateur">
+    <vex-breadcrumbs [crumbs]="['Administration', 'Utilisateurs', 'Détail Utilisateur']"
+        class="flex-auto"></vex-breadcrumbs>
+
+    <button class="ml-2" color="primary" mat-icon-button type="button">
+        <mat-icon svgIcon="mat:more_vert"></mat-icon>
+    </button>
+</vex-secondary-toolbar>
+<form [formGroup]="generalForm">
+    <div [@stagger]="true" class="p-6 container">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div @fadeInUp class="card flex-auto">
+                <div class="px-6 py-4 border-b flex items-center">
+                    <h2 class="title m-0">Détail Utilisateur</h2>
+                </div>
+
+                <div class="px-6 py-4 flex flex-col">
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Nom</mat-label>
+                            <input matInput required formControlName="lastName">
+                        </mat-form-field>
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Prénom</mat-label>
+                            <input matInput required formControlName="firstName">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Nom d'Utilisateur</mat-label>
+                            <input matInput required formControlName="username">
+                            <mat-hint>Demandez à votre Adminisateur votre Mot de Passe</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Magasin</mat-label>
+                            <input matInput [value]="payload.storeCode ? payload.storeCode + ' | ' + payload.storeName : 'Aucun magasin'" readonly>
+                            <mat-hint *ngIf="!payload.storeId && !payload.superAdmin" class="text-orange-600">Cet utilisateur n'a pas de magasin assigné</mat-hint>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:gap-4 items-center" *ngIf="payload.superAdmin">
+                        <mat-chip-listbox>
+                            <mat-chip color="primary" highlighted>
+                                <mat-icon svgIcon="mat:admin_panel_settings" class="mr-1"></mat-icon>
+                                Super Administrateur
+                            </mat-chip>
+                        </mat-chip-listbox>
+                    </div>
+                    <br>
+
+                    <section>
+                        <hr>
+                        <div class="component-header">
+                            <h5>Profils de l'Utilisateur</h5>
+                        </div>
+
+                        <table mat-table [dataSource]="dataSource" matSort>
+                            <!-- Code Column -->
+                            <ng-container matColumnDef="code">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
+                                <td mat-cell *matCellDef="let element" class="clickable"> {{element.code}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nom </th>
+                                <td mat-cell *matCellDef="let element" class="clickable"> {{element.name}} </td>
+                            </ng-container>
+
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+
+
+                    </section>
+
+
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>

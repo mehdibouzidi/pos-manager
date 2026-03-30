@@ -1,0 +1,57 @@
+<form [formGroup]="generalForm">
+    <div class="flex items-center" mat-dialog-title>
+        <h2 class="headline m-0 flex-auto">
+            Ajouter un Produit
+        </h2>
+
+        <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+            <mat-icon svgIcon="mat:close"></mat-icon>
+        </button>
+    </div>
+
+    <mat-divider class="text-border"></mat-divider>
+
+    <mat-dialog-content class="flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Code</mat-label>
+                <input matInput required formControlName="code">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Nom</mat-label>
+                <input matInput required formControlName="name">
+            </mat-form-field>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Max Stock</mat-label>
+                <input matInput formControlName="maxStock" type="number">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Min Stock</mat-label>
+                <input matInput formControlName="minStock" type="number">
+            </mat-form-field>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Prix de Gros</mat-label>
+                <input matInput formControlName="wholesalePrice" type="number" step="0.01">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Prix Détail de Vente</mat-label>
+                <input matInput formControlName="retailPrice" type="number" step="0.01">
+            </mat-form-field>
+        </div>
+
+
+
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button">Annuler</button>
+        <button color="primary" mat-flat-button (click)="add()">
+            Valider
+        </button>
+    </mat-dialog-actions>
+</form>

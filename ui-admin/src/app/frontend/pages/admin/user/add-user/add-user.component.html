@@ -1,0 +1,142 @@
+<vex-secondary-toolbar current="Ajouter un Utilisateur">
+    <vex-breadcrumbs [crumbs]="['Administration', 'Utilisateurs', 'Ajouter un Utilisateur']"
+        class="flex-auto"></vex-breadcrumbs>
+
+    <button class="ml-2" color="primary" mat-icon-button type="button">
+        <mat-icon svgIcon="mat:more_vert"></mat-icon>
+    </button>
+</vex-secondary-toolbar>
+<form [formGroup]="generalForm">
+    <div [@stagger]="true" class="p-6 container">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div @fadeInUp class="card flex-auto">
+                <div class="px-6 py-4 border-b flex items-center">
+                    <h2 class="title m-0">Ajouter un Utilisateur</h2>
+                </div>
+
+                <div class="px-6 py-4 flex flex-col">
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Nom</mat-label>
+                            <input matInput required formControlName="lastName">
+                        </mat-form-field>
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Prénom</mat-label>
+                            <input matInput required formControlName="firstName">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Nom d'Utilisateur</mat-label>
+                            <input matInput required formControlName="username">
+                        </mat-form-field>
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Mot de Passe</mat-label>
+                            <input [type]="inputType" matInput required formControlName="password">
+                            <button (click)="toggleVisibility()" mat-icon-button matIconSuffix
+                                matTooltip="Toggle Visibility" type="button">
+                                <mat-icon *ngIf="visible" svgIcon="mat:visibility"></mat-icon>
+                                <mat-icon *ngIf="!visible" svgIcon="mat:visibility_off"></mat-icon>
+                            </button>
+                            <mat-hint>Cliquez sur l'œil pour basculer la visibilité</mat-hint>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <mat-form-field class="flex-auto">
+                            <mat-label>Magasin</mat-label>
+                            <input type="text" placeholder="Sélectionnez un magasin" matInput
+                                [formControl]="posControl" [matAutocomplete]="autoPos">
+                            <mat-autocomplete #autoPos="matAutocomplete" [displayWith]="displayPosName">
+                                <mat-option *ngFor="let pos of filteredPoses | async" [value]="pos">
+                                    {{pos.code}} | {{pos.name}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-hint>L'utilisateur doit être associé à un magasin pour se connecter (sauf super admin)</mat-hint>
+                        </mat-form-field>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:gap-4 items-center">
+                        <mat-slide-toggle formControlName="superAdmin" color="primary">
+                            Super Administrateur
+                        </mat-slide-toggle>
+                        <mat-hint class="text-xs text-gray-500 ml-2">Un super admin peut se connecter sans magasin et voit toutes les données</mat-hint>
+                    </div>
+                    <br>
+
+                    <section>
+                        <hr>
+                        <div class="component-header">
+                            <h5>Ajout des Profils à l'Utilisateur</h5>
+                        </div>
+                        <div class="px-6 h-16  sticky left-0 flex items-center gap-4">
+                            <mat-form-field class="mat-autocomplete-profil profil-input">
+                                <mat-label>Profil</mat-label>
+                                <input type="text" placeholder="Choix" aria-label="Recette" matInput
+                                    [formControl]="profilControl" [matAutocomplete]="autoProfil">
+                                <mat-autocomplete #autoProfil="matAutocomplete" [displayWith]="displayProfilName">
+                                    <mat-option *ngFor="let option of filteredProfils  | async" [value]="option">
+                                        {{option.code}} | {{option.name}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+
+                            <span class="flex-1"></span>
+
+                            <button (click)="addProfil()" class="ml-4 flex-none" color="primary" mat-mini-fab
+                                matTooltip="Ajouter" type="button">
+                                <mat-icon svgIcon="mat:add"></mat-icon>
+                            </button>
+                        </div>
+
+                        <table mat-table [dataSource]="dataSource" matSort>
+                            <!-- Code Column -->
+                            <ng-container matColumnDef="code">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
+                                <td mat-cell *matCellDef="let element" class="clickable"> {{element.code}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nom </th>
+                                <td mat-cell *matCellDef="let element" class="clickable"> {{element.name}} </td>
+                            </ng-container>
+
+
+                            <!-- Actions Column -->
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                                <td mat-cell *matCellDef="let element">
+                                    <div class="flex">
+
+                                        <button
+                                            class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                            (click)="deleteProfil(element)" mat-mini-fab matTooltip="Supprimer"
+                                            type="button">
+                                            <mat-icon svgIcon="mat:delete"></mat-icon>
+                                        </button>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+
+
+                    </section>
+
+
+
+
+                    <div class="flex items-center justify-end gap-2">
+                        <button mat-button type="button">Annuler</button>
+                        <button color="primary" mat-flat-button type="button" [disabled]="!generalForm.valid"
+                            (click)="add()">Valider</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>

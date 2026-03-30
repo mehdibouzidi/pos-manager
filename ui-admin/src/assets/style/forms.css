@@ -1,0 +1,33 @@
+hr{
+    width: 100%;
+    margin: 20px 0px;
+}
+::ng-deep .mat-elevation-z8{
+    box-shadow: none !important;
+    height: 400px;
+}
+
+::ng-deep mat-form-field{
+    margin-right: 40px;
+}
+
+::ng-deep table button{
+    box-shadow: none !important;
+}
+
+
+::ng-deep .mat-form-field.textarea, ::ng-deep mat-form-field.mat-autocomplete {
+    width: 50% !important;
+}
+
+::ng-deep .content{
+    margin-left: 50px !important;
+}
+
+.clickable {
+    cursor: pointer;
+}
+  
+.clickable:hover {
+    background-color: #f1f1f1; /* Change to your desired hover color */
+}
