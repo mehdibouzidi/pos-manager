@@ -22,6 +22,10 @@ export class RequestsConstants{
     static readonly PRODUCT_FINDALL_CRITERIA_REQ = RequestsConstants.PRODUCT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
     static readonly PRODUCT_IMPORT_REQ = RequestsConstants.PRODUCT_REQ + UtilStatic.SLASH + UtilStatic.IMPORT;
 
+    //PRODUCT CATEGORY
+    static readonly PRODUCT_CATEGORY_REQ = RequestsConstants.API_SOURCE + BusinessConstants.PRODUCT_CATEGORY;
+    static readonly PRODUCT_CATEGORY_FINDALL_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+
     // ADMIN
      //Privilege
      static readonly PRIVILEGE_REQ = RequestsConstants.API_SOURCE + AdminConstants.PRIVILEGE;

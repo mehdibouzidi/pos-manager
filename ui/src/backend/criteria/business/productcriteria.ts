@@ -1,21 +1,21 @@
 import { CommonCriteria } from "../commoncriteria";
 
 export class ProductCriteria extends CommonCriteria{
-    id: number;
-    code: string;
-    name: string;
-    gammeId: number;
-    gammeName: string;
-    gammes: Array<string>;
-    categoryId: number;
-    categoryName: string;
-    categories: Array<string>;
-    subCategoryId: number;
-    subCategoryName: string;
-    unitId: number;
-    unitName: string;
-    typeId: number;
-    typeName: string;
+    id: number | null;
+    code: string | null;
+    name: string | null;
+    gammeId: number | null;
+    gammeName: string | null;
+    gammes: Array<string> | null;
+    categoryId: number | null;
+    categoryName: string | null;
+    categories: Array<string> | null;
+    subCategoryId: number | null;
+    subCategoryName: string | null;
+    unitId: number | null;
+    unitName: string | null;
+    typeId: number | null;
+    typeName: string | null;
 
     constructor(){
         super();

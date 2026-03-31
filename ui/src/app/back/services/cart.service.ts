@@ -21,7 +21,7 @@ export class CartService {
   );
 
   readonly subtotal = computed(() => 
-    this._items().reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
+    this._items().reduce((sum, item) => sum + (item.product.retailPrice * item.quantity), 0)
   );
 
   readonly tax = computed(() => this.subtotal() * this.TAX_RATE);
@@ -44,11 +44,11 @@ export class CartService {
     }
   }
 
-  removeFromCart(productId: string): void {
+  removeFromCart(productId: number): void {
     this._items.set(this._items().filter(item => item.product.id !== productId));
   }
 
-  updateQuantity(productId: string, quantity: number): void {
+  updateQuantity(productId: number, quantity: number): void {
     if (quantity <= 0) {
       this.removeFromCart(productId);
       return;
@@ -62,14 +62,14 @@ export class CartService {
     this._items.set(updatedItems);
   }
 
-  incrementQuantity(productId: string): void {
+  incrementQuantity(productId: number): void {
     const item = this._items().find(i => i.product.id === productId);
     if (item) {
       this.updateQuantity(productId, item.quantity + 1);
     }
   }
 
-  decrementQuantity(productId: string): void {
+  decrementQuantity(productId: number): void {
     const item = this._items().find(i => i.product.id === productId);
     if (item) {
       this.updateQuantity(productId, item.quantity - 1);

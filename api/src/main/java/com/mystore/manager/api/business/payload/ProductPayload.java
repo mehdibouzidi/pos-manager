@@ -15,4 +15,7 @@ public class ProductPayload extends GlobalDataPayload {
     private BigDecimal wholesalePrice; // Prix de Gros
     private BigDecimal retailPrice; // Prix détail de vente
     private BigDecimal currentStock; // Stock réel = achat - vente
+    private Integer categoryId;
+    private String categoryName;
+    private String photo; // base64 encoded
 }

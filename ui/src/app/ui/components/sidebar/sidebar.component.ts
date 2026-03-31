@@ -9,18 +9,26 @@ import { MenuService } from '../../../back/services/menu.service';
   template: `
     <aside class="sidebar">
       <div class="logo">
-        <span class="logo-icon">🍕</span>
+        <span class="logo-icon">🛒</span>
       </div>
       <nav class="categories">
-        @for (category of menuService.categories; track category.id) {
-          <button 
-            class="category-item"
-            [ngClass]="{ 'active': category.id === menuService.selectedCategoryId() }"
-            (click)="menuService.selectCategory(category.id)"
-          >
-            <span class="category-icon">{{ category.icon }}</span>
-            <span class="category-name">{{ category.name }}</span>
-          </button>
+        @if (menuService.loading()) {
+          <div class="loading">Chargement...</div>
+        } @else {
+          @for (category of menuService.categories(); track category.id) {
+            <button
+              class="category-item"
+              [ngClass]="{ 'active': category.id === menuService.selectedCategoryId() }"
+              (click)="menuService.selectCategory(category.id)"
+            >
+              @if (category.photo) {
+                <img class="category-img" [src]="'data:image/jpeg;base64,' + category.photo" [alt]="category.name">
+              } @else {
+                <span class="category-icon">📦</span>
+              }
+              <span class="category-name">{{ category.name }}</span>
+            </button>
+          }
         }
       </nav>
     </aside>
@@ -81,10 +89,24 @@ import { MenuService } from '../../../back/services/menu.service';
       font-size: 24px;
     }
 
+    .category-img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+    }
+
     .category-name {
       font-size: 11px;
       font-weight: 500;
       line-height: 1.2;
+    }
+
+    .loading {
+      font-size: 11px;
+      color: var(--text-gray);
+      text-align: center;
+      padding: 16px 0;
     }
   `]
 })

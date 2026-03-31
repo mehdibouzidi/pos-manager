@@ -8,33 +8,36 @@ import { CartService } from '../../../back/services/cart.service';
   standalone: true,
   imports: [CurrencyPipe, NgClass],
   template: `
-    <div class="product-card" [ngClass]="{ 'out-of-stock': product.stock === 0 }">
+    <div class="product-card" [ngClass]="{ 'out-of-stock': product.currentStock === 0 }">
       <div class="product-image">
-        <img [src]="product.image" [alt]="product.name">
-        @if (product.stock === 0) {
+        @if (product.photo) {
+          <img [src]="'data:image/jpeg;base64,' + product.photo" [alt]="product.name">
+        } @else {
+          <span class="no-photo">📦</span>
+        }
+        @if (product.currentStock === 0) {
           <div class="stock-overlay">Épuisé</div>
         }
       </div>
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
         <div class="stock-badge" [ngClass]="getStockClass()">
-          @if (product.stock === 0) {
+          @if (product.currentStock === 0) {
             <span>Rupture de stock</span>
-          } @else if (product.stock <= 5) {
-            <span>⚠ Plus que {{ product.stock }} disponible{{ product.stock > 1 ? 's' : '' }}</span>
+          } @else if (product.currentStock <= 5) {
+            <span>⚠ Plus que {{ product.currentStock }} disponible{{ product.currentStock > 1 ? 's' : '' }}</span>
           } @else {
-            <span>✓ En stock ({{ product.stock }})</span>
+            <span>✓ En stock ({{ product.currentStock }})</span>
           }
         </div>
         <div class="product-footer">
           <span class="product-price">
-            <span class="currency">$</span>{{ product.price | currency:'':'':'1.2-2' }}
+            <span class="currency">$</span>{{ product.retailPrice | currency:'':'':'1.2-2' }}
           </span>
           <button
             class="add-btn"
             aria-label="Ajouter au panier"
-            [disabled]="product.stock === 0"
+            [disabled]="product.currentStock === 0"
             (click)="addToCart()"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -90,6 +93,11 @@ import { CartService } from '../../../back/services/cart.service';
       height: 85%;
       object-fit: contain;
       transition: transform 0.3s ease;
+    }
+
+    .no-photo {
+      font-size: 48px;
+      opacity: 0.4;
     }
 
     .product-card:hover .product-image img {
@@ -206,14 +214,14 @@ export class ProductCardComponent {
   @Input({ required: true }) product!: Product;
 
   addToCart(): void {
-    if (this.product.stock > 0) {
+    if (this.product.currentStock > 0) {
       this.cartService.addToCart(this.product);
     }
   }
 
   getStockClass(): string {
-    if (this.product.stock === 0) return 'stock-out';
-    if (this.product.stock <= 5) return 'stock-low';
+    if (this.product.currentStock === 0) return 'stock-out';
+    if (this.product.currentStock <= 5) return 'stock-low';
     return 'stock-ok';
   }
 }

@@ -1,5 +1,14 @@
 # POS Manager — Workspace Overview
 
+## System Context
+
+This is a **distributed point-of-sale system** designed to operate in both **online** and **offline** modes.
+- **Online mode:** the POS UI communicates directly with the backend REST API using JWT authentication.
+- **Offline mode:** the POS UI operates autonomously (local storage / service worker / cached data) and syncs with the backend when connectivity is restored. API Keys are used to authenticate POS terminals independently of user sessions.
+- The system is **multi-tenant by POS terminal** (`pos_fk` on all business entities) — each point-of-sale terminal has its own isolated data scope.
+
+---
+
 This workspace contains three main modules:
 
 ## api/

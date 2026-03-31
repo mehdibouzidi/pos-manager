@@ -1,6 +1,7 @@
 import { HomeComponent } from './frontend/pages/home/home/home.component';
 import { AllProductsComponent } from './frontend/pages/supply/product/all-products/all-products.component';
 import { ImportProductsComponent } from './frontend/pages/supply/product/import-products/import-products.component';
+import { AllProductCategoriesComponent } from './frontend/pages/supply/product-category/all-product-categories/all-product-categories.component';
 import { VexRoutes } from '@vex/interfaces/vex-route.interface';
 import { LoginComponent } from './frontend/pages/admin/login/login.component';
 import { authGuard } from './backend/authguard/guards/auth.guard';
@@ -19,6 +20,9 @@ import { AllPosComponent } from './frontend/pages/admin/pos/all-pos/all-pos.comp
 import { AddPosComponent } from './frontend/pages/admin/pos/add-pos/add-pos.component';
 import { EditPosComponent } from './frontend/pages/admin/pos/edit-pos/edit-pos.component';
 import { ShowPosComponent } from './frontend/pages/admin/pos/show-pos/show-pos.component';
+import { AllApiKeysComponent } from './frontend/pages/admin/api-key/all-api-keys/all-api-keys.component';
+import { AllSessionLogsComponent } from './frontend/pages/admin/session-log/all-session-logs/all-session-logs.component';
+import { AllStockMovementsComponent } from './frontend/pages/supply/stock-movement/all-stock-movements/all-stock-movements.component';
 
 export const appRoutes: VexRoutes = [
   {
@@ -28,6 +32,14 @@ export const appRoutes: VexRoutes = [
   },
   // Auth
   { path: 'login', component: LoginComponent },
+
+  // Catalog - Product Categories
+  {
+    path: 'product-categories',
+    component: AllProductCategoriesComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.PRODUCT_CATEGORY_READ] }
+  },
 
   // Catalog - Products
   {
@@ -133,5 +145,29 @@ export const appRoutes: VexRoutes = [
     component: ShowPosComponent,
     canActivate: [authGuard],
     data: { privileges: [AdminConstants.ADMIN] }
+  },
+
+  // Admin - API Keys
+  {
+    path: 'api-keys',
+    component: AllApiKeysComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.API_KEY_READ] }
+  },
+
+  // Admin - Session Logs
+  {
+    path: 'session-logs',
+    component: AllSessionLogsComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.SESSION_LOG_READ] }
+  },
+
+  // Stock - Stock Movements
+  {
+    path: 'stock-movements',
+    component: AllStockMovementsComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.STOCK_MOVEMENT_READ] }
   }
 ];

@@ -24,6 +24,10 @@ export class RequestsLists{
         new Request(RequestsLists.POST, RequestsConstants.PRODUCT_FINDALL_CRITERIA_REQ),
         new Request(RequestsLists.POST, RequestsConstants.PRODUCT_IMPORT_REQ),
 
+        // PRODUCT CATEGORY
+        new Request(RequestsLists.GET, RequestsConstants.PRODUCT_CATEGORY_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.PRODUCT_CATEGORY_FINDALL_REQ),
+
         // Admin
         //PRIVILEGE
         new Request(RequestsLists.GET, RequestsConstants.PRIVILEGE_REQ),

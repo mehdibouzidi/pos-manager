@@ -31,6 +31,14 @@ export class NavigationLoaderService {
         children: [
           {
             type: 'link',
+            label: 'Catégories de Produits',
+            icon: 'mat:category',
+            route: '/product-categories',
+            staticRoute: '/product-categories',
+            visible: this.authService.hasRoles(Array.of(AdminConstants.PRODUCT_CATEGORY_READ, AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
             label: 'Produits',
             icon: 'mat:inventory_2',
             route: '/products',
@@ -79,6 +87,40 @@ export class NavigationLoaderService {
             icon: 'mat:group',
             routerLinkActiveOptions: { exact: true },
             visible: this.authService.hasRoles(Array.of(AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
+            label: 'Clés API',
+            route: '/api-keys',
+            staticRoute: '/api-keys',
+            icon: 'mat:vpn_key',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.API_KEY_READ, AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
+            label: 'Journaux de Sessions',
+            route: '/session-logs',
+            staticRoute: '/session-logs',
+            icon: 'mat:history',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.SESSION_LOG_READ, AdminConstants.ADMIN))
+          }
+        ]
+      },
+      {
+        type: 'subheading',
+        label: 'Stock',
+        visible: this.authService.hasRoles(AdminConstants.SIDENAV_STOCK),
+        children: [
+          {
+            type: 'link',
+            label: 'Mouvements de Stock',
+            route: '/stock-movements',
+            staticRoute: '/stock-movements',
+            icon: 'mat:inventory',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_READ, AdminConstants.ADMIN))
           }
         ]
       }

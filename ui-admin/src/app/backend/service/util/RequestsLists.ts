@@ -22,6 +22,14 @@ export class RequestsLists {
         new Request(RequestsLists.POST, RequestsConstants.PRODUCT_FINDALL_CRITERIA_REQ),
         new Request(RequestsLists.POST, RequestsConstants.PRODUCT_IMPORT_REQ),
 
+        // PRODUCT CATEGORY
+        new Request(RequestsLists.GET, RequestsConstants.PRODUCT_CATEGORY_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.PRODUCT_CATEGORY_ADD_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.PRODUCT_CATEGORY_UPDATE_REQ),
+        new Request(RequestsLists.DELETE, RequestsConstants.PRODUCT_CATEGORY_DELETE_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.PRODUCT_CATEGORY_FINDALL_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.PRODUCT_CATEGORY_FINDALL_CRITERIA_REQ),
+
         // ADMIN - Privilege
         new Request(RequestsLists.GET, RequestsConstants.PRIVILEGE_REQ),
         new Request(RequestsLists.POST, RequestsConstants.PRIVILEGE_ADD_REQ),
@@ -56,5 +64,27 @@ export class RequestsLists {
         new Request(RequestsLists.DELETE, RequestsConstants.POS_DELETE_REQ),
         new Request(RequestsLists.GET, RequestsConstants.POS_FINDALL_REQ),
         new Request(RequestsLists.POST, RequestsConstants.POS_FINDALL_CRITERIA_REQ),
+
+        // ADMIN - API Key
+        new Request(RequestsLists.GET, RequestsConstants.API_KEY_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.API_KEY_ADD_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.API_KEY_UPDATE_REQ),
+        new Request(RequestsLists.DELETE, RequestsConstants.API_KEY_DELETE_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.API_KEY_FINDALL_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.API_KEY_FINDALL_CRITERIA_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.API_KEY_REGENERATE_REQ),
+
+        // ADMIN - Session Log
+        new Request(RequestsLists.GET, RequestsConstants.SESSION_LOG_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.SESSION_LOG_FINDALL_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.SESSION_LOG_FINDALL_CRITERIA_REQ),
+
+        // BUSINESS - Stock Movement
+        new Request(RequestsLists.GET, RequestsConstants.STOCK_MOVEMENT_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.STOCK_MOVEMENT_ADD_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.STOCK_MOVEMENT_UPDATE_REQ),
+        new Request(RequestsLists.DELETE, RequestsConstants.STOCK_MOVEMENT_DELETE_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.STOCK_MOVEMENT_FINDALL_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.STOCK_MOVEMENT_FINDALL_CRITERIA_REQ),
     ];
 }

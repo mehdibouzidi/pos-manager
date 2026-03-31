@@ -92,6 +92,20 @@ public class SecurityConfig {
             auth.requestMatchers(HttpMethod.GET, SLASH + POS_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + POS_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + POS_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(ADMIN);
+
+            //API Key
+            auth.requestMatchers(HttpMethod.POST, SLASH + API_KEY_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(API_KEY_CREATE, ADMIN);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + API_KEY_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(API_KEY_UPDATE, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + API_KEY_CONTROLLER + "/regenerate/**").hasAnyAuthority(API_KEY_UPDATE, ADMIN);
+            auth.requestMatchers(HttpMethod.DELETE, SLASH + API_KEY_CONTROLLER + ID_PARAM).hasAnyAuthority(API_KEY_DELETE, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + API_KEY_CONTROLLER + ID_PARAM).hasAnyAuthority(API_KEY_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + API_KEY_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(API_KEY_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + API_KEY_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(API_KEY_READ, ADMIN);
+
+            //Session Log
+            auth.requestMatchers(HttpMethod.GET, SLASH + SESSION_LOG_CONTROLLER + ID_PARAM).hasAnyAuthority(SESSION_LOG_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + SESSION_LOG_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(SESSION_LOG_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + SESSION_LOG_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(SESSION_LOG_READ, ADMIN);
         };
     }
 
@@ -107,6 +121,22 @@ public class SecurityConfig {
             auth.requestMatchers(HttpMethod.GET, SLASH + PRODUCT_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(PRODUCT_READ, ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + PRODUCT_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(PRODUCT_READ, ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + PRODUCT_CONTROLLER + SLASH + IMPORT).hasAnyAuthority(PRODUCT_CREATE, ADMIN);
+
+            // ProductCategoryController
+            auth.requestMatchers(HttpMethod.POST, SLASH + PRODUCT_CATEGORY_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(PRODUCT_CATEGORY_CREATE, ADMIN);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + PRODUCT_CATEGORY_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(PRODUCT_CATEGORY_UPDATE, ADMIN);
+            auth.requestMatchers(HttpMethod.DELETE, SLASH + PRODUCT_CATEGORY_CONTROLLER + ID_PARAM).hasAnyAuthority(PRODUCT_CATEGORY_DELETE, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + PRODUCT_CATEGORY_CONTROLLER + ID_PARAM).hasAnyAuthority(PRODUCT_CATEGORY_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + PRODUCT_CATEGORY_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(PRODUCT_CATEGORY_READ, PRODUCT_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + PRODUCT_CATEGORY_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(PRODUCT_CATEGORY_READ, ADMIN);
+
+            // StockMovementController
+            auth.requestMatchers(HttpMethod.POST, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(STOCK_MOVEMENT_CREATE, ADMIN);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(STOCK_MOVEMENT_UPDATE, ADMIN);
+            auth.requestMatchers(HttpMethod.DELETE, SLASH + STOCK_MOVEMENT_CONTROLLER + ID_PARAM).hasAnyAuthority(STOCK_MOVEMENT_DELETE, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + STOCK_MOVEMENT_CONTROLLER + ID_PARAM).hasAnyAuthority(STOCK_MOVEMENT_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(STOCK_MOVEMENT_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(STOCK_MOVEMENT_READ, ADMIN);
 
         };
     }

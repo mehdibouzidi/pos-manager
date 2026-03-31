@@ -1,0 +1,55 @@
+<div mat-dialog-title class="flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <mat-icon svgIcon="mat:inventory" class="text-primary"></mat-icon>
+    <span>Détail du Mouvement de Stock</span>
+  </div>
+  <button mat-icon-button type="button" (click)="close()">
+    <mat-icon svgIcon="mat:close"></mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="flex flex-col gap-4 pt-4">
+  <div class="grid grid-cols-1 gap-4">
+
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Produit</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Code</span>
+        <span class="font-medium">{{ element.productCode }}</span>
+        <span class="text-secondary">Nom</span>
+        <span class="font-medium">{{ element.productName }}</span>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Mouvement</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Type</span>
+        <span class="text-xs font-semibold px-2 py-1 rounded-full w-fit" [ngClass]="getMovementTypeClass(element.movementType)">
+          {{ getMovementTypeLabel(element.movementType) }}
+        </span>
+        <span class="text-secondary">Quantité</span>
+        <span class="font-medium">{{ element.quantity }}</span>
+        <span class="text-secondary">Motif</span>
+        <span class="font-medium">{{ element.reason || '—' }}</span>
+        <span class="text-secondary">Date du mouvement</span>
+        <span class="font-medium">{{ element.movementDate | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Audit</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Créé par</span>
+        <span class="font-medium">{{ element.createdByFullName }}</span>
+        <span class="text-secondary">Créé le</span>
+        <span class="font-medium">{{ element.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Fermer</button>
+</mat-dialog-actions>

@@ -15,6 +15,8 @@ public class AdminConstants {
     public static final String USER_PROFILS_TABLE= "admin_user_profils";
     public static final String ADDRESS_TABLE= "admin_address";
     public static final String POS_TABLE= "admin_pos";
+    public static final String API_KEY_TABLE = "admin_api_keys";
+    public static final String SESSION_LOG_TABLE = "admin_session_logs";
 
     // REST Constants
     public static final String PRIVILEGE_CONTROLLER = "privilege";
@@ -25,6 +27,8 @@ public class AdminConstants {
     public static final String DISABLE_EP = "disable";
     public static final String SIGN_IN_EP = "signin";
     public static final String LOGIN_EP = "login";
+    public static final String API_KEY_CONTROLLER = "api-key";
+    public static final String SESSION_LOG_CONTROLLER = "session-log";
 
 
 }

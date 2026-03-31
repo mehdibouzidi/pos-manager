@@ -29,11 +29,11 @@ import { CartService } from '../../../back/services/cart.service';
           @for (item of cartService.items(); track item.product.id) {
             <div class="cart-item">
               <div class="item-image">
-                <img [src]="item.product.image" [alt]="item.product.name">
+                <img [src]="item.product.photo ? 'data:image/jpeg;base64,' + item.product.photo : null" [alt]="item.product.name">
               </div>
               <div class="item-details">
                 <h4>{{ item.product.name }}</h4>
-                <span class="item-price">{{ item.product.price | currency }}</span>
+                <span class="item-price">{{ item.product.retailPrice | currency }}</span>
               </div>
               <div class="item-controls">
                 <button class="qty-btn" (click)="cartService.decrementQuantity(item.product.id)">−</button>

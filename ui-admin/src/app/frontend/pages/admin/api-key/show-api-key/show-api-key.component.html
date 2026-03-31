@@ -1,0 +1,42 @@
+<div class="flex items-center" mat-dialog-title>
+    <h2 class="headline m-0 flex-auto">Détails de la Clé API</h2>
+    <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+        <mat-icon svgIcon="mat:close"></mat-icon>
+    </button>
+</div>
+<mat-divider class="text-border"></mat-divider>
+<mat-dialog-content class="flex flex-col gap-3 pt-4">
+    <div class="flex gap-4">
+        <div class="flex-1">
+            <p class="text-secondary text-xs mb-1">POS</p>
+            <p class="font-medium">{{ payload.posName || '—' }}</p>
+        </div>
+        <div class="flex-1">
+            <p class="text-secondary text-xs mb-1">Statut</p>
+            <p class="font-medium" [class.text-green-600]="payload.active" [class.text-red-600]="!payload.active">
+                {{ payload.active ? 'Actif' : 'Inactif' }}
+            </p>
+        </div>
+    </div>
+    <div>
+        <p class="text-secondary text-xs mb-1">Description</p>
+        <p class="font-medium">{{ payload.description || '—' }}</p>
+    </div>
+    <div>
+        <p class="text-secondary text-xs mb-1">Valeur de la clé</p>
+        <p class="font-mono text-sm bg-gray-100 rounded p-2 break-all">{{ payload.keyValue || '—' }}</p>
+    </div>
+    <div class="flex gap-4">
+        <div class="flex-1">
+            <p class="text-secondary text-xs mb-1">Créé le</p>
+            <p class="font-medium">{{ payload.createdAt || '—' }}</p>
+        </div>
+        <div class="flex-1">
+            <p class="text-secondary text-xs mb-1">Créé par</p>
+            <p class="font-medium">{{ payload.createdByFullName || '—' }}</p>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close type="button">Fermer</button>
+</mat-dialog-actions>

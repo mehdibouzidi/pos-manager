@@ -1,5 +1,6 @@
 package com.mystore.manager.api.business.model;
 
+import com.mystore.manager.api.business.model.ProductCategoryEntity;
 import com.mystore.manager.api.common.model.AbstractBusinessGlobalData;
 import com.mystore.manager.api.business.common.util.BusinessConstants;
 import jakarta.persistence.*;
@@ -25,12 +26,22 @@ import java.math.BigDecimal;
 public class ProductEntity extends AbstractBusinessGlobalData {
     private Double maxStock;
     private Double minStock;
+    @Column(name = "current_stock")
+    private Double currentStock;
     
     @Column(name = "wholesale_price", precision = 19, scale = 4)
     private BigDecimal wholesalePrice; // Prix de Gros
     
     @Column(name = "retail_price", precision = 19, scale = 4)
     private BigDecimal retailPrice; // Prix détail de vente
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_fk")
+    private ProductCategoryEntity category;
+
+    @Lob
+    @Column(name = "photo")
+    private byte[] photo;
 
     @Override
     public String toString() {

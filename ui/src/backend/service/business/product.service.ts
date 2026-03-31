@@ -5,6 +5,8 @@ import { RequestsConstants } from '../util/RequestsConstants';
 import { PayloadSanitizer } from '../util/payload-sanitizer';
 import { UtilStatic } from '../util/UtilStatic';
 import { ProductPayload } from '../../payloads/business/productpayload';
+import { Observable } from 'rxjs';
+import { Product } from '../../../app/back/models/product.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +21,8 @@ export class ProductService {
     return this.http.post( `${RequestsConstants.PRODUCT_FINDALL_CRITERIA_REQ}`, criteria);
   }
 
-  findAll(){
-    return this.http.get( `${RequestsConstants.PRODUCT_FINDALL_REQ}`);
+  findAll(): Observable<Product[]> {
+    return this.http.get<Product[]>( `${RequestsConstants.PRODUCT_FINDALL_REQ}`);
   }
 
   add(payload: ProductPayload){

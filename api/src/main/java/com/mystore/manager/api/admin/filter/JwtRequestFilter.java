@@ -4,6 +4,7 @@ import com.mystore.manager.api.admin.service.impl.JWTService;
 import com.mystore.manager.api.admin.service.impl.MainUserService;
 import com.mystore.manager.api.admin.util.AdminConstants;
 import com.mystore.manager.api.common.context.PosContext;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,19 +53,23 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith(AdminConstants.BEARER)) {
             jwt = authorizationHeader.substring(7);
-            username = jwtService.extractUsername(jwt);
-            
-            // Extract POS info from JWT and set in context
             try {
-                Integer posId = jwtService.extractPosId(jwt);
-                String posCode = jwtService.extractPosCode(jwt);
-                Boolean superAdmin = jwtService.extractSuperAdmin(jwt);
-                
-                PosContext.setPosId(posId);
-                PosContext.setPosCode(posCode);
-                PosContext.setSuperAdmin(superAdmin != null ? superAdmin : false);
-            } catch (Exception e) {
-                // Log but don't fail - POS context will be null
+                username = jwtService.extractUsername(jwt);
+
+                // Extract POS info from JWT and set in context
+                try {
+                    Integer posId = jwtService.extractPosId(jwt);
+                    String posCode = jwtService.extractPosCode(jwt);
+                    Boolean superAdmin = jwtService.extractSuperAdmin(jwt);
+
+                    PosContext.setPosId(posId);
+                    PosContext.setPosCode(posCode);
+                    PosContext.setSuperAdmin(superAdmin != null ? superAdmin : false);
+                } catch (Exception e) {
+                    // Log but don't fail - POS context will be null
+                }
+            } catch (JwtException e) {
+                // Invalid token (bad signature, expired, malformed...) — treat as unauthenticated
             }
         }
 

@@ -1,0 +1,29 @@
+<form [formGroup]="generalForm">
+    <div class="flex items-center" mat-dialog-title>
+        <h2 class="headline m-0 flex-auto">Modifier la Clé API</h2>
+        <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+            <mat-icon svgIcon="mat:close"></mat-icon>
+        </button>
+    </div>
+    <mat-divider class="text-border"></mat-divider>
+    <mat-dialog-content class="flex flex-col gap-4 pt-4">
+        <mat-form-field class="flex-auto">
+            <mat-label>Description</mat-label>
+            <input matInput required formControlName="description">
+        </mat-form-field>
+        <div class="flex items-center gap-4">
+            <div class="flex-auto font-mono text-xs bg-gray-100 rounded p-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                {{ payload.keyValue || '—' }}
+            </div>
+            <button mat-stroked-button color="warn" type="button" (click)="regenerate()" matTooltip="Régénérer la clé">
+                <mat-icon svgIcon="mat:refresh"></mat-icon>
+                Régénérer
+            </button>
+        </div>
+        <mat-slide-toggle formControlName="active" color="primary">Actif</mat-slide-toggle>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button">Annuler</button>
+        <button color="primary" mat-flat-button (click)="update()" [disabled]="generalForm.invalid">Enregistrer</button>
+    </mat-dialog-actions>
+</form>

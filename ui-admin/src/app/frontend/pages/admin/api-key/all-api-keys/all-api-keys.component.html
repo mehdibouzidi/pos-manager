@@ -1,0 +1,82 @@
+<vex-page-layout>
+    <vex-page-layout-header class="pb-16 flex flex-col items-start justify-center">
+        <div [class.container]="layoutCtrl.value === 'boxed'" [class.px-6]="layoutCtrl.value === 'fullwidth'"
+            class="w-full flex flex-col sm:flex-row justify-between">
+            <div>
+                <h1 class="title mt-0 mb-1">Clés API</h1>
+                <vex-breadcrumbs [crumbs]="['Administration', 'Clés API']"></vex-breadcrumbs>
+            </div>
+        </div>
+    </vex-page-layout-header>
+
+    <vex-page-layout-content [class.container]="layoutCtrl.value === 'boxed'"
+        [class.px-6]="layoutCtrl.value === 'fullwidth'" class="-mt-6">
+        <vex-page-layout-content [class.container]="layoutCtrl.value === 'boxed'"
+            [class.px-6]="layoutCtrl.value === 'fullwidth'" class="-mt-6">
+            <div class="card overflow-auto -mt-16">
+                <div class="bg-app-bar px-6 h-18 border-b sticky left-0 flex items-center table-filter">
+                    <mat-form-field class="input">
+                        <mat-label>Description</mat-label>
+                        <input matInput placeholder="Ex. Terminal 1" name="f.description" [(ngModel)]="criteria.description" (keydown.enter)="search()">
+                    </mat-form-field>
+                </div>
+
+                <div class="bg-app-bar px-6 h-16 border-b sticky left-0 flex items-center">
+                    <span class="flex-1"></span>
+                    <button [matMenuTriggerFor]="columnFilterMenu" class="ml-4 flex-none" mat-icon-button matTooltip="Filtrer colonnes" type="button">
+                        <mat-icon svgIcon="mat:filter_list"></mat-icon>
+                    </button>
+                    <button (click)="search()" class="ml-4 flex-none" color="primary" mat-mini-fab matTooltip="Rechercher" type="button">
+                        <mat-icon svgIcon="mat:search"></mat-icon>
+                    </button>
+                    <button *ngIf="canCreate()" (click)="goToAdd()" class="ml-4 flex-none" color="primary" mat-mini-fab matTooltip="Ajouter" type="button">
+                        <mat-icon svgIcon="mat:add"></mat-icon>
+                    </button>
+                </div>
+
+                <table [dataSource]="dataSource" class="w-full" mat-table matSort (matSortChange)="announceSortChange($event)">
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'text'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>{{ column.label }}</th>
+                            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>{{ row[column.property] }}</td>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <th *matHeaderCellDef mat-header-cell></th>
+                        <td *matCellDef="let row" mat-cell>
+                            <div class="flex">
+                                <button class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    matTooltip="Détails" (click)="goToShow(row)" mat-mini-fab>
+                                    <mat-icon svgIcon="mat:remove_red_eye"></mat-icon>
+                                </button>
+                                <button *ngIf="canEdit()"
+                                    class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    matTooltip="Modifier" (click)="goToEdit(row)" mat-mini-fab>
+                                    <mat-icon svgIcon="mat:edit"></mat-icon>
+                                </button>
+                                <button *ngIf="canDelete()"
+                                    class="w-8 h-8 p-0 leading-none flex items-center justify-center hover:bg-hover text-primary-600 bg-primary-600/10"
+                                    (click)="delete(row['id'])" mat-mini-fab matTooltip="Supprimer" type="button">
+                                    <mat-icon svgIcon="mat:delete"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+                    <tr *matRowDef="let row; columns: visibleColumns" @fadeInUp class="hover:bg-hover transition duration-400 ease-out-swift cursor-pointer" mat-row></tr>
+                </table>
+
+                <mat-paginator [pageSizeOptions]="pageSizeOptions" [pageSize]="pageSize"
+                    [length]="globalPayload.totalNumberOfElements" (page)="onPaginationChange($event)" class="sticky left-0"></mat-paginator>
+            </div>
+        </vex-page-layout-content>
+
+        <mat-menu #columnFilterMenu="matMenu" xPosition="before" yPosition="below">
+            <button (click)="toggleColumnVisibility(column, $event)" *ngFor="let column of columns" class="mat-menu-item block">
+                <mat-checkbox (click)="$event.stopPropagation()" [(ngModel)]="column.visible" color="primary">{{ column.label }}</mat-checkbox>
+            </button>
+        </mat-menu>
+    </vex-page-layout-content>
+</vex-page-layout>

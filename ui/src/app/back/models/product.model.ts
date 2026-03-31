@@ -1,22 +1,20 @@
 export interface Product {
-  id: string;
+  id: number;
+  code: string;
   name: string;
-  description: string;
-  price: number;
-  image: string;
-  categoryId: string;
-  subcategoryId: string;
-  stock: number;
+  retailPrice: number;
+  wholesalePrice: number;
+  maxStock: number;
+  minStock: number;
+  currentStock: number;
+  photo: string | null; // base64 encoded
+  categoryId: number | null;
+  categoryName: string | null;
 }
 
-export interface Category {
-  id: string;
+export interface ProductCategory {
+  id: number;
+  code: string;
   name: string;
-  icon: string;
-  subcategories: Subcategory[];
-}
-
-export interface Subcategory {
-  id: string;
-  name: string;
+  photo: string | null; // base64 encoded
 }

@@ -20,6 +20,14 @@ export class RequestsConstants {
     static readonly PRODUCT_FINDALL_CRITERIA_REQ = RequestsConstants.PRODUCT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
     static readonly PRODUCT_IMPORT_REQ = RequestsConstants.PRODUCT_REQ + UtilStatic.SLASH + UtilStatic.IMPORT;
 
+    // BUSINESS - ProductCategory
+    static readonly PRODUCT_CATEGORY_REQ = RequestsConstants.API_SOURCE + BusinessConstants.PRODUCT_CATEGORY;
+    static readonly PRODUCT_CATEGORY_ADD_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+    static readonly PRODUCT_CATEGORY_UPDATE_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ + UtilStatic.SLASH + UtilStatic.UPDATE;
+    static readonly PRODUCT_CATEGORY_DELETE_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ;
+    static readonly PRODUCT_CATEGORY_FINDALL_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+    static readonly PRODUCT_CATEGORY_FINDALL_CRITERIA_REQ = RequestsConstants.PRODUCT_CATEGORY_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
     // ADMIN - Privilege
     static readonly PRIVILEGE_REQ = RequestsConstants.API_SOURCE + AdminConstants.PRIVILEGE;
     static readonly PRIVILEGE_ADD_REQ = RequestsConstants.PRIVILEGE_REQ + UtilStatic.SLASH + UtilStatic.ADD;
@@ -53,4 +61,26 @@ export class RequestsConstants {
     static readonly POS_DELETE_REQ = RequestsConstants.POS_REQ;
     static readonly POS_FINDALL_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
     static readonly POS_FINDALL_CRITERIA_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
+    // ADMIN - API Key
+    static readonly API_KEY_REQ = RequestsConstants.API_SOURCE + AdminConstants.API_KEY;
+    static readonly API_KEY_ADD_REQ = RequestsConstants.API_KEY_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+    static readonly API_KEY_UPDATE_REQ = RequestsConstants.API_KEY_REQ + UtilStatic.SLASH + UtilStatic.UPDATE;
+    static readonly API_KEY_DELETE_REQ = RequestsConstants.API_KEY_REQ;
+    static readonly API_KEY_FINDALL_REQ = RequestsConstants.API_KEY_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+    static readonly API_KEY_FINDALL_CRITERIA_REQ = RequestsConstants.API_KEY_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+    static readonly API_KEY_REGENERATE_REQ = RequestsConstants.API_KEY_REQ + '/regenerate';
+
+    // ADMIN - Session Log
+    static readonly SESSION_LOG_REQ = RequestsConstants.API_SOURCE + AdminConstants.SESSION_LOG;
+    static readonly SESSION_LOG_FINDALL_REQ = RequestsConstants.SESSION_LOG_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+    static readonly SESSION_LOG_FINDALL_CRITERIA_REQ = RequestsConstants.SESSION_LOG_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
+    // BUSINESS - Stock Movement
+    static readonly STOCK_MOVEMENT_REQ = RequestsConstants.API_SOURCE + BusinessConstants.STOCK_MOVEMENT;
+    static readonly STOCK_MOVEMENT_ADD_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+    static readonly STOCK_MOVEMENT_UPDATE_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.UPDATE;
+    static readonly STOCK_MOVEMENT_DELETE_REQ = RequestsConstants.STOCK_MOVEMENT_REQ;
+    static readonly STOCK_MOVEMENT_FINDALL_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
+    static readonly STOCK_MOVEMENT_FINDALL_CRITERIA_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
 }

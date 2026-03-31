@@ -1,25 +1,27 @@
 import { Component, inject } from '@angular/core';
 import { MenuService } from '../../../back/services/menu.service';
 import { ProductCardComponent } from '../product-card/product-card.component';
-import { CategoryTabsComponent } from '../category-tabs/category-tabs.component';
 
 @Component({
   selector: 'app-product-grid',
   standalone: true,
-  imports: [ProductCardComponent, CategoryTabsComponent],
+  imports: [ProductCardComponent],
   template: `
     <div class="product-grid-container">
       <div class="grid-header">
         <h2 class="category-title">{{ menuService.getSelectedCategory()?.name }}</h2>
       </div>
-      <app-category-tabs />
       <div class="products-grid">
-        @for (product of menuService.getFilteredProducts(); track product.id) {
-          <app-product-card [product]="product" />
-        } @empty {
-          <div class="empty-state">
-            <p>Aucun produit trouvé dans cette catégorie</p>
-          </div>
+        @if (menuService.loading()) {
+          <div class="empty-state"><p>Chargement des produits...</p></div>
+        } @else {
+          @for (product of menuService.getFilteredProducts(); track product.id) {
+            <app-product-card [product]="product" />
+          } @empty {
+            <div class="empty-state">
+              <p>Aucun produit trouvé dans cette catégorie</p>
+            </div>
+          }
         }
       </div>
     </div>

@@ -18,8 +18,6 @@ import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { LoginPayload } from 'src/app/backend/payloads/admin/loginpayload';
 import { LocalStorageService } from 'src/app/backend/service/admin/local-storage.service';
 import { UtilStatic } from 'src/app/backend/service/util/UtilStatic';
-import { HttpClient } from '@angular/common/http';
-import { RequestsConstants } from 'src/app/backend/service/util/RequestsConstants';
 
 @Component({
   selector: 'vex-login',
@@ -45,16 +43,11 @@ export class LoginComponent {
 
   form = this.fb.group({
     username: ['', Validators.required],
-    password: ['', Validators.required],
-    storeCode: ['']
+    password: ['', Validators.required]
   });
 
   inputType = 'password';
   visible = false;
-  
-  // Track if user is superadmin (to hide store code field)
-  isSuperAdmin = false;
-  checkingUser = false;
 
   constructor(
     private router: Router,
@@ -62,52 +55,14 @@ export class LoginComponent {
     private cd: ChangeDetectorRef,
     private snackbar: MatSnackBar,
     private authService: AuthService,
-    private lsService: LocalStorageService,
-    private http: HttpClient
+    private lsService: LocalStorageService
   ) {}
-  
-  /**
-   * Check if username is a superadmin when user leaves the username field
-   */
-  onUsernameBlur() {
-    const username = this.form.value.username;
-    if (!username || username.trim().length === 0) {
-      this.isSuperAdmin = false;
-      this.cd.markForCheck();
-      return;
-    }
-    
-    this.checkingUser = true;
-    this.http.get<{superAdmin: boolean}>(`${RequestsConstants.API_SOURCE}user/check-superadmin/${username}`).subscribe({
-      next: (response) => {
-        this.isSuperAdmin = response?.superAdmin || false;
-        // If superadmin, clear and disable store code; otherwise enable it
-        if (this.isSuperAdmin) {
-          this.form.controls.storeCode.setValue('');
-          this.form.controls.storeCode.clearValidators();
-        } else {
-          this.form.controls.storeCode.setValidators(Validators.required);
-        }
-        this.form.controls.storeCode.updateValueAndValidity();
-        this.checkingUser = false;
-        this.cd.markForCheck();
-      },
-      error: () => {
-        // On error, assume not superadmin (need store code)
-        this.isSuperAdmin = false;
-        this.form.controls.storeCode.setValidators(Validators.required);
-        this.form.controls.storeCode.updateValueAndValidity();
-        this.checkingUser = false;
-        this.cd.markForCheck();
-      }
-    });
-  }
 
   send() {
     let loginPayload = new LoginPayload();
     loginPayload.usernameOrEmail = this.form.value.username;
     loginPayload.password = this.form.value.password;
-    loginPayload.storeCodeInput = this.form.value.storeCode || null;
+    loginPayload.storeCodeInput = null;
     this.authService.login(loginPayload).subscribe(
       (response : LoginPayload) => {
         if (response) {

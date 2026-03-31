@@ -6,7 +6,9 @@ import com.mystore.manager.api.admin.payload.LoginPayload;
 import com.mystore.manager.api.admin.payload.UserPayload;
 import com.mystore.manager.api.admin.repository.UserRepository;
 import com.mystore.manager.api.admin.service.impl.JWTService;
+import com.mystore.manager.api.admin.service.inter.ISessionLogService;
 import com.mystore.manager.api.admin.service.inter.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,10 +44,13 @@ public class AuthController {
     
     @Autowired
     private UserRepository userRepository;
-    
+
+    @Autowired
+    private ISessionLogService sessionLogService;
+
 
     @RequestMapping(value = LOGIN_EP, method = RequestMethod.POST)
-    public ResponseEntity<LoginPayload> createAuthenticationToken(@RequestBody LoginPayload payload) throws Exception {
+    public ResponseEntity<LoginPayload> createAuthenticationToken(@RequestBody LoginPayload payload, HttpServletRequest request) throws Exception {
 
         // First, check if user exists
         Optional<UserEntity> userEntityOpt = userRepository.findByUsernameOrEmail(
@@ -113,7 +118,10 @@ public class AuthController {
             result.setPosName(pos.getName());
         }
 
-        if(result.isActive()) result.setToken(jwt);
+        if (result.isActive()) {
+            result.setToken(jwt);
+            sessionLogService.recordLogin(userEntity, pos, request.getRemoteAddr());
+        }
 
         return ResponseEntity.ok(result);
     }

@@ -25,7 +25,7 @@ import { CartService } from '../../../back/services/cart.service';
               <div class="summary-item">
                 <span class="item-qty">{{ item.quantity }}x</span>
                 <span class="item-name">{{ item.product.name }}</span>
-                <span class="item-total">{{ item.product.price * item.quantity | currency }}</span>
+                <span class="item-total">{{ item.product.retailPrice * item.quantity | currency }}</span>
               </div>
             }
           </div>
@@ -329,9 +329,9 @@ export class PaymentModalComponent {
         <div class="item">
           <div class="item-details">
             <div class="item-name">${item.product.name}</div>
-            <div class="item-qty">${item.quantity} x ${item.product.price.toFixed(2)} $</div>
+            <div class="item-qty">${item.quantity} x ${item.product.retailPrice.toFixed(2)} $</div>
           </div>
-          <div class="item-price">${(item.product.price * item.quantity).toFixed(2)} $</div>
+          <div class="item-price">${(item.product.retailPrice * item.quantity).toFixed(2)} $</div>
         </div>
       `).join('')}
     </div>

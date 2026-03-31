@@ -1,0 +1,40 @@
+<form [formGroup]="generalForm">
+    <div class="flex items-center" mat-dialog-title>
+        <h2 class="headline m-0 flex-auto">
+            Modifier une Catégorie de Produit
+        </h2>
+        <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+            <mat-icon svgIcon="mat:close"></mat-icon>
+        </button>
+    </div>
+
+    <mat-divider class="text-border"></mat-divider>
+
+    <mat-dialog-content class="flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Code</mat-label>
+                <input matInput required formControlName="code">
+            </mat-form-field>
+            <mat-form-field class="flex-auto">
+                <mat-label>Nom</mat-label>
+                <input matInput required formControlName="name">
+            </mat-form-field>
+        </div>
+
+        <div class="flex flex-col gap-2 mt-2">
+            <label class="text-sm font-medium text-secondary">Photo</label>
+            <input type="file" accept="image/*" (change)="onPhotoChange($event)" class="text-sm">
+            <div *ngIf="photoPreview" class="mt-2">
+                <img [src]="photoPreview" alt="Aperçu" class="max-h-40 rounded object-contain border">
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button">Annuler</button>
+        <button color="primary" mat-flat-button (click)="edit()">
+            Valider
+        </button>
+    </mat-dialog-actions>
+</form>

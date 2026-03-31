@@ -39,6 +39,18 @@
     <include file="db/changelog/sql/V2041_remove_product_category_columns.sql"/>
     <!-- Rename Store → POS: table admin_pos, column pos_fk, privileges POS_* -->
     <include file="db/changelog/sql/V2042_rename_store_to_pos.sql"/>
+    <!-- Create product category table + privileges -->
+    <include file="db/changelog/sql/V2043_create_product_category_table.sql"/>
+    <!-- Add photo + category_fk columns to data_product -->
+    <include file="db/changelog/sql/V2044_add_photo_and_category_fk_to_product.sql"/>
+    <!-- Create admin_api_keys table + API Key privileges -->
+    <include file="db/changelog/sql/V2045_create_api_keys_table.sql"/>
+    <!-- Create admin_session_logs table + Session Log privilege -->
+    <include file="db/changelog/sql/V2046_create_session_logs_table.sql"/>
+    <!-- Add current_stock column to data_product + Stock Movement privileges -->
+    <include file="db/changelog/sql/V2047_add_current_stock_to_product.sql"/>
+    <!-- Create data_stock_movement table -->
+    <include file="db/changelog/sql/V2048_create_stock_movements_table.sql"/>
 
 </databaseChangeLog>
     

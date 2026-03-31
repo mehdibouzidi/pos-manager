@@ -1,0 +1,21 @@
+<form [formGroup]="generalForm">
+    <div class="flex items-center" mat-dialog-title>
+        <h2 class="headline m-0 flex-auto">Ajouter une Clé API</h2>
+        <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
+            <mat-icon svgIcon="mat:close"></mat-icon>
+        </button>
+    </div>
+    <mat-divider class="text-border"></mat-divider>
+    <mat-dialog-content class="flex flex-col gap-4 pt-4">
+        <mat-form-field class="flex-auto">
+            <mat-label>Description</mat-label>
+            <input matInput required formControlName="description" placeholder="Ex. Terminal caisse 01">
+        </mat-form-field>
+        <mat-slide-toggle formControlName="active" color="primary">Actif</mat-slide-toggle>
+        <p class="text-secondary text-sm">La valeur de la clé sera générée automatiquement.</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close type="button">Annuler</button>
+        <button color="primary" mat-flat-button (click)="add()" [disabled]="generalForm.invalid">Valider</button>
+    </mat-dialog-actions>
+</form>

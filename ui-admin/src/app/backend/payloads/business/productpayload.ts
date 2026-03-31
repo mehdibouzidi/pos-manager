@@ -6,6 +6,9 @@ export class ProductPayload extends BaseGlobalDataPayload {
     wholesalePrice: number; // Prix de Gros
     retailPrice: number; // Prix détail de vente
     currentStock: number; // Stock réel = achat - vente
+    categoryId: number;
+    categoryName: string;
+    photo: string; // base64 encoded
 
     constructor(){
         super();
@@ -14,5 +17,8 @@ export class ProductPayload extends BaseGlobalDataPayload {
         this.wholesalePrice = null;
         this.retailPrice = null;
         this.currentStock = 0;
+        this.categoryId = null;
+        this.categoryName = null;
+        this.photo = null;
     }
 }

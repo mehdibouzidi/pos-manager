@@ -19,9 +19,11 @@ public class AuditorAwareImpl implements AuditorAware<UserEntity> {
             return Optional.empty();
         }
 
-
-        // Fetch the UserEntity from the database
-        return Optional.of((UserEntity) authentication.getPrincipal());
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof UserEntity)) {
+            return Optional.empty();
+        }
+        return Optional.of((UserEntity) principal);
     }
 
 }
