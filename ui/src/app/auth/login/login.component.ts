@@ -7,6 +7,7 @@ import { AuthService } from '../../../backend/service/admin/auth.service';
 import { LocalStorageService } from '../../../backend/service/admin/local-storage.service';
 import { LoginPayload } from '../../../backend/payloads/admin/loginpayload';
 import { UtilStatic } from '../../../backend/service/util/UtilStatic';
+import { hashPassword } from '../../../backend/service/util/password-util';
 
 @Component({
   selector: 'app-login',
@@ -38,7 +39,7 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (!this.usernameOrEmail || !this.password) {
       this.errorMessage.set('Veuillez renseigner tous les champs.');
       return;
@@ -49,7 +50,7 @@ export class LoginComponent {
 
     const payload = new LoginPayload();
     payload.usernameOrEmail = this.usernameOrEmail;
-    payload.password = this.password;
+    payload.password = await hashPassword(this.password);
 
     this.authService.login(payload).subscribe({
       next: (response: any) => {

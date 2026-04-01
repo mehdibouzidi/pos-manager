@@ -48,6 +48,7 @@ import { ProfilService } from 'src/app/backend/service/admin/profil.service';
 import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { PosPayload } from 'src/app/backend/payloads/admin/pospayload';
 import { PosService } from 'src/app/backend/service/admin/pos.service';
+import { hashPassword } from 'src/app/backend/service/util/password-util';
 
 
 @Component({
@@ -121,11 +122,11 @@ export class AddUserComponent {
     private snackbar: MatSnackBar
   ) {}
 
-  add(): void {
+  async add(): Promise<void> {
     this.payload.lastName = this.f['lastName'].value;
     this.payload.firstName = this.f['firstName'].value;
     this.payload.username = this.f['username'].value;
-    this.payload.password = this.f['password'].value;
+    this.payload.password = await hashPassword(this.f['password'].value);
 
     this.userProfils = this.userProfils.filter(
       (privilege) => privilege !== null

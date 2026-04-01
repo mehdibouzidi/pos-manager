@@ -18,6 +18,7 @@ import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { LoginPayload } from 'src/app/backend/payloads/admin/loginpayload';
 import { LocalStorageService } from 'src/app/backend/service/admin/local-storage.service';
 import { UtilStatic } from 'src/app/backend/service/util/UtilStatic';
+import { hashPassword } from 'src/app/backend/service/util/password-util';
 
 @Component({
   selector: 'vex-login',
@@ -58,10 +59,10 @@ export class LoginComponent {
     private lsService: LocalStorageService
   ) {}
 
-  send() {
+  async send() {
     let loginPayload = new LoginPayload();
     loginPayload.usernameOrEmail = this.form.value.username;
-    loginPayload.password = this.form.value.password;
+    loginPayload.password = await hashPassword(this.form.value.password);
     loginPayload.storeCodeInput = null;
     this.authService.login(loginPayload).subscribe(
       (response : LoginPayload) => {

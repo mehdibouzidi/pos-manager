@@ -6,6 +6,7 @@ import { UserService } from '../../../../backend/service/admin/user.service';
 import { AuthService } from '../../../../backend/service/admin/auth.service';
 import { ChangePasswordPayload } from '../../../../backend/payloads/admin/changepasswordpayload';
 import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
+import { hashPassword } from '../../../../backend/service/util/password-util';
 
 @Component({
   selector: 'app-topbar',
@@ -475,12 +476,16 @@ export class TopbarComponent {
     this.showModal.set(false);
   }
 
-  submitPassword() {
-    if (!this.payload.oldPassword || !this.payload.newPassword || !this.payload.newPasswordConfirmed) {
+  async submitPassword() {
+    const rawOld = this.payload.oldPassword;
+    const rawNew = this.payload.newPassword;
+    const rawConfirm = this.payload.newPasswordConfirmed;
+
+    if (!rawOld || !rawNew || !rawConfirm) {
       this.modalError.set('Veuillez renseigner tous les champs.');
       return;
     }
-    if (this.payload.newPassword !== this.payload.newPasswordConfirmed) {
+    if (rawNew !== rawConfirm) {
       this.modalError.set('Les nouveaux mots de passe ne correspondent pas.');
       return;
     }
@@ -489,7 +494,12 @@ export class TopbarComponent {
     this.modalError.set('');
     this.modalSuccess.set('');
 
-    this.userService.updatePassword(this.payload).subscribe({
+    const hashedPayload = new ChangePasswordPayload();
+    hashedPayload.oldPassword = await hashPassword(rawOld);
+    hashedPayload.newPassword = await hashPassword(rawNew);
+    hashedPayload.newPasswordConfirmed = await hashPassword(rawConfirm);
+
+    this.userService.updatePassword(hashedPayload).subscribe({
       next: () => {
         this.saving.set(false);
         this.modalSuccess.set('Mot de passe modifié avec succès.');
