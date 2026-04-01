@@ -35,6 +35,7 @@ import { PrivilegePayload } from 'src/app/backend/payloads/admin/privilegepayloa
 import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { PrivilegeService } from 'src/app/backend/service/admin/privilege.service';
 import { UserService } from 'src/app/backend/service/admin/user.service';
+import { hashPassword } from 'src/app/backend/service/util/password-util';
 
 @Component({
   selector: 'vex-change-password',
@@ -86,16 +87,21 @@ export class ChangePasswordComponent {
     ) {}
   
   
-    update(): void {
-      this.payload.oldPassword = this.f['oldPassword'].value;
-      this.payload.newPassword = this.f['newPassword'].value;
-      this.payload.newPasswordConfirmed = this.f['newPasswordConfirmed'].value;
-      
-      if (this.payload.newPassword !== this.payload.newPasswordConfirmed) {
+    async update(): Promise<void> {
+      const rawOld = this.f['oldPassword'].value;
+      const rawNew = this.f['newPassword'].value;
+      const rawConfirm = this.f['newPasswordConfirmed'].value;
+
+      if (rawNew !== rawConfirm) {
         this.openSnackBar('error', 'Nouveau Mot de Passe ne Correspond pas au Mot de Passe Confirmé');
         
         return;
       }
+
+      this.payload.oldPassword = await hashPassword(rawOld);
+      this.payload.newPassword = await hashPassword(rawNew);
+      this.payload.newPasswordConfirmed = await hashPassword(rawConfirm);
+
       this.service.updatePassword(this.payload).subscribe({
         next: (response: any) => {
           if (response != null) {
