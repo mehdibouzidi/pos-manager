@@ -76,7 +76,6 @@ export class EditProductComponent {
     this.payload.code = this.f['code'].value;
     this.payload.maxStock = this.f['maxStock'].value;
     this.payload.minStock = this.f['minStock'].value;
-    this.payload.wholesalePrice = this.f['wholesalePrice'].value;
     this.payload.retailPrice = this.f['retailPrice'].value;
     this.payload.categoryId = this.f['categoryId'].value;
 
@@ -121,7 +120,6 @@ export class EditProductComponent {
       ],
       maxStock: [this.payload.maxStock],
       minStock: [this.payload.minStock],
-      wholesalePrice: [this.payload.wholesalePrice],
       retailPrice: [this.payload.retailPrice],
       categoryId: [this.payload.categoryId]
     });
@@ -144,7 +142,6 @@ export class EditProductComponent {
             code: this.payload.code,
             maxStock: this.payload.maxStock,
             minStock: this.payload.minStock,
-            wholesalePrice: this.payload.wholesalePrice,
             retailPrice: this.payload.retailPrice,
             categoryId: this.payload.categoryId
           });

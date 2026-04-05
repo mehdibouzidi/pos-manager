@@ -90,9 +90,6 @@ export class ShowProductComponent {
       minStock: [
         {value: this.payload.minStock, disabled: true},
       ],
-      wholesalePrice: [
-        {value: this.payload.wholesalePrice, disabled: true},
-      ],
       retailPrice: [
         {value: this.payload.retailPrice, disabled: true},
       ]

@@ -216,12 +216,6 @@ export class AllProductsComponent {
       visible: true
     },
     {
-      label: 'Prix de Gros',
-      property: 'wholesalePrice',
-      type: 'text',
-      visible: true
-    },
-    {
       label: 'Prix Détail',
       property: 'retailPrice',
       type: 'text',

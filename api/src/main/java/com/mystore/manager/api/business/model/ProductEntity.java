@@ -28,10 +28,7 @@ public class ProductEntity extends AbstractBusinessGlobalData {
     private Double minStock;
     @Column(name = "current_stock")
     private Double currentStock;
-    
-    @Column(name = "wholesale_price", precision = 19, scale = 4)
-    private BigDecimal wholesalePrice; // Prix de Gros
-    
+
     @Column(name = "retail_price", precision = 19, scale = 4)
     private BigDecimal retailPrice; // Prix détail de vente
 
@@ -49,7 +46,6 @@ public class ProductEntity extends AbstractBusinessGlobalData {
                 ", name='" + getName() + '\'' +
                 ", maxStock=" + maxStock +
                 ", minStock=" + minStock +
-                ", wholesalePrice=" + wholesalePrice +
                 ", retailPrice=" + retailPrice +
                 '}';
     }

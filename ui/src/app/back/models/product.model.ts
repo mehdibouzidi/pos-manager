@@ -3,7 +3,6 @@ export interface Product {
   code: string;
   name: string;
   retailPrice: number;
-  wholesalePrice: number;
   maxStock: number;
   minStock: number;
   currentStock: number;

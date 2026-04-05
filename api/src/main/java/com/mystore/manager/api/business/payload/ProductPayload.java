@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 public class ProductPayload extends GlobalDataPayload {
     private Double maxStock;
     private Double minStock;
-    private BigDecimal wholesalePrice; // Prix de Gros
     private BigDecimal retailPrice; // Prix détail de vente
     private BigDecimal currentStock; // Stock réel = achat - vente
     private Integer categoryId;

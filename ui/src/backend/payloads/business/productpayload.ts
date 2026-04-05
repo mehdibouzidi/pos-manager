@@ -1,7 +1,6 @@
 export class ProductPayload {
     maxStock: number;
     minStock: number;
-    wholesalePrice: number | null;
     retailPrice: number | null;
     currentStock: number;
     categoryId: number | null;
@@ -14,7 +13,6 @@ export class ProductPayload {
     constructor(){
         this.maxStock = 0;
         this.minStock = 0;
-        this.wholesalePrice = null;
         this.retailPrice = null;
         this.currentStock = 0;
         this.categoryId = null;

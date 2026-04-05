@@ -23,7 +23,6 @@ public class ProductMapper implements IMapper<ProductPayload, ProductEntity> {
         entity = BusinessGlobalDataMapper.payloadToEntity(payload, entity);
         if (Objects.nonNull(payload.getMaxStock()))       entity.setMaxStock(payload.getMaxStock());
         if (Objects.nonNull(payload.getMinStock()))       entity.setMinStock(payload.getMinStock());
-        if (Objects.nonNull(payload.getWholesalePrice())) entity.setWholesalePrice(payload.getWholesalePrice());
         if (Objects.nonNull(payload.getRetailPrice()))    entity.setRetailPrice(payload.getRetailPrice());
         if (Objects.nonNull(payload.getCategoryId())) {
             ProductCategoryEntity category = categoryRepository.findById(payload.getCategoryId()).orElse(null);
@@ -41,7 +40,6 @@ public class ProductMapper implements IMapper<ProductPayload, ProductEntity> {
             payload = BusinessGlobalDataMapper.entityToPayload(entity, payload);
             payload.setMaxStock(entity.getMaxStock());
             payload.setMinStock(entity.getMinStock());
-            payload.setWholesalePrice(entity.getWholesalePrice());
             payload.setRetailPrice(entity.getRetailPrice());
             if (Objects.nonNull(entity.getCurrentStock())) {
                 payload.setCurrentStock(java.math.BigDecimal.valueOf(entity.getCurrentStock()));
