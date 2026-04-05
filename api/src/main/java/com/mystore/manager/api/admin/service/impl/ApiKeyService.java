@@ -8,7 +8,6 @@ import com.mystore.manager.api.admin.payload.ApiKeyPayload;
 import com.mystore.manager.api.admin.repository.ApiKeyRepository;
 import com.mystore.manager.api.admin.repository.PosRepository;
 import com.mystore.manager.api.admin.service.inter.IApiKeyService;
-import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -96,14 +95,7 @@ public class ApiKeyService implements IApiKeyService {
 
     @Override
     public List<ApiKeyPayload> findAll() {
-        List<ApiKeyEntity> entities;
-        if (PosContext.isSuperAdmin()) {
-            entities = apiKeyRepository.findAll();
-        } else {
-            Integer posId = PosContext.getPosId();
-            entities = posId != null ? apiKeyRepository.findAllByPos_Id(posId) : List.of();
-        }
-        return mapper.entityListToPayload(entities, false);
+        return mapper.entityListToPayload(apiKeyRepository.findAll(), false);
     }
 
     @Override
@@ -119,9 +111,6 @@ public class ApiKeyService implements IApiKeyService {
         }
         if (criteria.getPosId() != null) {
             predicates.add(cb.equal(root.get("pos").get("id"), criteria.getPosId()));
-        } else if (!PosContext.isSuperAdmin()) {
-            Integer posId = PosContext.getPosId();
-            if (posId != null) predicates.add(cb.equal(root.get("pos").get("id"), posId));
         }
         if (criteria.getDescription() != null && !criteria.getDescription().isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get("description")), "%" + criteria.getDescription().toLowerCase() + "%"));
@@ -141,9 +130,6 @@ public class ApiKeyService implements IApiKeyService {
         if (criteria.getId() != null) countPredicates.add(cb.equal(countRoot.get("id"), criteria.getId()));
         if (criteria.getPosId() != null) {
             countPredicates.add(cb.equal(countRoot.get("pos").get("id"), criteria.getPosId()));
-        } else if (!PosContext.isSuperAdmin()) {
-            Integer posId = PosContext.getPosId();
-            if (posId != null) countPredicates.add(cb.equal(countRoot.get("pos").get("id"), posId));
         }
         if (criteria.getDescription() != null && !criteria.getDescription().isEmpty()) {
             countPredicates.add(cb.like(cb.lower(countRoot.get("description")), "%" + criteria.getDescription().toLowerCase() + "%"));
