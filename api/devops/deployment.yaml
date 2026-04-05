@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pos-api-deployment
-  namespace: pos-prod
+  namespace: app-dev
   labels:
     app: pos-api
 spec:
