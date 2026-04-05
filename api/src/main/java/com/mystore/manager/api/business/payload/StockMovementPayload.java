@@ -14,6 +14,7 @@ public class StockMovementPayload extends GlobalUserDatePayload {
     private String categoryName;
     private String movementType;
     private Double quantity;
+    private Double retailPrice;
     private String reason;
     private String movementDate;
 }

@@ -44,8 +44,11 @@ export class AdminConstants {
   static readonly STOCK_MOVEMENT_UPDATE = 'STOCK_MOVEMENT_UPDATE';
   static readonly STOCK_MOVEMENT_DELETE = 'STOCK_MOVEMENT_DELETE';
 
+  static readonly DASHBOARD_READ = 'DASHBOARD_READ';
+
   // SIDE NAV ACCESS
   static readonly SIDENAV_CATALOG = Array.of(this.ADMIN, this.PRODUCT_READ, this.PRODUCT_CATEGORY_READ);
   static readonly SIDENAV_ADMIN = Array.of(this.ADMIN);
   static readonly SIDENAV_STOCK = Array.of(this.ADMIN, this.STOCK_MOVEMENT_READ);
+  static readonly SIDENAV_DASHBOARD = Array.of(this.ADMIN, this.DASHBOARD_READ);
 }

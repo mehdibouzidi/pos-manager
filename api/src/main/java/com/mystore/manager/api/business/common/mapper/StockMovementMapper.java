@@ -36,6 +36,9 @@ public class StockMovementMapper implements IMapper<StockMovementPayload, StockM
                 payload.setProductId(entity.getProduct().getId());
                 payload.setProductCode(entity.getProduct().getCode());
                 payload.setProductName(entity.getProduct().getName());
+                if (Objects.nonNull(entity.getProduct().getRetailPrice())) {
+                    payload.setRetailPrice(entity.getProduct().getRetailPrice().doubleValue());
+                }
                 if (Objects.nonNull(entity.getProduct().getCategory())) {
                     payload.setCategoryId(entity.getProduct().getCategory().getId());
                     payload.setCategoryName(entity.getProduct().getCategory().getName());

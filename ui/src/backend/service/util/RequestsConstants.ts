@@ -63,5 +63,9 @@ export class RequestsConstants{
      static readonly POS_DELETE_REQ = RequestsConstants.POS_REQ;
      static readonly POS_FINDALL_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
      static readonly POS_FINDALL_CRITERIA_REQ = RequestsConstants.POS_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
+    //STOCK MOVEMENT
+     static readonly STOCK_MOVEMENT_REQ = RequestsConstants.API_SOURCE + BusinessConstants.STOCK_MOVEMENT;
+     static readonly STOCK_MOVEMENT_ADD_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.ADD;
 }
 

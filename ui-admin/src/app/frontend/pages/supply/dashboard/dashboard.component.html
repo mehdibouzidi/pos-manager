@@ -1,0 +1,192 @@
+<vex-page-layout>
+  <vex-page-layout-header class="pb-16 flex flex-col items-start justify-center">
+    <div class="w-full flex flex-col sm:flex-row justify-between">
+      <div>
+        <h1 class="title mt-0 mb-1">Tableau de Bord</h1>
+        <vex-breadcrumbs [crumbs]="['Tableau de Bord']"></vex-breadcrumbs>
+      </div>
+      <div class="mt-4 sm:mt-0 flex items-center gap-2">
+        <mat-button-toggle-group [value]="period" (change)="onPeriodChange($event.value)" class="mat-toggle-sm">
+          <mat-button-toggle value="WEEK">7 jours</mat-button-toggle>
+          <mat-button-toggle value="MONTH">30 jours</mat-button-toggle>
+          <mat-button-toggle value="YEAR">12 mois</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+  </vex-page-layout-header>
+
+  <vex-page-layout-content class="-mt-6">
+    <mat-progress-bar *ngIf="loading" mode="indeterminate" color="primary" class="mb-4"></mat-progress-bar>
+
+    <!-- KPI Cards -->
+    <div @stagger class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6" *ngIf="stats">
+      <div @fadeInUp *ngFor="let card of kpiCards"
+           class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+        <div class="rounded-full p-3 flex-shrink-0" [ngClass]="card.colorClass">
+          <mat-icon [svgIcon]="card.icon" class="w-6 h-6"></mat-icon>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm text-gray-500 mb-1 truncate">{{ card.label }}</p>
+          <p class="text-xl font-semibold text-gray-800 truncate">{{ card.value }}</p>
+          <p *ngIf="card.sublabel" class="text-xs text-gray-400 truncate mt-0.5">{{ card.sublabel }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div @stagger class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" *ngIf="stats">
+      <!-- History chart -->
+      <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-base font-semibold text-gray-700 mb-4">Historique des Ventes</h3>
+        <vex-chart
+          *ngIf="historyChartSeries.length > 0 && (historyChartSeries[0].data?.length > 0 || historyChartSeries[1]?.data?.length > 0)"
+          [options]="historyChartOptions"
+          [series]="historyChartSeries">
+        </vex-chart>
+        <div *ngIf="historyChartSeries.length === 0 || (historyChartSeries[0].data?.length === 0)"
+             class="flex items-center justify-center h-40 text-gray-400 text-sm">
+          Aucune donnée de vente pour cette période
+        </div>
+      </div>
+
+      <!-- Product revenue bar chart -->
+      <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-base font-semibold text-gray-700 mb-4">Top Produits par Chiffre d'Affaires</h3>
+        <vex-chart
+          *ngIf="productChartSeries.length > 0 && productChartSeries[0].data?.length > 0"
+          [options]="productChartOptions"
+          [series]="productChartSeries">
+        </vex-chart>
+        <div *ngIf="!productChartSeries.length || !productChartSeries[0]?.data?.length"
+             class="flex items-center justify-center h-40 text-gray-400 text-sm">
+          Aucune vente enregistrée
+        </div>
+      </div>
+    </div>
+
+    <!-- Top 3 -->
+    <div @stagger class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" *ngIf="stats?.productStats?.length">
+
+      <!-- Top 3 par Quantité -->
+      <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-gray-700">Top 3 — Quantité vendue</h3>
+          <span class="text-xs text-gray-400 font-medium">CA total : {{ totalSalesRevenue() }}</span>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div *ngFor="let p of top3ByQuantity; let i = index"
+               class="flex items-center gap-3 rounded-lg p-3 border"
+               [ngClass]="i === 0 ? 'bg-amber-50 border-amber-200' : i === 1 ? 'bg-gray-50 border-gray-200' : 'bg-orange-50 border-orange-200'">
+            <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                  [ngClass]="i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-gray-400 text-white' : 'bg-orange-300 text-white'">
+              {{ i + 1 }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-gray-800 text-sm truncate">{{ p.productName }}</div>
+              <div class="text-xs text-gray-500 mt-0.5">{{ formatNumber(p.salesCount) }} vente(s)</div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold text-blue-600 text-base">{{ formatNumber(p.salesQuantity) }} <span class="text-xs font-normal text-gray-400">unités</span></div>
+              <div class="text-xs text-green-600 font-medium">{{ formatCurrency(p.salesRevenue) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 3 par Marge -->
+      <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-gray-700">Top 3 — Marge brute</h3>
+          <span class="text-xs text-gray-400 font-medium">CA total : {{ totalSalesRevenue() }}</span>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div *ngFor="let p of top3ByMargin; let i = index"
+               class="flex items-center gap-3 rounded-lg p-3 border"
+               [ngClass]="i === 0 ? 'bg-teal-50 border-teal-200' : i === 1 ? 'bg-gray-50 border-gray-200' : 'bg-teal-50 border-teal-100'">
+            <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                  [ngClass]="i === 0 ? 'bg-teal-500 text-white' : i === 1 ? 'bg-gray-400 text-white' : 'bg-teal-300 text-white'">
+              {{ i + 1 }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-gray-800 text-sm truncate">{{ p.productName }}</div>
+              <div class="text-xs text-gray-500 mt-0.5">{{ formatNumber(p.salesQuantity) }} unités vendues</div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold text-base" [ngClass]="p.margin >= 0 ? 'text-teal-600' : 'text-red-500'">
+                {{ formatCurrency(p.margin) }}
+              </div>
+              <div class="text-xs text-green-600 font-medium">CA : {{ formatCurrency(p.salesRevenue) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Product stats table -->
+    <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5" *ngIf="stats">
+      <h3 class="text-base font-semibold text-gray-700 mb-4">Détail des Ventes par Produit</h3>
+      <table mat-table [dataSource]="stats?.productStats ?? []" class="w-full">
+
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef class="text-left text-xs font-semibold text-gray-500 uppercase">Produit</th>
+          <td mat-cell *matCellDef="let row" class="text-sm">
+            <span class="font-medium text-gray-800">{{ row.productName }}</span>
+            <span class="ml-1 text-xs text-gray-400">({{ row.productCode }})</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="salesCount">
+          <th mat-header-cell *matHeaderCellDef class="text-right text-xs font-semibold text-gray-500 uppercase">Nb Ventes</th>
+          <td mat-cell *matCellDef="let row" class="text-right text-sm text-gray-700">
+            {{ formatNumber(row.salesCount) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="salesQuantity">
+          <th mat-header-cell *matHeaderCellDef class="text-right text-xs font-semibold text-gray-500 uppercase">Quantité</th>
+          <td mat-cell *matCellDef="let row" class="text-right text-sm text-gray-700">
+            {{ formatNumber(row.salesQuantity) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="salesRevenue">
+          <th mat-header-cell *matHeaderCellDef class="text-right text-xs font-semibold text-gray-500 uppercase">Chiffre d'Affaires</th>
+          <td mat-cell *matCellDef="let row" class="text-right text-sm font-semibold text-green-600">
+            {{ formatCurrency(row.salesRevenue) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="entryValue">
+          <th mat-header-cell *matHeaderCellDef class="text-right text-xs font-semibold text-gray-500 uppercase">Valeur Achats</th>
+          <td mat-cell *matCellDef="let row" class="text-right text-sm text-orange-500">
+            {{ formatCurrency(row.entryValue) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="margin">
+          <th mat-header-cell *matHeaderCellDef class="text-right text-xs font-semibold text-gray-500 uppercase">Marge Brute</th>
+          <td mat-cell *matCellDef="let row" class="text-right text-sm font-semibold"
+              [ngClass]="row.margin >= 0 ? 'text-teal-600' : 'text-red-500'">
+            {{ formatCurrency(row.margin) }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"></tr>
+      </table>
+
+      <div *ngIf="!stats?.productStats?.length" class="text-center py-8 text-gray-400 text-sm">
+        Aucune vente enregistrée
+      </div>
+    </div>
+
+    <!-- Empty state when stats not loaded -->
+    <div *ngIf="!stats && !loading" class="text-center py-16 text-gray-400">
+      <mat-icon svgIcon="mat:bar_chart" class="w-12 h-12 mx-auto mb-3 text-gray-300"></mat-icon>
+      <p>Impossible de charger les données du tableau de bord</p>
+    </div>
+
+  </vex-page-layout-content>
+</vex-page-layout>

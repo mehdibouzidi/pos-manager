@@ -64,6 +64,9 @@ export class RequestsLists{
         new Request(RequestsLists.DELETE, RequestsConstants.POS_DELETE_REQ),
         new Request(RequestsLists.GET, RequestsConstants.POS_FINDALL_REQ),
         new Request(RequestsLists.POST, RequestsConstants.POS_FINDALL_CRITERIA_REQ),
+
+        //STOCK MOVEMENT
+        new Request(RequestsLists.POST, RequestsConstants.STOCK_MOVEMENT_ADD_REQ),
     ];
 
 

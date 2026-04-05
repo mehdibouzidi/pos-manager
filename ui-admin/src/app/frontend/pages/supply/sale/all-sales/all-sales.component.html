@@ -1,0 +1,99 @@
+<vex-page-layout>
+  <vex-page-layout-header class="pb-16 flex flex-col items-start justify-center">
+    <div class="w-full flex flex-col sm:flex-row justify-between container">
+      <div>
+        <h1 class="title mt-0 mb-1">Ventes</h1>
+        <vex-breadcrumbs [crumbs]="['Stock', 'Ventes']"></vex-breadcrumbs>
+      </div>
+    </div>
+  </vex-page-layout-header>
+
+  <vex-page-layout-content class="-mt-6 container">
+    <div class="card overflow-auto -mt-16">
+
+      <!-- Filters -->
+      <div class="bg-app-bar px-6 h-18 border-b sticky left-0 flex items-center table-filter">
+
+        <mat-form-field class="input">
+          <mat-label>Produit</mat-label>
+          <input matInput [formControl]="productCtrl" [matAutocomplete]="autoProduct"
+            (input)="onProductInput($any($event.target).value)" placeholder="Rechercher un produit..." />
+          <button *ngIf="productCtrl.value" matSuffix mat-icon-button type="button" (click)="clearProduct()">
+            <mat-icon svgIcon="mat:close" class="icon-sm"></mat-icon>
+          </button>
+          <mat-autocomplete #autoProduct="matAutocomplete" (optionSelected)="selectProduct($event)">
+            <mat-option *ngFor="let p of filteredProducts" [value]="p">
+              {{ p.name }} ({{ p.code }})
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field class="input">
+          <mat-label>Catégorie</mat-label>
+          <input matInput [formControl]="categoryCtrl" [matAutocomplete]="autoCategory"
+            (input)="onCategoryInput($any($event.target).value)" placeholder="Rechercher une catégorie..." />
+          <button *ngIf="categoryCtrl.value" matSuffix mat-icon-button type="button" (click)="clearCategory()">
+            <mat-icon svgIcon="mat:close" class="icon-sm"></mat-icon>
+          </button>
+          <mat-autocomplete #autoCategory="matAutocomplete" (optionSelected)="selectCategory($event)">
+            <mat-option *ngFor="let c of filteredCategories" [value]="c">
+              {{ c.name }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Actions bar -->
+      <div class="bg-app-bar px-6 h-16 border-b sticky left-0 flex items-center">
+        <h2 class="title my-0 ltr:pr-4 rtl:pl-4 ltr:mr-4 rtl:ml-4 ltr:border-r rtl:border-l hidden sm:block flex-none">
+          <span>Ventes</span>
+        </h2>
+        <span class="flex-1"></span>
+      </div>
+
+      <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="primary"></mat-progress-bar>
+
+      <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort (matSortChange)="announceSortChange($event)">
+
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Produit</th>
+          <td mat-cell *matCellDef="let row">{{ row.productName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="categoryName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</th>
+          <td mat-cell *matCellDef="let row">{{ row.categoryName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantité</th>
+          <td mat-cell *matCellDef="let row">{{ row.quantity }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="retailPrice">
+          <th mat-header-cell *matHeaderCellDef>Prix</th>
+          <td mat-cell *matCellDef="let row">{{ row.retailPrice | number:'1.2-2' }} Da</td>
+        </ng-container>
+
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let row">{{ (row.quantity * row.retailPrice) | number:'1.2-2' }} Da</td>
+        </ng-container>
+
+        <ng-container matColumnDef="movementDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.movementDate | date:'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="visibleColumns"></tr>
+        <tr mat-row @fadeInUp *matRowDef="let row; columns: visibleColumns;"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="pageSizeOptions" [pageSize]="pageSize"
+        [length]="globalPayload.totalNumberOfElements"
+        (page)="onPaginationChange($event)" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </vex-page-layout-content>
+</vex-page-layout>

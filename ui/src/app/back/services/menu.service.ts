@@ -54,6 +54,13 @@ export class MenuService {
     });
   }
 
+  reloadProducts(): void {
+    this.productService.findAll().subscribe({
+      next: (products) => this._products.set(products as any),
+      error: () => {}
+    });
+  }
+
   selectCategory(categoryId: number): void {
     this._selectedCategoryId.set(categoryId);
   }

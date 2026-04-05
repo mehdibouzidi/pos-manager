@@ -1,0 +1,20 @@
+:host {
+  display: block;
+}
+
+.mat-toggle-sm {
+  .mat-button-toggle {
+    height: 36px;
+    font-size: 13px;
+  }
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  padding: 10px 12px;
+}

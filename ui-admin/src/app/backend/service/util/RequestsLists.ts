@@ -86,5 +86,8 @@ export class RequestsLists {
         new Request(RequestsLists.DELETE, RequestsConstants.STOCK_MOVEMENT_DELETE_REQ),
         new Request(RequestsLists.GET, RequestsConstants.STOCK_MOVEMENT_FINDALL_REQ),
         new Request(RequestsLists.POST, RequestsConstants.STOCK_MOVEMENT_FINDALL_CRITERIA_REQ),
+
+        // BUSINESS - Dashboard
+        new Request(RequestsLists.GET, RequestsConstants.DASHBOARD_STATS_REQ),
     ];
 }

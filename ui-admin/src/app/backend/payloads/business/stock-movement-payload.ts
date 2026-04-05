@@ -10,6 +10,7 @@ export class StockMovementPayload {
     posName: string;
     movementType: string;
     quantity: number;
+    retailPrice: number;
     reason: string;
     movementDate: string;
     createdAt: string;

@@ -1,12 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { CartService } from '../../../back/services/cart.service';
+import { MenuService } from '../../../back/services/menu.service';
+import { StockMovementService } from '../../../../backend/service/business/stock-movement.service';
 
 @Component({
   selector: 'app-payment-modal',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe],
+  imports: [DecimalPipe, DatePipe],
   template: `
+    @if (cartService.snackMessage()) {
+      <div class="snackbar snackbar-success">{{ cartService.snackMessage() }}</div>
+    }
     @if (cartService.isPaymentOpen()) {
       <div class="payment-overlay" (click)="cartService.closePayment()"></div>
       <div class="payment-modal">
@@ -25,30 +31,17 @@ import { CartService } from '../../../back/services/cart.service';
               <div class="summary-item">
                 <span class="item-qty">{{ item.quantity }}x</span>
                 <span class="item-name">{{ item.product.name }}</span>
-                <span class="item-total">{{ item.product.retailPrice * item.quantity | currency }}</span>
+                <span class="item-total">{{ item.product.retailPrice * item.quantity | number:'1.0-2' }} Da</span>
               </div>
             }
           </div>
           
           <div class="totals">
-            <div class="total-row">
-              <span>Sous-total</span>
-              <span>{{ cartService.subtotal() | currency }}</span>
-            </div>
-            <div class="total-row">
-              <span>Taxe (10%)</span>
-              <span>{{ cartService.tax() | currency }}</span>
-            </div>
             <div class="total-row grand-total">
               <span>Total</span>
-              <span>{{ cartService.total() | currency }}</span>
+              <span>{{ cartService.total() | number:'1.0-2' }} Da</span>
             </div>
           </div>
-        </div>
-
-        <div class="payment-info">
-          <span class="cash-icon">??</span>
-          <span>Paiement en espèces</span>
         </div>
 
         <button class="confirm-btn" (click)="confirmAndPrint()">
@@ -58,6 +51,25 @@ import { CartService } from '../../../back/services/cart.service';
     }
   `,
   styles: [`
+    .snackbar {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      z-index: 2000;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .snackbar-success {
+      background: #16a34a;
+      color: #fff;
+    }
+
     .payment-overlay {
       position: fixed;
       inset: 0;
@@ -206,14 +218,36 @@ import { CartService } from '../../../back/services/cart.service';
 })
 export class PaymentModalComponent {
   cartService = inject(CartService);
+  private menuService = inject(MenuService);
+  private stockMovementService = inject(StockMovementService);
 
   confirmAndPrint(): void {
     const orderNumber = Math.floor(Math.random() * 9000) + 1000;
     const now = new Date();
     const items = this.cartService.items();
-    const subtotal = this.cartService.subtotal();
-    const tax = this.cartService.tax();
     const total = this.cartService.total();
+
+    const movementDate = now.toISOString();
+    const saleRequests = items.map(item =>
+      this.stockMovementService.add({
+        productId: item.product.id,
+        movementType: 'SALE',
+        quantity: item.quantity,
+        movementDate
+      })
+    );
+
+    forkJoin(saleRequests).subscribe({
+      next: () => {
+        this.menuService.reloadProducts();
+        this.cartService.showSnack('Vente effectuée avec succès !');
+        this.printAndClose(orderNumber, now, items, total);
+      },
+      error: () => this.printAndClose(orderNumber, now, items, total)
+    });
+  }
+
+  private printAndClose(orderNumber: number, now: Date, items: any[], total: number): void {
 
     const receiptHtml = `
 <!DOCTYPE html>
@@ -329,25 +363,17 @@ export class PaymentModalComponent {
         <div class="item">
           <div class="item-details">
             <div class="item-name">${item.product.name}</div>
-            <div class="item-qty">${item.quantity} x ${item.product.retailPrice.toFixed(2)} $</div>
+            <div class="item-qty">${item.quantity} x ${item.product.retailPrice.toFixed(2)} Da</div>
           </div>
-          <div class="item-price">${(item.product.retailPrice * item.quantity).toFixed(2)} $</div>
+          <div class="item-price">${(item.product.retailPrice * item.quantity).toFixed(2)} Da</div>
         </div>
       `).join('')}
     </div>
 
     <div class="totals">
-      <div class="total-row">
-        <span>Sous-total :</span>
-        <span>${subtotal.toFixed(2)} $</span>
-      </div>
-      <div class="total-row">
-        <span>Taxe (10%) :</span>
-        <span>${tax.toFixed(2)} $</span>
-      </div>
       <div class="total-row grand-total">
         <span>TOTAL :</span>
-        <span>${total.toFixed(2)} $</span>
+        <span>${total.toFixed(2)} Da</span>
       </div>
     </div>
 

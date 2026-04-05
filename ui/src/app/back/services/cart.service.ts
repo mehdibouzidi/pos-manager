@@ -6,15 +6,15 @@ import { Product } from '../models/product.model';
   providedIn: 'root'
 })
 export class CartService {
-  private readonly TAX_RATE = 0.1; // 10% tax
-
   private _items = signal<CartItem[]>([]);
   private _isCartOpen = signal<boolean>(false);
   private _isPaymentOpen = signal<boolean>(false);
+  private _snackMessage = signal<string | null>(null);
 
   readonly items = this._items.asReadonly();
   readonly isCartOpen = this._isCartOpen.asReadonly();
   readonly isPaymentOpen = this._isPaymentOpen.asReadonly();
+  readonly snackMessage = this._snackMessage.asReadonly();
 
   readonly itemCount = computed(() => 
     this._items().reduce((sum, item) => sum + item.quantity, 0)
@@ -24,9 +24,7 @@ export class CartService {
     this._items().reduce((sum, item) => sum + (item.product.retailPrice * item.quantity), 0)
   );
 
-  readonly tax = computed(() => this.subtotal() * this.TAX_RATE);
-
-  readonly total = computed(() => this.subtotal() + this.tax());
+  readonly total = computed(() => this.subtotal());
 
   addToCart(product: Product): void {
     const currentItems = this._items();
@@ -78,6 +76,11 @@ export class CartService {
 
   clearCart(): void {
     this._items.set([]);
+  }
+
+  showSnack(message: string): void {
+    this._snackMessage.set(message);
+    setTimeout(() => this._snackMessage.set(null), 3000);
   }
 
   toggleCart(): void {

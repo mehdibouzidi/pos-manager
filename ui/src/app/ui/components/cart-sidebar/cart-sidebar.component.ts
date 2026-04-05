@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../../back/services/cart.service';
 
 @Component({
   selector: 'app-cart-sidebar',
   standalone: true,
-  imports: [CurrencyPipe],
+  imports: [DecimalPipe],
   template: `
     <div class="cart-overlay" [class.open]="cartService.isCartOpen()" (click)="cartService.closeCart()"></div>
     <aside class="cart-sidebar" [class.open]="cartService.isCartOpen()">
@@ -33,7 +33,7 @@ import { CartService } from '../../../back/services/cart.service';
               </div>
               <div class="item-details">
                 <h4>{{ item.product.name }}</h4>
-                <span class="item-price">{{ item.product.retailPrice | currency }}</span>
+                <span class="item-price">{{ item.product.retailPrice | number:'1.0-2' }} Da</span>
               </div>
               <div class="item-controls">
                 <button class="qty-btn" (click)="cartService.decrementQuantity(item.product.id)">−</button>
@@ -52,17 +52,10 @@ import { CartService } from '../../../back/services/cart.service';
 
       @if (cartService.items().length > 0) {
         <div class="cart-summary">
-          <div class="summary-row">
-            <span>Sous-total</span>
-            <span>{{ cartService.subtotal() | currency }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Taxe (10%)</span>
-            <span>{{ cartService.tax() | currency }}</span>
-          </div>
+
           <div class="summary-row total">
             <span>Total</span>
-            <span>{{ cartService.total() | currency }}</span>
+            <span>{{ cartService.total() | number:'1.0-2' }} Da</span>
           </div>
           <button class="checkout-btn" (click)="cartService.openPayment()">
             Passer au paiement

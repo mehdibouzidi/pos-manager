@@ -26,6 +26,22 @@ export class NavigationLoaderService {
     this._items.next([
       {
         type: 'subheading',
+        label: 'Tableau de Bord',
+        visible: this.authService.hasRoles(AdminConstants.SIDENAV_DASHBOARD),
+        children: [
+          {
+            type: 'link',
+            label: 'Tableau de Bord',
+            icon: 'mat:dashboard',
+            route: '/dashboard',
+            staticRoute: '/dashboard',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.DASHBOARD_READ, AdminConstants.ADMIN))
+          }
+        ]
+      },
+      {
+        type: 'subheading',
         label: 'Catalogue',
         visible: this.authService.hasRoles(AdminConstants.SIDENAV_CATALOG),
         children: [
@@ -58,6 +74,15 @@ export class NavigationLoaderService {
             route: '/stock-movements',
             staticRoute: '/stock-movements',
             icon: 'mat:inventory',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_READ, AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
+            label: 'Ventes',
+            route: '/sales',
+            staticRoute: '/sales',
+            icon: 'mat:point_of_sale',
             routerLinkActiveOptions: { exact: true },
             visible: this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_READ, AdminConstants.ADMIN))
           },

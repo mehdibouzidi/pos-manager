@@ -24,6 +24,8 @@ import { AllApiKeysComponent } from './frontend/pages/admin/api-key/all-api-keys
 import { AllSessionLogsComponent } from './frontend/pages/admin/session-log/all-session-logs/all-session-logs.component';
 import { AllStockMovementsComponent } from './frontend/pages/supply/stock-movement/all-stock-movements/all-stock-movements.component';
 import { CurrentStockComponent } from './frontend/pages/supply/current-stock/current-stock.component';
+import { DashboardComponent } from './frontend/pages/supply/dashboard/dashboard.component';
+import { AllSalesComponent } from './frontend/pages/supply/sale/all-sales/all-sales.component';
 
 export const appRoutes: VexRoutes = [
   {
@@ -178,5 +180,21 @@ export const appRoutes: VexRoutes = [
     component: CurrentStockComponent,
     canActivate: [authGuard],
     data: { privileges: [AdminConstants.ADMIN, AdminConstants.PRODUCT_READ] }
+  },
+
+  // Dashboard
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.DASHBOARD_READ] }
+  },
+
+  // Sales
+  {
+    path: 'sales',
+    component: AllSalesComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.STOCK_MOVEMENT_READ] }
   }
 ];

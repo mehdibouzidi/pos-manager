@@ -85,4 +85,8 @@ export class RequestsConstants {
     static readonly STOCK_MOVEMENT_DELETE_REQ = RequestsConstants.STOCK_MOVEMENT_REQ;
     static readonly STOCK_MOVEMENT_FINDALL_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL;
     static readonly STOCK_MOVEMENT_FINDALL_CRITERIA_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
+    // BUSINESS - Dashboard
+    static readonly DASHBOARD_REQ = RequestsConstants.API_SOURCE + BusinessConstants.DASHBOARD;
+    static readonly DASHBOARD_STATS_REQ = RequestsConstants.DASHBOARD_REQ + '/stats';
 }
