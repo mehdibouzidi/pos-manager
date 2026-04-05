@@ -19,7 +19,7 @@ spec:
       - name: ghcr-secret
       containers:
       - name: pos-admin
-        image: ghcr.io/GITHUB_OWNER/pos-manager-admin:latest
+        image: ghcr.io/mehdibouzidi/pos-manager-admin:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
