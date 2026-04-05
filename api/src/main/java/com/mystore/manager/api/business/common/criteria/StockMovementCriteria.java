@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 public class StockMovementCriteria extends PaginationCriteria {
     private Integer id;
     private Integer productId;
+    private Integer categoryId;
     private Integer posId;
     private String movementType;
     private String reason;

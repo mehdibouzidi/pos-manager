@@ -3,6 +3,8 @@ export class StockMovementPayload {
     productId: number;
     productCode: string;
     productName: string;
+    categoryId: number;
+    categoryName: string;
     posId: number;
     posCode: string;
     posName: string;
@@ -20,6 +22,8 @@ export class StockMovementPayload {
         this.productId = null;
         this.productCode = null;
         this.productName = null;
+        this.categoryId = null;
+        this.categoryName = null;
         this.posId = null;
         this.posCode = null;
         this.posName = null;

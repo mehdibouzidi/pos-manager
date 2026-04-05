@@ -49,6 +49,31 @@ export class NavigationLoaderService {
       },
       {
         type: 'subheading',
+        label: 'Stock',
+        visible: this.authService.hasRoles(AdminConstants.SIDENAV_STOCK),
+        children: [
+          {
+            type: 'link',
+            label: 'Mouvements de Stock',
+            route: '/stock-movements',
+            staticRoute: '/stock-movements',
+            icon: 'mat:inventory',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_READ, AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
+            label: 'Stock Actuel',
+            route: '/current-stock',
+            staticRoute: '/current-stock',
+            icon: 'mat:warehouse',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.PRODUCT_READ, AdminConstants.ADMIN))
+          }
+        ]
+      },
+      {
+        type: 'subheading',
         label: 'Administration',
         visible: this.authService.hasRoles(AdminConstants.SIDENAV_ADMIN),
         children: [
@@ -105,22 +130,6 @@ export class NavigationLoaderService {
             icon: 'mat:history',
             routerLinkActiveOptions: { exact: true },
             visible: this.authService.hasRoles(Array.of(AdminConstants.SESSION_LOG_READ, AdminConstants.ADMIN))
-          }
-        ]
-      },
-      {
-        type: 'subheading',
-        label: 'Stock',
-        visible: this.authService.hasRoles(AdminConstants.SIDENAV_STOCK),
-        children: [
-          {
-            type: 'link',
-            label: 'Mouvements de Stock',
-            route: '/stock-movements',
-            staticRoute: '/stock-movements',
-            icon: 'mat:inventory',
-            routerLinkActiveOptions: { exact: true },
-            visible: this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_READ, AdminConstants.ADMIN))
           }
         ]
       }

@@ -2,9 +2,8 @@ import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatOptionModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatOptionModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
@@ -18,46 +17,37 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { SelectionModel } from '@angular/cdk/collections';
 import { TableColumn } from '@vex/interfaces/table-column.interface';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { stagger40ms } from '@vex/animations/stagger.animation';
 import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { GlobalPayload } from 'src/app/backend/payloads/global/globalpayload';
 import { AuthService } from 'src/app/backend/service/admin/auth.service';
-import { AdminConstants } from 'src/app/backend/service/util/AdminConstants';
 import { finalize } from 'rxjs/operators';
-import { DeleteConfirmationDialogComponent } from 'src/app/frontend/common/delete-confirmation-dialog/delete-confirmation-dialog.component';
-import { StockMovementCriteria } from 'src/app/backend/criteria/business/stock-movement-criteria';
-import { StockMovementPayload } from 'src/app/backend/payloads/business/stock-movement-payload';
-import { StockMovementService } from 'src/app/backend/service/business/stock-movement.service';
-import { AddStockMovementComponent } from '../add-stock-movement/add-stock-movement.component';
-import { EditStockMovementComponent } from '../edit-stock-movement/edit-stock-movement.component';
-import { ShowStockMovementComponent } from '../show-stock-movement/show-stock-movement.component';
+import { ProductCriteria } from 'src/app/backend/criteria/business/productcriteria';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
 import { ProductService } from 'src/app/backend/service/business/product.service';
 import { ProductCategoryPayload } from 'src/app/backend/payloads/business/product-category-payload';
 import { ProductCategoryService } from 'src/app/backend/service/business/product-category.service';
 
 @Component({
-  selector: 'vex-all-stock-movements',
+  selector: 'vex-current-stock',
   standalone: true,
-  templateUrl: './all-stock-movements.component.html',
-  styleUrl: './all-stock-movements.component.scss',
+  templateUrl: './current-stock.component.html',
+  styleUrl: './current-stock.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
     VexPageLayoutComponent, VexPageLayoutHeaderDirective, VexBreadcrumbsComponent,
     MatButtonToggleModule, ReactiveFormsModule, VexPageLayoutContentDirective,
     NgIf, MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule,
     MatTableModule, MatSortModule, NgFor, NgClass, MatPaginatorModule,
-    FormsModule, MatDialogModule, MatCheckboxModule, MatInputModule,
-    MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule
+    FormsModule, MatInputModule, MatProgressBarModule, CommonModule,
+    MatAutocompleteModule, MatOptionModule
   ]
 })
-export class AllStockMovementsComponent implements OnInit {
-  criteria = new StockMovementCriteria();
-  globalPayload = new GlobalPayload<StockMovementPayload>();
+export class CurrentStockComponent implements OnInit {
+  criteria = new ProductCriteria();
+  globalPayload = new GlobalPayload<ProductPayload>();
 
   allProducts: ProductPayload[] = [];
   filteredProducts: ProductPayload[] = [];
@@ -68,33 +58,20 @@ export class AllStockMovementsComponent implements OnInit {
   categoryCtrl = new FormControl('');
 
   constructor(
-    private service: StockMovementService,
-    private productService: ProductService,
+    private service: ProductService,
     private categoryService: ProductCategoryService,
     private liveAnnouncer: LiveAnnouncer,
-    public dialog: MatDialog,
     public authService: AuthService
   ) {}
 
-  canCreate(): boolean {
-    return this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_CREATE, AdminConstants.ADMIN));
-  }
-  canEdit(): boolean {
-    return this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_UPDATE, AdminConstants.ADMIN));
-  }
-  canDelete(): boolean {
-    return this.authService.hasRoles(Array.of(AdminConstants.STOCK_MOVEMENT_DELETE, AdminConstants.ADMIN));
-  }
-
   ngOnInit(): void {
-    this.setupTable();
     this.loadProducts();
     this.loadCategories();
     this.search();
   }
 
   loadProducts() {
-    this.productService.findAll().subscribe({
+    this.service.findAll().subscribe({
       next: (data: any) => {
         this.allProducts = data || [];
         this.filteredProducts = this.allProducts;
@@ -117,7 +94,7 @@ export class AllStockMovementsComponent implements OnInit {
       p.name?.toLowerCase().includes(lower) || p.code?.toLowerCase().includes(lower)
     );
     if (!value) {
-      this.criteria.productId = null;
+      this.criteria.name = null;
       this.search();
     }
   }
@@ -125,14 +102,14 @@ export class AllStockMovementsComponent implements OnInit {
   selectProduct(event: MatAutocompleteSelectedEvent) {
     const product: ProductPayload = event.option.value;
     this.productCtrl.setValue(product.name, { emitEvent: false });
-    this.criteria.productId = product.id;
+    this.criteria.name = product.name;
     this.search();
   }
 
   clearProduct() {
     this.productCtrl.setValue('');
     this.filteredProducts = this.allProducts;
-    this.criteria.productId = null;
+    this.criteria.name = null;
     this.search();
   }
 
@@ -161,13 +138,7 @@ export class AllStockMovementsComponent implements OnInit {
     this.search();
   }
 
-  setupTable() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
   search() {
-    this.criteria.reason = this.criteria.reason || null;
     this.findByCriteria();
   }
 
@@ -177,7 +148,7 @@ export class AllStockMovementsComponent implements OnInit {
     this.service.findAllByCriteria(this.criteria)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (response: GlobalPayload<StockMovementPayload>) => {
+        next: (response: GlobalPayload<ProductPayload>) => {
           if (response) {
             this.globalPayload = response;
             this.dataSource.data = this.globalPayload.elements;
@@ -187,65 +158,35 @@ export class AllStockMovementsComponent implements OnInit {
       });
   }
 
-  delete(id: number) {
-    if (!this.canDelete()) return;
-    const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent);
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.service.delete(id).subscribe({
-          next: (response: boolean) => {
-            if (response) this.search();
-          },
-          error: () => {}
-        });
-      }
-    });
-  }
-
-  goToAdd() {
-    const dialogRef = this.dialog.open(AddStockMovementComponent, { width: '600px', data: {} });
-    dialogRef.afterClosed().subscribe(() => this.search());
-  }
-
-  goToEdit(element: StockMovementPayload) {
-    const dialogRef = this.dialog.open(EditStockMovementComponent, { width: '600px', data: { element } });
-    dialogRef.afterClosed().subscribe(() => this.search());
-  }
-
-  goToShow(element: StockMovementPayload) {
-    this.dialog.open(ShowStockMovementComponent, { width: '600px', data: { element } });
-  }
-
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   layoutCtrl = new UntypedFormControl('fullwidth');
   isLoading = false;
-  dataSource = new MatTableDataSource<StockMovementPayload>();
-  selection = new SelectionModel<StockMovementPayload>(true, []);
+  dataSource = new MatTableDataSource<ProductPayload>();
 
   @Input()
-  columns: TableColumn<StockMovementPayload>[] = [
-    { label: 'Produit',   property: 'productName',  type: 'text',   visible: true },
-    { label: 'Catégorie', property: 'categoryName', type: 'text',   visible: true },
-    { label: 'Type',      property: 'movementType', type: 'text',   visible: true },
-    { label: 'Quantité',  property: 'quantity',     type: 'text',   visible: true },
-    { label: 'Motif',     property: 'reason',       type: 'text',   visible: true },
-    { label: 'Date',      property: 'movementDate', type: 'text',   visible: true },
-    { label: 'Actions',   property: 'actions',      type: 'button', visible: true }
+  columns: TableColumn<ProductPayload>[] = [
+    { label: 'Produit',      property: 'product',      type: 'text',   visible: true },
+    { label: 'Catégorie',    property: 'categoryName', type: 'text',   visible: true },
+    { label: 'Stock Min',    property: 'minStock',     type: 'text',   visible: true },
+    { label: 'Stock Max',    property: 'maxStock',     type: 'text',   visible: true },
+    { label: 'Stock Actuel', property: 'currentStock', type: 'text',   visible: true },
+    { label: 'Prix Détail',  property: 'retailPrice',  type: 'text',   visible: true },
+    { label: 'Valeur',       property: 'stockValue',   type: 'text',   visible: true }
   ];
 
-  pageSize = 10;
-  pageSizeOptions: number[] = [5, 10, 20, 50];
+  pageSize = 20;
+  pageSizeOptions: number[] = [10, 20, 50, 100];
 
-  toggleColumnVisibility(column: TableColumn<StockMovementPayload>, event: Event) {
+  toggleColumnVisibility(column: TableColumn<ProductPayload>, event: Event) {
     event.stopPropagation();
     event.stopImmediatePropagation();
     column.visible = !column.visible;
   }
 
   get visibleColumns() {
-    return this.columns.filter((column) => column.visible).map((column) => column.property);
+    return this.columns.filter(c => c.visible).map(c => c.property);
   }
 
   trackByProperty<T>(index: number, column: TableColumn<T>) {
@@ -266,21 +207,21 @@ export class AllStockMovementsComponent implements OnInit {
     return event;
   }
 
-  getMovementTypeLabel(type: string): string {
-    switch (type) {
-      case 'ENTRY': return 'Entrée';
-      case 'LOSS': return 'Perte';
-      case 'SALE': return 'Vente';
-      default: return type;
-    }
+  getStockValue(product: ProductPayload): number {
+    return (product.currentStock ?? 0) * (product.retailPrice ?? 0);
   }
 
-  getMovementTypeClass(type: string): string {
-    switch (type) {
-      case 'ENTRY': return 'text-green-600 bg-green-50';
-      case 'LOSS': return 'text-orange-600 bg-orange-50';
-      case 'SALE': return 'text-red-600 bg-red-50';
-      default: return '';
-    }
+  get totalStockValue(): number {
+    return this.dataSource.data.reduce((sum, p) => sum + this.getStockValue(p), 0);
+  }
+
+  getStockStatusClass(product: ProductPayload): string {
+    const stock = product.currentStock ?? 0;
+    const min = product.minStock ?? 0;
+    const max = product.maxStock ?? 0;
+    if (stock <= 0) return 'text-red-600 font-bold';
+    if (min > 0 && stock <= min) return 'text-orange-500 font-semibold';
+    if (max > 0 && stock >= max) return 'text-blue-500';
+    return 'text-green-600';
   }
 }

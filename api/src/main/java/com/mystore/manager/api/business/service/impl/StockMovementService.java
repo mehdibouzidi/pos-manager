@@ -133,6 +133,7 @@ public class StockMovementService implements IStockMovementService {
         List<Predicate> predicates = new ArrayList<>();
         if (criteria.getId() != null) predicates.add(cb.equal(root.get("id"), criteria.getId()));
         if (criteria.getProductId() != null) predicates.add(cb.equal(root.get("product").get("id"), criteria.getProductId()));
+        if (criteria.getCategoryId() != null) predicates.add(cb.equal(root.get("product").get("category").get("id"), criteria.getCategoryId()));
         if (criteria.getPosId() != null) {
             predicates.add(cb.equal(root.get("pos").get("id"), criteria.getPosId()));
         } else if (!PosContext.isSuperAdmin()) {
@@ -153,8 +154,7 @@ public class StockMovementService implements IStockMovementService {
         Double current = Objects.requireNonNullElse(product.getCurrentStock(), 0.0);
         switch (movementType.toUpperCase()) {
             case "ENTRY" -> product.setCurrentStock(current + quantity);
-            case "EXIT"  -> product.setCurrentStock(current - quantity);
-            case "ADJUSTMENT" -> product.setCurrentStock(quantity);
+            case "LOSS", "SALE" -> product.setCurrentStock(current - quantity);
         }
         productRepository.save(product);
     }

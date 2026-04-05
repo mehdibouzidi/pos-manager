@@ -13,11 +13,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.mystore.manager.api.admin.util.AdminConstants.*;
@@ -50,6 +55,12 @@ public class SecurityConfig {
             
             // Health check endpoints (public)
             auth.requestMatchers("/api/health/**").permitAll();
+
+            // Public key for RSA password encryption at login
+            auth.requestMatchers(HttpMethod.GET, SLASH + PUBLIC_KEY_EP).permitAll();
+
+            // Logout clears the cookie — permitted to all authenticated/unauthenticated callers
+            auth.requestMatchers(HttpMethod.POST, SLASH + LOGOUT_EP).permitAll();
 
             //Admin-----------------------------------------------------------------------------------------
             auth.requestMatchers(HttpMethod.POST, SLASH + LOGIN_EP).permitAll();
@@ -156,8 +167,32 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(
+                "https://pos.elafia-manager.com",
+                "https://pos-admin.elafia-manager.com",
+                "http://localhost:4200",
+                "http://localhost:4201"
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
+
+        // CORS — override @CrossOrigin wildcard defaults so allowCredentials works with cookies
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
+        // Stateless session — auth state is carried by the httpOnly cookie, not server-side session
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(auth -> {
             adminRules().accept(auth);

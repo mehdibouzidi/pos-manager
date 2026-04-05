@@ -33,8 +33,7 @@ export class AddStockMovementComponent implements OnInit {
 
   movementTypes = [
     { value: 'ENTRY', label: 'Entrée' },
-    { value: 'EXIT', label: 'Sortie' },
-    { value: 'ADJUSTMENT', label: 'Ajustement' }
+    { value: 'LOSS', label: 'Perte' }
   ];
 
   constructor(

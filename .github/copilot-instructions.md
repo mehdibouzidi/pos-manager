@@ -60,3 +60,31 @@ When a new business entity requires a database table or schema change, a **new d
 - Use `BEGIN` / `END` blocks
 - Include an existence check before creating tables or columns (e.g. `IF NOT EXISTS`)
 - Be registered at the end of the **master changelog** file
+
+---
+
+## Stock Business Rules
+
+### Sidenav section order (ui-admin)
+The `NavigationLoaderService` (`ui-admin/src/app/core/navigation/navigation-loader.service.ts`) must define sections in this order:
+1. **Catalogue** — Catégories de produits, Produits
+2. **Stock** — Mouvements de Stock (and future stock screens)
+3. **Administration** — POS, Privileges, Profils, Utilisateurs, Clés API, Journaux
+
+### Stock actuel formula
+`currentStock = Entrées (ENTRY) − Pertes (LOSS) − Ventes (SALE)`
+
+This is computed incrementally in `StockMovementService.updateProductStock()` and stored in `ProductEntity.currentStock`.
+
+### Movement types
+| Code | Label | Who creates it |
+|------|-------|----------------|
+| `ENTRY` | Entrée | Admin UI (manually) |
+| `LOSS` | Perte | Admin UI (manually) |
+| `SALE` | Vente | POS (automatically on each sale — **never shown in the admin form**) |
+
+- The admin UI (add/edit stock-movement forms) must only offer **ENTRY** and **LOSS** as selectable types.
+- **SALE** movements are created programmatically by the POS when a sale is recorded; they must never appear as a manual option.
+- `ENTRY` adds to stock. `LOSS` and `SALE` subtract from stock.
+- The old types `EXIT` and `ADJUSTMENT` are **deprecated** — do not use them in new code.
+

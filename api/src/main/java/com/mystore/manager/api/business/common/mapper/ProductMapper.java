@@ -43,6 +43,9 @@ public class ProductMapper implements IMapper<ProductPayload, ProductEntity> {
             payload.setMinStock(entity.getMinStock());
             payload.setWholesalePrice(entity.getWholesalePrice());
             payload.setRetailPrice(entity.getRetailPrice());
+            if (Objects.nonNull(entity.getCurrentStock())) {
+                payload.setCurrentStock(java.math.BigDecimal.valueOf(entity.getCurrentStock()));
+            }
             if (Objects.nonNull(entity.getCategory())) {
                 payload.setCategoryId(entity.getCategory().getId());
                 payload.setCategoryName(entity.getCategory().getName());

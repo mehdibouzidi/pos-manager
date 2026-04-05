@@ -23,6 +23,7 @@ import { ShowPosComponent } from './frontend/pages/admin/pos/show-pos/show-pos.c
 import { AllApiKeysComponent } from './frontend/pages/admin/api-key/all-api-keys/all-api-keys.component';
 import { AllSessionLogsComponent } from './frontend/pages/admin/session-log/all-session-logs/all-session-logs.component';
 import { AllStockMovementsComponent } from './frontend/pages/supply/stock-movement/all-stock-movements/all-stock-movements.component';
+import { CurrentStockComponent } from './frontend/pages/supply/current-stock/current-stock.component';
 
 export const appRoutes: VexRoutes = [
   {
@@ -169,5 +170,13 @@ export const appRoutes: VexRoutes = [
     component: AllStockMovementsComponent,
     canActivate: [authGuard],
     data: { privileges: [AdminConstants.ADMIN, AdminConstants.STOCK_MOVEMENT_READ] }
+  },
+
+  // Stock - Current Stock
+  {
+    path: 'current-stock',
+    component: CurrentStockComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.PRODUCT_READ] }
   }
 ];

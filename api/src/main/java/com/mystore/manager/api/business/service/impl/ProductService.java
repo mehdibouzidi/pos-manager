@@ -109,20 +109,9 @@ public class ProductService implements com.mystore.manager.api.business.service.
                 query -> {}
         );
         
-        // Calculate and populate currentStock for each product
-        if (result.getElements() != null && !result.getElements().isEmpty()) {
-            populateCurrentStock(result.getElements());
-        }
-        
         return result;
     }
     
-    private void populateCurrentStock(List<ProductPayload> products) {
-        for (ProductPayload product : products) {
-            product.setCurrentStock(BigDecimal.ZERO);
-        }
-    }
-
     @Override
     public List<ProductPayload> findAll() {
         List<ProductEntity> entities;
