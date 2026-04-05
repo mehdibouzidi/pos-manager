@@ -52,8 +52,8 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
-          kubectl set image deployment/pos-api-deployment pos-api=ghcr.io/${{ github.repository_owner }}/pos-manager-api:${{ steps.version.outputs.release_version }} -n pos-prod
-          kubectl rollout status deployment/pos-api-deployment -n pos-prod
+          kubectl set image deployment/pos-api-deployment pos-api=ghcr.io/${{ github.repository_owner }}/pos-manager-api:${{ steps.version.outputs.release_version }} -n app-dev
+          kubectl rollout status deployment/pos-api-deployment -n app-dev
 
       - name: Increment to next SNAPSHOT in pom.xml
         run: |
