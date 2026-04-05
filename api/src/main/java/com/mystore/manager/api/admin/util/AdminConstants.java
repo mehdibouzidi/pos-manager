@@ -29,6 +29,8 @@ public class AdminConstants {
     public static final String LOGIN_EP = "login";
     public static final String API_KEY_CONTROLLER = "api-key";
     public static final String SESSION_LOG_CONTROLLER = "session-log";
+    public static final String LOGOUT_EP = "logout";
+    public static final String PUBLIC_KEY_EP = "public-key";
 
 
 }

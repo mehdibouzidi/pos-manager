@@ -11,6 +11,7 @@ import { UserPayload } from '../../payloads/admin/userpayload';
 import { UserService } from './user.service';
 import { Router } from '@angular/router';
 import { AdminConstants } from '../util/AdminConstants';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -48,13 +49,37 @@ export class AuthService {
   }
   
   logout(){
-    this.ls.clear();
-    this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
+    this.http.post(RequestsConstants.LOGOUT_REQ, {}, { withCredentials: true }).subscribe({
+      complete: () => {
+        this.ls.clear();
+        this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
+      },
+      error: () => {
+        this.ls.clear();
+        this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
+      }
+    });
   }
   
   setJwt(token: string){
-    this.token = token;
-    this.ls.setItem(UtilStatic.TOKEN, token);
+    // Token is now stored in httpOnly cookie by the server — no longer stored in localStorage
+  }
+
+  async encryptPassword(plainPassword: string): Promise<string> {
+    const publicKeyB64 = await firstValueFrom(
+      this.http.get(RequestsConstants.PUBLIC_KEY_REQ, { responseType: 'text' })
+    );
+    const keyBytes = Uint8Array.from(atob(publicKeyB64), c => c.charCodeAt(0));
+    const cryptoKey = await window.crypto.subtle.importKey(
+      'spki',
+      keyBytes.buffer,
+      { name: 'RSA-OAEP', hash: 'SHA-256' },
+      false,
+      ['encrypt']
+    );
+    const encoded = new TextEncoder().encode(plainPassword);
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, cryptoKey, encoded);
+    return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
   }
 
   setUsername(username: string){
@@ -62,7 +87,8 @@ export class AuthService {
   }
 
   getJwt(){
-    return localStorage.getItem(UtilStatic.TOKEN);
+    // Token is in httpOnly cookie — not accessible from JavaScript
+    return null;
   }
   
   getUsername(){
@@ -108,19 +134,13 @@ export class AuthService {
     
 
   checkIsLoggedIn(): boolean {
-    const token = localStorage.getItem(UtilStatic.TOKEN);
-    if (!token) return false;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.exp * 1000 < Date.now()) {
-        this.ls.clear();
-        return false;
-      }
-      return true;
-    } catch {
+    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
+    if (!expStr) return false;
+    if (Date.now() > parseInt(expStr, 10)) {
       this.ls.clear();
       return false;
     }
+    return true;
   }
   
   hasRoles(requestedPrivileges: Array<string>) {

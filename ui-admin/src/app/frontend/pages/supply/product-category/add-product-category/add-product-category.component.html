@@ -23,18 +23,17 @@
         </div>
 
         <div class="flex flex-col gap-2 mt-2">
-            <label class="text-sm font-medium text-secondary">Photo</label>
-            <input type="file" accept="image/*" (change)="onPhotoChange($event)" class="text-sm">
-            <div *ngIf="photoPreview" class="mt-2">
-                <img [src]="photoPreview" alt="Aperçu" class="max-h-40 rounded object-contain border">
-            </div>
+            <button mat-stroked-button type="button" (click)="photoInput.click()">
+                <mat-icon svgIcon="mat:upload_file"></mat-icon>
+                Choisir une photo
+            </button>
+            <input #photoInput type="file" accept="image/*" (change)="onPhotoChange($event)" class="hidden">
+            <img *ngIf="photoPreview" [src]="photoPreview" alt="Aperçu" class="mt-2 max-h-32 rounded object-contain border">
         </div>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
         <button mat-button mat-dialog-close type="button">Annuler</button>
-        <button color="primary" mat-flat-button (click)="add()">
-            Valider
-        </button>
+        <button color="primary" mat-flat-button type="button" [disabled]="!generalForm.valid" (click)="add()">Valider</button>
     </mat-dialog-actions>
 </form>

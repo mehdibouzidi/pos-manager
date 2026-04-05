@@ -7,6 +7,7 @@ import com.mystore.manager.api.common.context.PosContext;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tomcat.websocket.Constants;
@@ -46,13 +47,10 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
         // Clear POS context at the start of each request
         PosContext.clear();
 
-        final String authorizationHeader = request.getHeader(Constants.AUTHORIZATION_HEADER_NAME);
-
         String username = null;
-        String jwt = null;
+        String jwt = extractJwt(request);
 
-        if (authorizationHeader != null && authorizationHeader.startsWith(AdminConstants.BEARER)) {
-            jwt = authorizationHeader.substring(7);
+        if (jwt != null) {
             try {
                 username = jwtService.extractUsername(jwt);
 
@@ -94,6 +92,27 @@ public class JwtRequestFilter extends BasicAuthenticationFilter {
             // Clear POS context after request processing
             PosContext.clear();
         }
+    }
+
+    /**
+     * Extracts the JWT from the httpOnly cookie named "jwt".
+     * Falls back to the Authorization: Bearer header for API-key / legacy clients.
+     */
+    private String extractJwt(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        // Fallback: Authorization header (used by API-key authenticated terminals)
+        String authHeader = request.getHeader(Constants.AUTHORIZATION_HEADER_NAME);
+        if (authHeader != null && authHeader.startsWith(AdminConstants.BEARER)) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 
 }

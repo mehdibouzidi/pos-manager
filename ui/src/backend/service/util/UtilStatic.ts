@@ -21,6 +21,7 @@ export class UtilStatic {
   static readonly FROM_QUOTATION = 'fromQuotation';
 
   static readonly TOKEN = 'pos-token';
+  static readonly SESSION_EXP = 'session-exp';
   static readonly USERNAME = 'username';
   static readonly PRIVILEGES = 'privileges';
   static readonly FIRSTNAME = 'firstname';

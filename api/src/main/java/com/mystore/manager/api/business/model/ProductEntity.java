@@ -39,8 +39,7 @@ public class ProductEntity extends AbstractBusinessGlobalData {
     @JoinColumn(name = "category_fk")
     private ProductCategoryEntity category;
 
-    @Lob
-    @Column(name = "photo")
+    @Column(name = "photo", columnDefinition = "bytea")
     private byte[] photo;
 
     @Override

@@ -38,7 +38,7 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (!this.usernameOrEmail || !this.password) {
       this.errorMessage.set('Veuillez renseigner tous les champs.');
       return;
@@ -49,14 +49,22 @@ export class LoginComponent {
 
     const payload = new LoginPayload();
     payload.usernameOrEmail = this.usernameOrEmail;
-    payload.password = this.password;
+
+    try {
+      payload.password = await this.authService.encryptPassword(this.password);
+    } catch {
+      this.loading.set(false);
+      this.errorMessage.set('Erreur lors du chiffrement du mot de passe.');
+      return;
+    }
 
     this.authService.login(payload).subscribe({
       next: (response: any) => {
         const res = response as LoginPayload;
         this.loading.set(false);
-        if (res.token) {
-          this.authService.setJwt(res.token);
+        if (res.tokenExpiry) {
+          // Token is in httpOnly cookie — store only session expiry and user info
+          this.ls.setItem(UtilStatic.SESSION_EXP, res.tokenExpiry.toString());
           this.authService.setUsername(res.usernameOrEmail ?? this.usernameOrEmail);
           this.ls.setItem(UtilStatic.FIRSTNAME, res.firstName);
           this.ls.setItem(UtilStatic.LASTNAME, res.lastName);

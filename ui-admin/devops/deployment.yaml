@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-admin-deployment
+  namespace: pos-prod
+  labels:
+    app: pos-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pos-admin
+  template:
+    metadata:
+      labels:
+        app: pos-admin
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      containers:
+      - name: pos-admin
+        image: ghcr.io/GITHUB_OWNER/pos-manager-admin:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 50m
+            memory: 64Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%

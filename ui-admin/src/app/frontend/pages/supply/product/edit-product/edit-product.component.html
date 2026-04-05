@@ -42,17 +42,31 @@
                 <input matInput formControlName="retailPrice" type="number" step="0.01">
             </mat-form-field>
         </div>
-
-
-
+        <div class="flex flex-col sm:flex-row sm:gap-4">
+            <mat-form-field class="flex-auto">
+                <mat-label>Catégorie</mat-label>
+                <mat-select formControlName="categoryId">
+                    <mat-option [value]="null">— Aucune —</mat-option>
+                    @for (cat of categories; track cat.id) {
+                        <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div class="flex flex-col gap-2 mt-2">
+            <button mat-stroked-button type="button" (click)="photoInput.click()">
+                <mat-icon svgIcon="mat:upload_file"></mat-icon>
+                Choisir une photo
+            </button>
+            <input #photoInput type="file" accept="image/*" (change)="onPhotoChange($event)" class="hidden">
+            <img *ngIf="photoPreview" [src]="photoPreview" alt="Aperçu" class="mt-2 max-h-32 rounded object-contain border">
+        </div>
 
 
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
         <button mat-button mat-dialog-close type="button">Annuler</button>
-        <button color="primary" mat-flat-button (click)="edit()">
-            Valider
-        </button>
+        <button color="primary" mat-flat-button type="button" [disabled]="!generalForm.valid" (click)="edit()">Valider</button>
     </mat-dialog-actions>
 </form>

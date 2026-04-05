@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  api_source: 'http://localhost:8080/'
+  api_source: 'https://api.mystore-manager.com/'
 };

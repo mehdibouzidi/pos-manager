@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-api-deployment
+  namespace: pos-prod
+  labels:
+    app: pos-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pos-api
+  template:
+    metadata:
+      labels:
+        app: pos-api
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      containers:
+      - name: pos-api
+        image: ghcr.io/GITHUB_OWNER/pos-manager-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Xmx400m -Xms400m"
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: pos-postgres-secret
+              key: datasource-url
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: pos-postgres-secret
+              key: datasource-username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pos-postgres-secret
+              key: datasource-password
+        - name: APP_JWTSECRET
+          valueFrom:
+            secretKeyRef:
+              name: pos-api-secret
+              key: JWT_SECRET
+        - name: APP_COOKIESECURE
+          valueFrom:
+            secretKeyRef:
+              name: pos-api-secret
+              key: COOKIE_SECURE
+        - name: APP_COOKIESAMESITE
+          valueFrom:
+            secretKeyRef:
+              name: pos-api-secret
+              key: COOKIE_SAME_SITE
+        resources:
+          limits:
+            cpu: 400m
+            memory: 800Mi
+          requests:
+            cpu: 400m
+            memory: 800Mi
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%

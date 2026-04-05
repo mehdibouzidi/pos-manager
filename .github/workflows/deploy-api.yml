@@ -1,0 +1,71 @@
+name: Deploy API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CI_CD }}
+
+      - name: Compute versions
+        id: version
+        run: |
+          FULL_VERSION=$(awk '/<\/parent>/{found=1} found && /<version>/{match($0,/<version>(.*)<\/version>/,a); print a[1]; exit}' api/pom.xml)
+          RELEASE_VERSION=${FULL_VERSION%-SNAPSHOT}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$RELEASE_VERSION"
+          NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))-SNAPSHOT"
+          echo "release_version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set release version in pom.xml
+        run: |
+          sed -i "s|<version>${{ steps.version.outputs.release_version }}-SNAPSHOT</version>|<version>${{ steps.version.outputs.release_version }}</version>|" api/pom.xml
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CI_CD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api
+          file: ./api/devops/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/pos-manager-api:${{ steps.version.outputs.release_version }}
+          build-args: APP_VERSION=${{ steps.version.outputs.release_version }}
+
+      - name: Deploy to Kubernetes
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
+          kubectl set image deployment/pos-api-deployment pos-api=ghcr.io/${{ github.repository_owner }}/pos-manager-api:${{ steps.version.outputs.release_version }} -n pos-prod
+          kubectl rollout status deployment/pos-api-deployment -n pos-prod
+
+      - name: Increment to next SNAPSHOT in pom.xml
+        run: |
+          sed -i "s|<version>${{ steps.version.outputs.release_version }}</version>|<version>${{ steps.version.outputs.next_version }}</version>|" api/pom.xml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add api/pom.xml
+          git commit -m "release(api): ${{ steps.version.outputs.release_version }} → ${{ steps.version.outputs.next_version }}"
+          git tag v${{ steps.version.outputs.release_version }}-api
+          git pull --rebase
+          git push
+          git push --tags

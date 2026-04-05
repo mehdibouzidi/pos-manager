@@ -58,11 +58,18 @@ export class LoginComponent {
     private lsService: LocalStorageService
   ) {}
 
-  send() {
+  async send() {
     let loginPayload = new LoginPayload();
     loginPayload.usernameOrEmail = this.form.value.username;
-    loginPayload.password = this.form.value.password;
     loginPayload.storeCodeInput = null;
+
+    try {
+      loginPayload.password = await this.authService.encryptPassword(this.form.value.password);
+    } catch {
+      this.openSnackBar('error', 'Erreur lors du chiffrement du mot de passe.');
+      return;
+    }
+
     this.authService.login(loginPayload).subscribe(
       (response : LoginPayload) => {
         if (response) {
@@ -76,7 +83,11 @@ export class LoginComponent {
             this.openSnackBar('error', 'Votre compte est désactivé. Veuillez contacter l\'administrateur.');
             return;
           }
-          localStorage.setItem(UtilStatic.TOKEN, response.token);
+
+          // Token is in httpOnly cookie — store only the session expiry and user info
+          if (response.tokenExpiry) {
+            localStorage.setItem(UtilStatic.SESSION_EXP, response.tokenExpiry.toString());
+          }
           localStorage.setItem(UtilStatic.USERNAME, response.usernameOrEmail);
           localStorage.setItem(UtilStatic.PRIVILEGES, JSON.stringify(response.privileges));
           localStorage.setItem(UtilStatic.FIRSTNAME, JSON.stringify(response.firstName));

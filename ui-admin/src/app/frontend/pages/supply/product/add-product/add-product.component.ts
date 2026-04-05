@@ -21,9 +21,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
 import { Observable } from 'rxjs';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
+import { ProductCategoryPayload } from 'src/app/backend/payloads/business/product-category-payload';
 import { ProductService } from 'src/app/backend/service/business/product.service';
+import { ProductCategoryService } from 'src/app/backend/service/business/product-category.service';
 
 @Component({
   selector: 'vex-add-product',
@@ -43,6 +46,7 @@ import { ProductService } from 'src/app/backend/service/business/product.service
     MatInputModule,
     MatDatepickerModule,
     MatCommonModule,
+    MatSelectModule,
     CommonModule
   ]
 })
@@ -51,12 +55,15 @@ export class AddProductComponent {
   generalForm: FormGroup;
 
   payload = new ProductPayload();
+  categories: ProductCategoryPayload[] = [];
+  photoPreview: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<AddProductComponent>,
     @Inject(MAT_DIALOG_DATA) public data,
-    private service: ProductService
+    private service: ProductService,
+    private categoryService: ProductCategoryService
   ) {}
 
   close(): void {
@@ -70,6 +77,7 @@ export class AddProductComponent {
     this.payload.minStock = this.f['minStock'].value;
     this.payload.wholesalePrice = this.f['wholesalePrice'].value;
     this.payload.retailPrice = this.f['retailPrice'].value;
+    this.payload.categoryId = this.f['categoryId'].value;
 
     this.service.add(this.payload).subscribe({
       next: (response: ProductPayload) => {
@@ -81,8 +89,23 @@ export class AddProductComponent {
     });
   }
 
+  onPhotoChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        this.payload.photo = result.split(',')[1];
+        this.photoPreview = result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
   initData() {
-    // No external data needed
+    this.categoryService.findAll().subscribe({
+      next: (res: any) => { this.categories = res as ProductCategoryPayload[]; }
+    });
   }
 
   initForm() {
@@ -98,7 +121,8 @@ export class AddProductComponent {
       maxStock: [this.payload.maxStock],
       minStock: [this.payload.minStock],
       wholesalePrice: [this.payload.wholesalePrice],
-      retailPrice: [this.payload.retailPrice]
+      retailPrice: [this.payload.retailPrice],
+      categoryId: [this.payload.categoryId]
     });
   }
 

@@ -11,6 +11,8 @@ export class RequestsConstants{
 //ADMIN
     static readonly SIGNIN_REQ = RequestsConstants.API_SOURCE + AdminConstants.SIGNIN;
     static readonly LOGIN_REQ = RequestsConstants.API_SOURCE + AdminConstants.LOGIN;
+    static readonly LOGOUT_REQ = RequestsConstants.API_SOURCE + AdminConstants.LOGOUT;
+    static readonly PUBLIC_KEY_REQ = RequestsConstants.API_SOURCE + AdminConstants.PUBLIC_KEY;
 
  //BUSINESS
     //PRODUCT

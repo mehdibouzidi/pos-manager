@@ -5,6 +5,7 @@ export class LoginPayload{
     usernameOrEmail: string | null;
     password: string | null;
     token: string | null;
+    tokenExpiry: number | null;
     active: boolean | null = null;
     privileges: Array<string> = new Array<string>();
     
@@ -26,6 +27,7 @@ export class LoginPayload{
         this.usernameOrEmail = null;
         this.password = null;
         this.token = null;
+        this.tokenExpiry = null;
         this.superAdmin = false;
         this.posId = null;
         this.posCode = null;

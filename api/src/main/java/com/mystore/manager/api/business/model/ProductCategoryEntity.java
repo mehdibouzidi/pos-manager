@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @org.hibernate.annotations.BatchSize(size = 50)
 public class ProductCategoryEntity extends AbstractBusinessGlobalData {
 
-    @Lob
-    @Column(name = "photo")
+    @Column(name = "photo", columnDefinition = "bytea")
     private byte[] photo;
 }

@@ -1,5 +1,7 @@
 export class AdminConstants {
   static readonly LOGIN = 'login';
+  static readonly LOGOUT = 'logout';
+  static readonly PUBLIC_KEY = 'public-key';
   static readonly SIGNIN = 'signin';
   static readonly USER = 'user';
   static readonly DISABLE = 'disable';

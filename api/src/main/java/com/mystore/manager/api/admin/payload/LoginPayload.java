@@ -39,4 +39,7 @@ public class LoginPayload {
     private String errorCode;
     private String errorMessage;
 
+    // Epoch-millis timestamp at which the session expires (for frontend session tracking)
+    private Long tokenExpiry;
+
 }

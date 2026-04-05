@@ -21,9 +21,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
 import { Observable } from 'rxjs';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
+import { ProductCategoryPayload } from 'src/app/backend/payloads/business/product-category-payload';
 import { ProductService } from 'src/app/backend/service/business/product.service';
+import { ProductCategoryService } from 'src/app/backend/service/business/product-category.service';
 
 @Component({
   selector: 'vex-edit-product',
@@ -43,6 +46,7 @@ import { ProductService } from 'src/app/backend/service/business/product.service
     MatInputModule,
     MatDatepickerModule,
     MatCommonModule,
+    MatSelectModule,
     CommonModule
   ]
 })
@@ -50,21 +54,17 @@ export class EditProductComponent {
   generalForm: FormGroup;
 
   payload = new ProductPayload();
+  categories: ProductCategoryPayload[] = [];
+  photoPreview: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<EditProductComponent>,
     @Inject(MAT_DIALOG_DATA) public data,
-    private service: ProductService
+    private service: ProductService,
+    private categoryService: ProductCategoryService
   ) {
     this.payload = this.data.element;
-    this.service.get(this.payload.id).subscribe({
-      next: (response: ProductPayload) => {
-      if (response != null) {
-      this.payload = response;
-      }
-      }
-    });
   }
 
   close(): void {
@@ -78,6 +78,7 @@ export class EditProductComponent {
     this.payload.minStock = this.f['minStock'].value;
     this.payload.wholesalePrice = this.f['wholesalePrice'].value;
     this.payload.retailPrice = this.f['retailPrice'].value;
+    this.payload.categoryId = this.f['categoryId'].value;
 
     this.service.update(this.payload).subscribe({
       next: (response: ProductPayload) => {
@@ -89,8 +90,23 @@ export class EditProductComponent {
     });
   }
 
+  onPhotoChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        this.payload.photo = result.split(',')[1];
+        this.photoPreview = result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
   initData() {
-    // No external data needed
+    this.categoryService.findAll().subscribe({
+      next: (res: any) => { this.categories = res as ProductCategoryPayload[]; }
+    });
   }
 
   initForm() {
@@ -106,7 +122,8 @@ export class EditProductComponent {
       maxStock: [this.payload.maxStock],
       minStock: [this.payload.minStock],
       wholesalePrice: [this.payload.wholesalePrice],
-      retailPrice: [this.payload.retailPrice]
+      retailPrice: [this.payload.retailPrice],
+      categoryId: [this.payload.categoryId]
     });
   }
 
@@ -115,7 +132,25 @@ export class EditProductComponent {
   ngOnInit(): void {
     this.initData();
     this.initForm();
-    this.initObservables();
+    this.service.get(this.payload.id).subscribe({
+      next: (response: ProductPayload) => {
+        if (response != null) {
+          this.payload = response;
+          if (this.payload.photo) {
+            this.photoPreview = 'data:image/jpeg;base64,' + this.payload.photo;
+          }
+          this.generalForm.patchValue({
+            name: this.payload.name,
+            code: this.payload.code,
+            maxStock: this.payload.maxStock,
+            minStock: this.payload.minStock,
+            wholesalePrice: this.payload.wholesalePrice,
+            retailPrice: this.payload.retailPrice,
+            categoryId: this.payload.categoryId
+          });
+        }
+      }
+    });
   }
 
   get f() {

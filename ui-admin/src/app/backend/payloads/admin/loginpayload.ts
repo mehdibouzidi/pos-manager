@@ -6,6 +6,7 @@ export class LoginPayload{
     password: string;
     storeCodeInput: string; // Store code entered by user at login (for non-superadmin)
     token: string;
+    tokenExpiry: number | null;
     active: boolean;
     privileges: Array<string> = new Array<string>();
     
@@ -28,6 +29,7 @@ export class LoginPayload{
         this.password = null;
         this.storeCodeInput = null;
         this.token = null;
+        this.tokenExpiry = null;
         this.superAdmin = false;
         this.storeId = null;
         this.storeCode = null;
