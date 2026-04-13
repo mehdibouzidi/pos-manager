@@ -16,13 +16,6 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     <header class="topbar">
       <div class="topbar-left">
         <span class="app-name">POS Manager</span>
-        @if (posName) {
-          <span class="topbar-left-divider"></span>
-          <span class="store-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            {{ posName }}
-          </span>
-        }
       </div>
 
       <div class="topbar-right" #menuAnchor>
@@ -40,6 +33,12 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
         }
 
         <div class="user-info">
+          @if (posName) {
+            <span class="store-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              {{ posName }}
+            </span>
+          }
           <span class="username">{{ fullName }}</span>
         </div>
 
@@ -148,10 +147,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     }
 
     .topbar-left-divider {
-      width: 1px;
-      height: 18px;
-      background: var(--border-color);
-      flex-shrink: 0;
+      display: none;
     }
 
     .topbar-right {
@@ -165,20 +161,6 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--primary-orange);
-      color: white;
-      font-weight: 600;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
     }
 
     .username {
@@ -498,7 +480,9 @@ export class TopbarComponent {
   showConfirm = false;
 
   get posName(): string | null {
-    return this.ls.getItem(UtilStatic.POS_NAME) || null;
+    return this.ls.getItem(UtilStatic.POS_NAME)
+        || this.ls.getItem(UtilStatic.POS_CODE)
+        || null;
   }
 
   get fullName(): string {
@@ -569,7 +553,14 @@ export class TopbarComponent {
 
   closeSession(): void {
     this.menuOpen.set(false);
-    this.caisseSessionService.showCloseModal();
+    // Refresh stats before opening so the modal always shows live totals
+    this.caisseSessionService.getCurrent().subscribe({
+      next: (session) => {
+        this.caisseSessionService.setCurrentSession(session);
+        this.caisseSessionService.showCloseModal();
+      },
+      error: () => this.caisseSessionService.showCloseModal()
+    });
   }
 
   @HostListener('document:click', ['$event'])

@@ -113,19 +113,18 @@ public class CaisseSessionService implements ICaisseSessionService {
                 : 0;
         entity.setLastOrderNumber(lastOrderNumber);
 
-        // Compute sales totals for this session
-        if (posId != null) {
-            Object[] totals = saleRepository.findSalesTotalsByPosAndDateBetween(posId, entity.getOpenedAt(), closedAt);
-            double totalSalesAmount = (totals[0] != null) ? ((Number) totals[0]).doubleValue() : 0.0;
-            long totalSalesCount = (totals[1] != null) ? ((Number) totals[1]).longValue() : 0L;
-            entity.setTotalSalesAmount(BigDecimal.valueOf(totalSalesAmount));
-            entity.setTotalSalesCount((int) totalSalesCount);
+        // Compute sales totals using the session FK (reliable, no time-range guesswork)
+        List<Object[]> totalsList = saleRepository.findSalesTotalsBySession(entity.getId());
+        Object[] totals = (!totalsList.isEmpty()) ? totalsList.get(0) : new Object[]{0.0, 0L};
+        double totalSalesAmount = (totals[0] != null) ? ((Number) totals[0]).doubleValue() : 0.0;
+        long totalSalesCount   = (totals[1] != null) ? ((Number) totals[1]).longValue()   : 0L;
+        entity.setTotalSalesAmount(BigDecimal.valueOf(totalSalesAmount));
+        entity.setTotalSalesCount((int) totalSalesCount);
 
-            // variance = closingBalance - (openingBalance + totalSalesAmount)
-            if (Objects.nonNull(entity.getClosingBalance()) && Objects.nonNull(entity.getOpeningBalance())) {
-                BigDecimal expected = entity.getOpeningBalance().add(BigDecimal.valueOf(totalSalesAmount));
-                entity.setVariance(entity.getClosingBalance().subtract(expected));
-            }
+        // variance = closingBalance - (openingBalance + totalSalesAmount)
+        if (Objects.nonNull(entity.getClosingBalance()) && Objects.nonNull(entity.getOpeningBalance())) {
+            BigDecimal expected = entity.getOpeningBalance().add(BigDecimal.valueOf(totalSalesAmount));
+            entity.setVariance(entity.getClosingBalance().subtract(expected));
         }
 
         entity.setStatus(STATUS_CLOSED);
@@ -138,7 +137,20 @@ public class CaisseSessionService implements ICaisseSessionService {
         Integer posId = PosContext.getPosId();
         if (posId == null) return null;
         return repository.findByPos_IdAndStatus(posId, STATUS_OPEN)
-                .map(mapper::entityToPayload)
+                .map(entity -> {
+                    CaisseSessionPayload payload = mapper.entityToPayload(entity);
+                    // Compute live running totals (not persisted until close)
+                    List<Object[]> totalsList = saleRepository.findSalesTotalsBySession(entity.getId());
+                    if (!totalsList.isEmpty() && totalsList.get(0) != null) {
+                        Object[] totals = totalsList.get(0);
+                        payload.setTotalSalesAmount(totals[0] != null ? ((Number) totals[0]).doubleValue() : 0.0);
+                        payload.setTotalSalesCount(totals[1] != null ? ((Number) totals[1]).intValue() : 0);
+                    } else {
+                        payload.setTotalSalesAmount(0.0);
+                        payload.setTotalSalesCount(0);
+                    }
+                    return payload;
+                })
                 .orElse(null);
     }
 

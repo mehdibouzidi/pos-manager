@@ -55,6 +55,7 @@
     <include file="db/changelog/sql/V2050_insert_sale_privileges.sql"/>
     <include file="db/changelog/sql/V2051_create_caisse_sessions_table.sql"/>
     <include file="db/changelog/sql/V2052_insert_caisse_session_privileges.sql"/>
+    <include file="db/changelog/sql/V2053_add_caisse_session_fk_to_sale.sql"/>
 
 </databaseChangeLog>
     

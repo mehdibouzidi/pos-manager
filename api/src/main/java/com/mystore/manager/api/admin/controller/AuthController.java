@@ -120,13 +120,11 @@ public class AuthController {
         UserEntity userEntity = userEntityOpt.get();
         
         // Determine the POS to use for login
-        PosEntity pos = null;
-        
-        if (!userEntity.isSuperAdmin()) {
-            // Non-superAdmin: use the POS assigned to the user
-            pos = userEntity.getPos();
-        }
-        // SuperAdmin logs in without POS context (can access everything)
+        // Always use the POS assigned to the user, even for superAdmin.
+        // SuperAdmin data-access privileges come from the `superAdmin` JWT claim,
+        // not from the absence of posId. Having posId in the JWT allows a superAdmin
+        // assigned to a terminal to use the POS UI (open/close caisse, etc.).
+        PosEntity pos = userEntity.getPos();
         
         // Check if user is active
         if (!userEntity.isActive()) {
@@ -148,7 +146,7 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(payload.getUsernameOrEmail());
 
-        // Pass POS info to JWT generation (null for superAdmin without POS)
+        // Pass POS info to JWT generation
         Integer posId = pos != null ? pos.getId() : null;
         String posCode = pos != null ? pos.getCode() : null;
         final String jwt = jwtService.generateToken(userDetails, posId, posCode, userEntity.isSuperAdmin());

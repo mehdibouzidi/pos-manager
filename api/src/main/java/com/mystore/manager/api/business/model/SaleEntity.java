@@ -30,6 +30,10 @@ public class SaleEntity extends AbstractBusinessAudit {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "caisse_session_fk")
+    private CaisseSessionEntity caisseSession;
+
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SaleItemEntity> items = new ArrayList<>();
 }

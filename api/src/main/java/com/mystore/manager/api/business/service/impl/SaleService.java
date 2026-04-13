@@ -1,11 +1,13 @@
 package com.mystore.manager.api.business.service.impl;
 
 import com.mystore.manager.api.business.common.mapper.SaleMapper;
+import com.mystore.manager.api.business.model.CaisseSessionEntity;
 import com.mystore.manager.api.business.model.SaleEntity;
 import com.mystore.manager.api.business.model.SaleItemEntity;
 import com.mystore.manager.api.business.payload.SaleItemPayload;
 import com.mystore.manager.api.business.payload.SalePayload;
 import com.mystore.manager.api.business.payload.StockMovementPayload;
+import com.mystore.manager.api.business.repository.CaisseSessionRepository;
 import com.mystore.manager.api.business.repository.ProductRepository;
 import com.mystore.manager.api.business.repository.SaleItemRepository;
 import com.mystore.manager.api.business.repository.SaleRepository;
@@ -30,18 +32,21 @@ public class SaleService implements ISaleService {
     private final ProductRepository productRepository;
     private final SaleMapper saleMapper;
     private final IStockMovementService stockMovementService;
+    private final CaisseSessionRepository caisseSessionRepository;
 
     @Autowired
     public SaleService(SaleRepository saleRepository,
                        SaleItemRepository saleItemRepository,
                        ProductRepository productRepository,
                        SaleMapper saleMapper,
-                       IStockMovementService stockMovementService) {
+                       IStockMovementService stockMovementService,
+                       CaisseSessionRepository caisseSessionRepository) {
         this.saleRepository = saleRepository;
         this.saleItemRepository = saleItemRepository;
         this.productRepository = productRepository;
         this.saleMapper = saleMapper;
         this.stockMovementService = stockMovementService;
+        this.caisseSessionRepository = caisseSessionRepository;
     }
 
     @Override
@@ -65,6 +70,13 @@ public class SaleService implements ISaleService {
         if (sale.getPaymentMethod() == null) {
             sale.setPaymentMethod("CASH");
         }
+
+        // Attach to the currently open caisse session
+        if (posId != null) {
+            caisseSessionRepository.findByPos_IdAndStatus(posId, "OPEN")
+                    .ifPresent(sale::setCaisseSession);
+        }
+
         sale = saleRepository.save(sale);
 
         // Process items

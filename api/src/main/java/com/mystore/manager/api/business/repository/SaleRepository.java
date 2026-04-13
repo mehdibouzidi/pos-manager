@@ -33,4 +33,7 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Integer> {
             @Param("from") Instant from,
             @Param("to") Instant to
     );
+
+    @Query("SELECT COALESCE(SUM(s.totalAmount), 0.0), COUNT(s.id) FROM SaleEntity s WHERE s.caisseSession.id = :sessionId")
+    List<Object[]> findSalesTotalsBySession(@Param("sessionId") Integer sessionId);
 }
