@@ -31,6 +31,11 @@ export class CartService {
     const existingIndex = currentItems.findIndex(item => item.product.id === product.id);
 
     if (existingIndex >= 0) {
+      const existing = currentItems[existingIndex];
+      if (existing.quantity >= (product.currentStock ?? 0)) {
+        this.showSnack(`Stock insuffisant pour "${product.name}"`);
+        return;
+      }
       const updatedItems = [...currentItems];
       updatedItems[existingIndex] = {
         ...updatedItems[existingIndex],
@@ -52,6 +57,11 @@ export class CartService {
       return;
     }
 
+    const item = this._items().find(i => i.product.id === productId);
+    if (item && quantity > (item.product.currentStock ?? 0)) {
+      quantity = item.product.currentStock ?? 0;
+    }
+
     const updatedItems = this._items().map(item => 
       item.product.id === productId 
         ? { ...item, quantity } 
@@ -63,6 +73,10 @@ export class CartService {
   incrementQuantity(productId: number): void {
     const item = this._items().find(i => i.product.id === productId);
     if (item) {
+      if (item.quantity >= (item.product.currentStock ?? 0)) {
+        this.showSnack(`Stock insuffisant pour "${item.product.name}"`);
+        return;
+      }
       this.updateQuantity(productId, item.quantity + 1);
     }
   }

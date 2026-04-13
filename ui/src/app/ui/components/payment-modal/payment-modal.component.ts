@@ -1,9 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { forkJoin } from 'rxjs';
 import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
-import { StockMovementService } from '../../../../backend/service/business/stock-movement.service';
+import { SaleService, SaleRequest } from '../../../../backend/service/business/sale.service';
 
 @Component({
   selector: 'app-payment-modal',
@@ -219,31 +218,43 @@ import { StockMovementService } from '../../../../backend/service/business/stock
 export class PaymentModalComponent {
   cartService = inject(CartService);
   private menuService = inject(MenuService);
-  private stockMovementService = inject(StockMovementService);
+  private saleService = inject(SaleService);
+  private logoBase64 = '';
+
+  constructor() {
+    fetch('assets/logo/logoElAfia.png')
+      .then(r => r.blob())
+      .then(blob => new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      }))
+      .then(b64 => this.logoBase64 = b64)
+      .catch(() => {});
+  }
 
   confirmAndPrint(): void {
-    const orderNumber = Math.floor(Math.random() * 9000) + 1000;
     const now = new Date();
     const items = this.cartService.items();
     const total = this.cartService.total();
 
-    const movementDate = now.toISOString();
-    const saleRequests = items.map(item =>
-      this.stockMovementService.add({
+    const saleRequest: SaleRequest = {
+      totalAmount: total,
+      paymentMethod: 'CASH',
+      items: items.map(item => ({
         productId: item.product.id,
-        movementType: 'SALE',
         quantity: item.quantity,
-        movementDate
-      })
-    );
+        unitPrice: item.product.retailPrice
+      }))
+    };
 
-    forkJoin(saleRequests).subscribe({
-      next: () => {
+    this.saleService.add(saleRequest).subscribe({
+      next: (response) => {
         this.menuService.reloadProducts();
         this.cartService.showSnack('Vente effectuée avec succès !');
-        this.printAndClose(orderNumber, now, items, total);
+        this.printAndClose(response.orderNumber, now, items, total);
       },
-      error: () => this.printAndClose(orderNumber, now, items, total)
+      error: () => this.printAndClose(0, now, items, total)
     });
   }
 
@@ -346,10 +357,8 @@ export class PaymentModalComponent {
 <body>
   <div class="ticket">
     <div class="header">
-      <div class="logo">&#127829;</div>
-      <div class="store-name">FOODGO KIOSK</div>
-      <div class="store-info">123 Rue de la Nourriture</div>
-      <div class="store-info">Tél : (555) 123-4567</div>
+      ${this.logoBase64 ? `<img src="${this.logoBase64}" style="width:60px;height:60px;object-fit:contain;margin-bottom:4px;" alt="Logo">` : ''}
+      <div class="store-name">SARL El Afia</div>
     </div>
 
     <div class="order-info">

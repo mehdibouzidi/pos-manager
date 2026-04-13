@@ -47,6 +47,8 @@ export class AddStockMovementComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.initForm();
+    this.generalForm.get('productId')!.valueChanges.subscribe(() => this.updateQuantityValidator());
+    this.generalForm.get('movementType')!.valueChanges.subscribe(() => this.updateQuantityValidator());
   }
 
   loadProducts() {
@@ -59,6 +61,23 @@ export class AddStockMovementComponent implements OnInit {
   }
 
   get f() { return this.generalForm.controls; }
+
+  get selectedProduct(): ProductPayload | null {
+    const id = this.f['productId'].value;
+    return this.products.find(p => p.id === id) ?? null;
+  }
+
+  updateQuantityValidator(): void {
+    const quantityCtrl = this.generalForm.get('quantity')!;
+    const type = this.f['movementType'].value;
+    const product = this.selectedProduct;
+    const validators = [Validators.required, Validators.min(0.01)];
+    if (type === 'LOSS' && product) {
+      validators.push(Validators.max(product.currentStock));
+    }
+    quantityCtrl.setValidators(validators);
+    quantityCtrl.updateValueAndValidity();
+  }
 
   close(): void {
     this.dialogRef.close();

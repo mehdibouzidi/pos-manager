@@ -34,6 +34,7 @@
       <input matInput type="number" formControlName="quantity" placeholder="0.00" />
       <mat-error *ngIf="f['quantity'].hasError('required')">La quantité est obligatoire</mat-error>
       <mat-error *ngIf="f['quantity'].hasError('min')">La quantité doit être supérieure à 0</mat-error>
+      <mat-error *ngIf="f['quantity'].hasError('max')">La quantité dépasse le stock disponible ({{ selectedProduct?.currentStock }})</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">

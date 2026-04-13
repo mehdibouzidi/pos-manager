@@ -30,5 +30,8 @@ public class PrivilegeConstants {
     public static final String STOCK_MOVEMENT_UPDATE = "STOCK_MOVEMENT_UPDATE";
     public static final String STOCK_MOVEMENT_DELETE = "STOCK_MOVEMENT_DELETE";
 
+    public static final String SALE_READ = "SALE_READ";
+    public static final String SALE_CREATE = "SALE_CREATE";
+
     public static final String DASHBOARD_READ = "DASHBOARD_READ";
 }

@@ -149,6 +149,10 @@ public class SecurityConfig {
             auth.requestMatchers(HttpMethod.GET, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(STOCK_MOVEMENT_READ, ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + STOCK_MOVEMENT_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(STOCK_MOVEMENT_READ, ADMIN);
 
+            // SaleController
+            auth.requestMatchers(HttpMethod.POST, SLASH + SALE_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(SALE_CREATE, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + SALE_CONTROLLER + ID_PARAM).hasAnyAuthority(SALE_READ, ADMIN);
+
             // DashboardController
             auth.requestMatchers(HttpMethod.GET, SLASH + DASHBOARD_CONTROLLER + "/stats").hasAnyAuthority(DASHBOARD_READ, ADMIN);
 

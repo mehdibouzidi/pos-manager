@@ -15,6 +15,10 @@ public class BusinessConstants {
     public static final String STOCK_MOVEMENT_TABLE = "data_stock_movement";
     public static final String STOCK_MOVEMENT_CONTROLLER = "stock-movement";
 
+    public static final String SALE_TABLE = "data_sale";
+    public static final String SALE_ITEM_TABLE = "data_sale_item";
+    public static final String SALE_CONTROLLER = "sale";
+
     public static final String DASHBOARD_CONTROLLER = "dashboard";
 
 }

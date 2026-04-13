@@ -67,5 +67,9 @@ export class RequestsConstants{
     //STOCK MOVEMENT
      static readonly STOCK_MOVEMENT_REQ = RequestsConstants.API_SOURCE + BusinessConstants.STOCK_MOVEMENT;
      static readonly STOCK_MOVEMENT_ADD_REQ = RequestsConstants.STOCK_MOVEMENT_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+
+    //SALE
+     static readonly SALE_REQ = RequestsConstants.API_SOURCE + BusinessConstants.SALE;
+     static readonly SALE_ADD_REQ = RequestsConstants.SALE_REQ + UtilStatic.SLASH + UtilStatic.ADD;
 }
 

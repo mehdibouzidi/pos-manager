@@ -67,6 +67,9 @@ export class RequestsLists{
 
         //STOCK MOVEMENT
         new Request(RequestsLists.POST, RequestsConstants.STOCK_MOVEMENT_ADD_REQ),
+
+        //SALE
+        new Request(RequestsLists.POST, RequestsConstants.SALE_ADD_REQ),
     ];
 
 

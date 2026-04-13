@@ -51,6 +51,8 @@
     <include file="db/changelog/sql/V2047_add_current_stock_to_product.sql"/>
     <!-- Create data_stock_movement table -->
     <include file="db/changelog/sql/V2048_create_stock_movements_table.sql"/>
+    <include file="db/changelog/sql/V2049_create_sale_tables.sql"/>
+    <include file="db/changelog/sql/V2050_insert_sale_privileges.sql"/>
 
 </databaseChangeLog>
     
