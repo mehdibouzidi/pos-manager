@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elafia-api-deployment
+  labels:
+    app: elafia-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elafia-api
+  template:
+    metadata:
+      labels:
+        app: elafia-api
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      containers:
+      - name: elafia-api
+        image: ghcr.io/mehdibouzidi/elafia:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "-Xmx400m -Xms400m"
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: datasource-url
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: datasource-username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: datasource-password
+        - name: AI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secret
+              key: AI_API_KEY
+        - name: APP_RSA_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-secret
+              key: APP_RSA_PRIVATE_KEY
+        resources:
+          limits:
+            cpu: 400m
+            memory: 800Mi
+          requests:
+            cpu: 400m
+            memory: 800Mi
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%

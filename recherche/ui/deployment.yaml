@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elafia-manager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elafia-manager
+  template:
+    metadata:
+      labels:
+        app: elafia-manager
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      containers:
+      - name: elafia-managers
+        image: ghcr.io/mehdibouzidi/elafia-ui:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 50m
+            memory: 64Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%

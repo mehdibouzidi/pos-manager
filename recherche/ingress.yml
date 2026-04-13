@@ -1,0 +1,98 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: elafia-ingress
+  namespace: app-dev
+  uid: 3dd3ddd0-15d3-4c07-b86b-20b73208f855
+  resourceVersion: '24428060'
+  generation: 3
+  creationTimestamp: '2025-02-02T22:59:33Z'
+  labels:
+    k8slens-edit-resource-version: v1
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubectl.kubernetes.io/last-applied-configuration: >
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/force-ssl-redirect":"true","nginx.ingress.kubernetes.io/use-regex":"true"},"name":"elafia-ingress","namespace":"app-dev"},"spec":{"ingressClassName":"nginx","rules":[{"host":"elafia-manager.com","http":{"paths":[{"backend":{"service":{"name":"elafia-manager-service","port":{"number":80}}},"path":"/(.*)","pathType":"ImplementationSpecific"}]}},{"host":"www.elafia-manager.com","http":{"paths":[{"backend":{"service":{"name":"elafia-manager-service","port":{"number":80}}},"path":"/(.*)","pathType":"ImplementationSpecific"}]}},{"host":"api.elafia-manager.com","http":{"paths":[{"backend":{"service":{"name":"elafia-api-service","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["elafia-manager.com","www.elafia-manager.com","api.elafia-manager.com"],"secretName":"my-tls-secret"}]}}
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '600'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '600'
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+  selfLink: /apis/networking.k8s.io/v1/namespaces/app-dev/ingresses/elafia-ingress
+status:
+  loadBalancer:
+    ingress:
+    - ip: 172.232.48.54
+      hostname: 172-232-48-54.ip.linodeusercontent.com
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - mystore-manager.com
+    - www.mystore-manager.com
+    - api.mystore-manager.com
+    - elafia-manager.com
+    - www.elafia-manager.com
+    - api.elafia-manager.com
+    secretName: my-tls-secret
+  rules:
+  - host: mystore-manager.com
+    http:
+      paths:
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: mystore-manager-service
+            port:
+              number: 80
+  - host: www.mystore-manager.com
+    http:
+      paths:
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: mystore-manager-service
+            port:
+              number: 80
+  - host: api.mystore-manager.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mystore-api-service
+            port:
+              number: 80
+  - host: elafia-manager.com
+    http:
+      paths:
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: elafia-manager-service
+            port:
+              number: 80
+  - host: www.elafia-manager.com
+    http:
+      paths:
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: elafia-manager-service
+            port:
+              number: 80
+  - host: api.elafia-manager.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: elafia-api-service
+            port:
+              number: 80

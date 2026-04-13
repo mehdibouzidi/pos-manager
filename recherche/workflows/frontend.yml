@@ -1,0 +1,81 @@
+name: Build and Push Frontend
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.CI_CD }}
+
+    - name: Compute versions
+      id: version
+      run: |
+        FULL_VERSION=$(node -p "require('./ui/package.json').version")
+        RELEASE_VERSION=${FULL_VERSION%-SNAPSHOT}
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$RELEASE_VERSION"
+        NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))-SNAPSHOT"
+        echo "release_version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+        echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Set release version in package.json
+      run: |
+        node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('ui/package.json'));
+          pkg.version = '${{ steps.version.outputs.release_version }}';
+          fs.writeFileSync('ui/package.json', JSON.stringify(pkg, null, 2) + '\\n');
+        "
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: mehdibouzidi
+        password: ${{ secrets.CI_CD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./ui
+        push: true
+        tags: ghcr.io/mehdibouzidi/elafia-ui:${{ steps.version.outputs.release_version }}
+        build-args: APP_VERSION=${{ steps.version.outputs.release_version }}
+
+    - name: Deploy to Kubernetes
+      env:
+        KUBECONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
+      run: |
+        mkdir -p ~/.kube
+        echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
+        kubectl set image deployment/elafia-manager-deployment elafia-managers=ghcr.io/mehdibouzidi/elafia-ui:${{ steps.version.outputs.release_version }}
+        kubectl rollout status deployment/elafia-manager-deployment
+
+    - name: Increment to next SNAPSHOT in package.json
+      run: |
+        node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('ui/package.json'));
+          pkg.version = '${{ steps.version.outputs.next_version }}';
+          fs.writeFileSync('ui/package.json', JSON.stringify(pkg, null, 2) + '\\n');
+        "
+
+    - name: Commit and push
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add ui/package.json
+        git commit -m "release(UI): ${{ steps.version.outputs.release_version }} → increment to ${{ steps.version.outputs.next_version }}"
+        git tag v${{ steps.version.outputs.release_version }}-ui
+        git pull --rebase
+        git push
+        git push --tags
