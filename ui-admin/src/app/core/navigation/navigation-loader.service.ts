@@ -94,6 +94,15 @@ export class NavigationLoaderService {
             icon: 'mat:warehouse',
             routerLinkActiveOptions: { exact: true },
             visible: this.authService.hasRoles(Array.of(AdminConstants.PRODUCT_READ, AdminConstants.ADMIN))
+          },
+          {
+            type: 'link',
+            label: 'Clôtures de Caisse',
+            route: '/caisse-sessions',
+            staticRoute: '/caisse-sessions',
+            icon: 'mat:lock_clock',
+            routerLinkActiveOptions: { exact: true },
+            visible: this.authService.hasRoles(Array.of(AdminConstants.CAISSE_SESSION_READ, AdminConstants.ADMIN))
           }
         ]
       },

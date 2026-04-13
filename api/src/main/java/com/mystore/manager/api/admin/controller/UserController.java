@@ -49,7 +49,7 @@ public class UserController {
     public ResponseEntity<UserPayload> editUser(
             @RequestPart(value="picture", required = false) MultipartFile picture,
             @RequestPart("user") UserPayload UserPayload,
-            @RequestHeader(name= HttpHeaders.AUTHORIZATION) String token
+            @RequestHeader(name= HttpHeaders.AUTHORIZATION, required = false) String token
     ){
         UserPayload.setPictureIn(picture);
         try {
@@ -64,7 +64,7 @@ public class UserController {
     @PutMapping(path = RESET_PASSWORD_EP, consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> changePassword(
             @RequestBody ChangePasswordPayload payload,
-            @RequestHeader(name= HttpHeaders.AUTHORIZATION) String token
+            @RequestHeader(name= HttpHeaders.AUTHORIZATION, required = false) String token
     ){
         try {
             return new ResponseEntity(userService.changePassword(payload,token), HttpStatus.OK);

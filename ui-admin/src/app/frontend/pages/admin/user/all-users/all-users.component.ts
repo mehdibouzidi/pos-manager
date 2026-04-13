@@ -199,6 +199,12 @@ export class AllUsersComponent {
       visible: true
     },
     {
+      label: 'Point de Vente',
+      property: 'posName',
+      type: 'text',
+      visible: true
+    },
+    {
       label: 'Actif',
       property: 'active',
       type: 'boolean',

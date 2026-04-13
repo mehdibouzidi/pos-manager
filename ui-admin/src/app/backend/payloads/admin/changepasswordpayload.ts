@@ -1,8 +1,8 @@
 
 export class ChangePasswordPayload{
-    oldPassword: string;
-    newPassword: string;
-    newPasswordConfirmed: string;
+    oldPassword: string | null;
+    newPassword: string | null;
+    newPasswordConfirmed: string | null;
     
     constructor(){
         this.oldPassword = null;

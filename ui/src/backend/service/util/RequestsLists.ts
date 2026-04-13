@@ -70,6 +70,12 @@ export class RequestsLists{
 
         //SALE
         new Request(RequestsLists.POST, RequestsConstants.SALE_ADD_REQ),
+
+        //CAISSE SESSION
+        new Request(RequestsLists.POST, RequestsConstants.CAISSE_SESSION_OPEN_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.CAISSE_SESSION_CLOSE_REQ),
+        new Request(RequestsLists.GET, RequestsConstants.CAISSE_SESSION_CURRENT_REQ),
+        new Request(RequestsLists.POST, RequestsConstants.CAISSE_SESSION_FINDALL_CRITERIA_REQ),
     ];
 
 

@@ -19,6 +19,9 @@ public class BusinessConstants {
     public static final String SALE_ITEM_TABLE = "data_sale_item";
     public static final String SALE_CONTROLLER = "sale";
 
+    public static final String CAISSE_SESSION_TABLE = "data_caisse_session";
+    public static final String CAISSE_SESSION_CONTROLLER = "caisse-session";
+
     public static final String DASHBOARD_CONTROLLER = "dashboard";
 
 }

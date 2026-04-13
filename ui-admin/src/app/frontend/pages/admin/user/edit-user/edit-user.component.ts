@@ -125,16 +125,7 @@ export class EditUserComponent {
     this.f['superAdmin'].setValue(this.payload.superAdmin || false);
     this.userProfils = this.payload.profils;
     this.dataSource.data = this.userProfils;
-    
-    // Set pos if exists
-    if (this.payload.storeId) {
-      this.selectedPos = {
-        id: this.payload.storeId,
-        code: this.payload.storeCode,
-        name: this.payload.storeName
-      } as PosPayload;
-      this.posControl.setValue(this.selectedPos);
-    }
+    // POS is set after filteredPoses is ready in initData()
   }
 
   edit(): void {
@@ -150,8 +141,8 @@ export class EditUserComponent {
     
     // Add pos info
     if (this.selectedPos) {
-      this.payload.storeId = this.selectedPos.id;
-      this.payload.storeCode = this.selectedPos.code;
+      this.payload.posId = this.selectedPos.id;
+      this.payload.posCode = this.selectedPos.code;
     }
     
     // Super admin flag
@@ -160,7 +151,7 @@ export class EditUserComponent {
     this.service.edit(this.payload).subscribe({
       next: (response: ProfilPayload) => {
         if (response != null) {
-          this.router.navigate(['user']);
+          this.router.navigate(['/user']);
         }
       },
       error: (e) => {
@@ -201,6 +192,14 @@ export class EditUserComponent {
               name ? this._filterPoses(name) : this.poses.slice()
             )
           );
+          // Set the value AFTER filteredPoses is ready so displayWith renders correctly
+          if (this.payload.posId) {
+            const match = this.poses.find(p => p.id === this.payload.posId);
+            if (match) {
+              this.selectedPos = match;
+              this.posControl.setValue(match);
+            }
+          }
         }
       },
       error: () => {}
@@ -312,10 +311,6 @@ export class EditUserComponent {
       this.profil = value;
     });
 
-    this.categoryControl.valueChanges.subscribe((value) => {
-      this.generalForm.get('category').setValue(value);
-    });
-    
     this.posControl.valueChanges.subscribe((value) => {
       if (value && typeof value === 'object') {
         this.selectedPos = value;

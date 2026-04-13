@@ -37,8 +37,8 @@
                     <div class="flex flex-col sm:flex-row sm:gap-4">
                         <mat-form-field class="flex-auto">
                             <mat-label>Magasin</mat-label>
-                            <input matInput [value]="payload.storeCode ? payload.storeCode + ' | ' + payload.storeName : 'Aucun magasin'" readonly>
-                            <mat-hint *ngIf="!payload.storeId && !payload.superAdmin" class="text-orange-600">Cet utilisateur n'a pas de magasin assigné</mat-hint>
+                            <input matInput [value]="payload.posCode ? payload.posCode + ' | ' + payload.posName : 'Aucun magasin'" readonly>
+                            <mat-hint *ngIf="!payload.posId && !payload.superAdmin" class="text-orange-600">Cet utilisateur n'a pas de magasin assigné</mat-hint>
                         </mat-form-field>
                     </div>
                     

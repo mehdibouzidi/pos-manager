@@ -6,6 +6,7 @@ import { UserService } from '../../../../backend/service/admin/user.service';
 import { AuthService } from '../../../../backend/service/admin/auth.service';
 import { ChangePasswordPayload } from '../../../../backend/payloads/admin/changepasswordpayload';
 import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
+import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
 
 @Component({
   selector: 'app-topbar',
@@ -15,17 +16,30 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
     <header class="topbar">
       <div class="topbar-left">
         <span class="app-name">POS Manager</span>
+        @if (posName) {
+          <span class="topbar-left-divider"></span>
+          <span class="store-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            {{ posName }}
+          </span>
+        }
       </div>
 
       <div class="topbar-right" #menuAnchor>
+
+        @if (caisseSessionService.currentSession()) {
+          <button class="close-caisse-btn" (click)="closeSession()">
+            <span class="close-caisse-dot"></span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+            Clôturer la caisse
+          </button>
+          <div class="topbar-divider"></div>
+        }
+
         <div class="user-info">
-          @if (posName) {
-            <span class="store-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              {{ posName }}
-            </span>
-            <span class="separator"></span>
-          }
           <span class="username">{{ fullName }}</span>
         </div>
 
@@ -133,6 +147,13 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
       letter-spacing: 0.5px;
     }
 
+    .topbar-left-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--border-color);
+      flex-shrink: 0;
+    }
+
     .topbar-right {
       display: flex;
       align-items: center;
@@ -180,10 +201,48 @@ import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
       white-space: nowrap;
     }
 
-    .separator {
+    /* ── Close caisse button ─────────────────────────── */
+    .close-caisse-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 18px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: #dc2626;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      transition: background 0.15s, box-shadow 0.15s;
+      box-shadow: 0 1px 4px rgba(220, 38, 38, 0.35);
+    }
+
+    .close-caisse-btn:hover {
+      background: #b91c1c;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+    }
+
+    .close-caisse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+
+    .topbar-divider {
       width: 1px;
-      height: 18px;
+      height: 24px;
       background: var(--border-color);
+      flex-shrink: 0;
     }
 
     /* ── Menu button (3 dots) ────────────────────────── */
@@ -425,6 +484,7 @@ export class TopbarComponent {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private elRef = inject(ElementRef);
+  caisseSessionService = inject(CaisseSessionService);
 
   menuOpen = signal(false);
   showModal = signal(false);
@@ -505,6 +565,11 @@ export class TopbarComponent {
   logout() {
     this.menuOpen.set(false);
     this.authService.logout();
+  }
+
+  closeSession(): void {
+    this.menuOpen.set(false);
+    this.caisseSessionService.showCloseModal();
   }
 
   @HostListener('document:click', ['$event'])

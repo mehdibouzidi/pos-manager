@@ -71,5 +71,12 @@ export class RequestsConstants{
     //SALE
      static readonly SALE_REQ = RequestsConstants.API_SOURCE + BusinessConstants.SALE;
      static readonly SALE_ADD_REQ = RequestsConstants.SALE_REQ + UtilStatic.SLASH + UtilStatic.ADD;
+
+    //CAISSE SESSION
+     static readonly CAISSE_SESSION_REQ = RequestsConstants.API_SOURCE + BusinessConstants.CAISSE_SESSION;
+     static readonly CAISSE_SESSION_OPEN_REQ = RequestsConstants.CAISSE_SESSION_REQ + '/open';
+     static readonly CAISSE_SESSION_CLOSE_REQ = RequestsConstants.CAISSE_SESSION_REQ + '/close';
+     static readonly CAISSE_SESSION_CURRENT_REQ = RequestsConstants.CAISSE_SESSION_REQ + '/current';
+     static readonly CAISSE_SESSION_FINDALL_CRITERIA_REQ = RequestsConstants.CAISSE_SESSION_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
 }
 

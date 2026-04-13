@@ -89,4 +89,8 @@ export class RequestsConstants {
     // BUSINESS - Dashboard
     static readonly DASHBOARD_REQ = RequestsConstants.API_SOURCE + BusinessConstants.DASHBOARD;
     static readonly DASHBOARD_STATS_REQ = RequestsConstants.DASHBOARD_REQ + '/stats';
+
+    // BUSINESS - Caisse Session
+    static readonly CAISSE_SESSION_REQ = RequestsConstants.API_SOURCE + BusinessConstants.CAISSE_SESSION;
+    static readonly CAISSE_SESSION_FINDALL_CRITERIA_REQ = RequestsConstants.CAISSE_SESSION_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
 }

@@ -1,39 +1,24 @@
-import { AsyncPipe, CommonModule, NgFor, NgIf } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatCommonModule, MatOptionModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef
-} from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTableModule } from '@angular/material/table';
+import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
+import { stagger40ms } from '@vex/animations/stagger.animation';
 import { VexBreadcrumbsComponent } from '@vex/components/vex-breadcrumbs/vex-breadcrumbs.component';
 import { VexSecondaryToolbarComponent } from '@vex/components/vex-secondary-toolbar/vex-secondary-toolbar.component';
 import { ChangePasswordPayload } from 'src/app/backend/payloads/admin/changepasswordpayload';
-import { PrivilegePayload } from 'src/app/backend/payloads/admin/privilegepayload';
 import { AuthService } from 'src/app/backend/service/admin/auth.service';
-import { PrivilegeService } from 'src/app/backend/service/admin/privilege.service';
 import { UserService } from 'src/app/backend/service/admin/user.service';
 
 @Component({
@@ -41,6 +26,7 @@ import { UserService } from 'src/app/backend/service/admin/user.service';
   standalone: true,
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss',
+  animations: [fadeInUp400ms, stagger40ms],
   imports: [
     VexSecondaryToolbarComponent,
     VexBreadcrumbsComponent,
@@ -51,16 +37,7 @@ import { UserService } from 'src/app/backend/service/admin/user.service';
     MatSelectModule,
     MatOptionModule,
     NgIf,
-    ReactiveFormsModule,
-    MatAutocompleteModule,
-    NgFor,
-    MatDatepickerModule,
-    MatSliderModule,
-    MatRadioModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
-    AsyncPipe,
-    MatTableModule
+    ReactiveFormsModule
   ]
 })
 export class ChangePasswordComponent {

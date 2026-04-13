@@ -89,5 +89,8 @@ export class RequestsLists {
 
         // BUSINESS - Dashboard
         new Request(RequestsLists.GET, RequestsConstants.DASHBOARD_STATS_REQ),
+
+        // BUSINESS - Caisse Session
+        new Request(RequestsLists.POST, RequestsConstants.CAISSE_SESSION_FINDALL_CRITERIA_REQ),
     ];
 }

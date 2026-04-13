@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SidebarComponent } from '../ui/components/sidebar/sidebar.component';
 import { ProductGridComponent } from '../ui/components/product-grid/product-grid.component';
 import { CartButtonComponent } from '../ui/components/cart-button/cart-button.component';
 import { CartSidebarComponent } from '../ui/components/cart-sidebar/cart-sidebar.component';
 import { PaymentModalComponent } from '../ui/components/payment-modal/payment-modal.component';
 import { TopbarComponent } from '../ui/components/topbar/topbar.component';
+import { OpenCaisseModalComponent } from '../ui/components/open-caisse-modal/open-caisse-modal.component';
+import { CloseCaisseModalComponent } from '../ui/components/close-caisse-modal/close-caisse-modal.component';
+import { CaisseSessionService } from '../../backend/service/business/caisse-session.service';
 
 @Component({
   selector: 'app-pos',
@@ -15,7 +18,9 @@ import { TopbarComponent } from '../ui/components/topbar/topbar.component';
     ProductGridComponent,
     CartButtonComponent,
     CartSidebarComponent,
-    PaymentModalComponent
+    PaymentModalComponent,
+    OpenCaisseModalComponent,
+    CloseCaisseModalComponent
   ],
   template: `
     <div class="page-wrapper">
@@ -30,6 +35,8 @@ import { TopbarComponent } from '../ui/components/topbar/topbar.component';
     <app-cart-button />
     <app-cart-sidebar />
     <app-payment-modal />
+    <app-open-caisse-modal />
+    <app-close-caisse-modal />
   `,
   styles: [`
     .page-wrapper {
@@ -54,4 +61,24 @@ import { TopbarComponent } from '../ui/components/topbar/topbar.component';
     }
   `]
 })
-export class PosComponent {}
+export class PosComponent implements OnInit {
+  private caisseSessionService = inject(CaisseSessionService);
+
+  ngOnInit(): void {
+    this.caisseSessionService.getCurrent().subscribe({
+      next: (session) => {
+        if (session) {
+          this.caisseSessionService.setCurrentSession(session);
+        } else {
+          this.caisseSessionService.setCurrentSession(null);
+          this.caisseSessionService.showOpenModal();
+        }
+      },
+      error: () => {
+        this.caisseSessionService.setCurrentSession(null);
+        this.caisseSessionService.showOpenModal();
+      }
+    });
+  }
+}
+

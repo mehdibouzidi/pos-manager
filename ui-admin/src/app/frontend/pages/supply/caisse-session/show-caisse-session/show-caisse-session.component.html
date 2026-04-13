@@ -1,0 +1,82 @@
+<div mat-dialog-title class="flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <mat-icon svgIcon="mat:point_of_sale" class="text-primary"></mat-icon>
+    <span>Détail de la Session de Caisse</span>
+  </div>
+  <button mat-icon-button type="button" (click)="close()">
+    <mat-icon svgIcon="mat:close"></mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="flex flex-col gap-4 pt-4">
+  <div class="grid grid-cols-1 gap-4">
+
+    <!-- Terminal & Statut -->
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Terminal</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Code</span>
+        <span class="font-medium">{{ element.posCode }}</span>
+        <span class="text-secondary">Nom</span>
+        <span class="font-medium">{{ element.posName }}</span>
+        <span class="text-secondary">Caissier</span>
+        <span class="font-medium">{{ element.createdByFullName }}</span>
+        <span class="text-secondary">Statut</span>
+        <span class="text-xs font-semibold px-2 py-1 rounded-full w-fit" [ngClass]="getStatusClass(element.status)">
+          {{ getStatusLabel(element.status) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Horaires -->
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Horaires</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Ouverture</span>
+        <span class="font-medium">{{ element.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="text-secondary">Clôture</span>
+        <span class="font-medium">{{ element.closedAt ? (element.closedAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+      </div>
+    </div>
+
+    <!-- Finances -->
+    <div class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Finances</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <span class="text-secondary">Fond d'ouverture</span>
+        <span class="font-medium">{{ element.openingBalance | number:'1.2-2' }}</span>
+        <span class="text-secondary">Total des ventes</span>
+        <span class="font-medium">{{ element.totalSalesAmount | number:'1.2-2' }}</span>
+        <span class="text-secondary">Nb de commandes</span>
+        <span class="font-medium">{{ element.totalSalesCount }}</span>
+        <span class="text-secondary">Plage de commandes</span>
+        <span class="font-mono text-xs font-medium">
+          <ng-container *ngIf="element.firstOrderNumber; else noOrders">
+            #{{ element.firstOrderNumber }} → #{{ element.lastOrderNumber }}
+          </ng-container>
+          <ng-template #noOrders>—</ng-template>
+        </span>
+        <span class="text-secondary">Solde attendu</span>
+        <span class="font-medium">{{ (element.openingBalance + element.totalSalesAmount) | number:'1.2-2' }}</span>
+        <span class="text-secondary">Montant compté</span>
+        <span class="font-medium">{{ element.closingBalance != null ? (element.closingBalance | number:'1.2-2') : '—' }}</span>
+        <span class="text-secondary">Écart</span>
+        <span *ngIf="element.variance != null" class="font-semibold" [ngClass]="getVarianceClass(element.variance)">
+          {{ element.variance >= 0 ? '+' : '' }}{{ element.variance | number:'1.2-2' }}
+        </span>
+        <span *ngIf="element.variance == null">—</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-gray-50 rounded-lg p-4" *ngIf="element.notes">
+      <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Notes</h3>
+      <p class="text-sm">{{ element.notes }}</p>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Fermer</button>
+</mat-dialog-actions>

@@ -33,5 +33,9 @@ public class PrivilegeConstants {
     public static final String SALE_READ = "SALE_READ";
     public static final String SALE_CREATE = "SALE_CREATE";
 
+    public static final String CAISSE_SESSION_READ = "CAISSE_SESSION_READ";
+    public static final String CAISSE_SESSION_CREATE = "CAISSE_SESSION_CREATE";
+    public static final String CAISSE_SESSION_CLOSE = "CAISSE_SESSION_CLOSE";
+
     public static final String DASHBOARD_READ = "DASHBOARD_READ";
 }

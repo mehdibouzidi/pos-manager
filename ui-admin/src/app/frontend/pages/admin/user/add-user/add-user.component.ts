@@ -135,8 +135,8 @@ export class AddUserComponent {
     
     // Add pos info
     if (this.selectedPos) {
-      this.payload.storeId = this.selectedPos.id;
-      this.payload.storeCode = this.selectedPos.code;
+      this.payload.posId = this.selectedPos.id;
+      this.payload.posCode = this.selectedPos.code;
     }
     
     // Super admin flag
@@ -145,7 +145,7 @@ export class AddUserComponent {
     this.service.signin(this.payload).subscribe({
       next: (response: ProfilPayload) => {
         if (response != null) {
-          this.router.navigate(['user']);
+          this.router.navigate(['/user']);
         }
       },
       error: (e) => {
@@ -203,11 +203,17 @@ export class AddUserComponent {
   }
 
   ngOnInit(): void {
-    this.initData();
     this.initForm();
     this.setupTable();
     this.dataSource.data = this.userProfils;
+    // Initialize filteredPoses eagerly so the dropdown isn't undefined while loading
+    this.filteredPoses = this.posControl.valueChanges.pipe(
+      startWith(''),
+      map((value) => (typeof value === 'string' ? value : value?.name || '')),
+      map((name) => name ? this._filterPoses(name) : this.poses.slice())
+    );
     this.initObservables();
+    this.initData();
   }
 
   get f() {
@@ -295,10 +301,6 @@ export class AddUserComponent {
       this.profil = value;
     });
 
-    this.categoryControl.valueChanges.subscribe((value) => {
-      this.generalForm.get('category').setValue(value);
-    });
-    
     this.posControl.valueChanges.subscribe((value) => {
       if (value && typeof value === 'object') {
         this.selectedPos = value;

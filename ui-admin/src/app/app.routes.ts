@@ -26,6 +26,7 @@ import { AllStockMovementsComponent } from './frontend/pages/supply/stock-moveme
 import { CurrentStockComponent } from './frontend/pages/supply/current-stock/current-stock.component';
 import { DashboardComponent } from './frontend/pages/supply/dashboard/dashboard.component';
 import { AllSalesComponent } from './frontend/pages/supply/sale/all-sales/all-sales.component';
+import { AllCaisseSessionsComponent } from './frontend/pages/supply/caisse-session/all-caisse-sessions/all-caisse-sessions.component';
 
 export const appRoutes: VexRoutes = [
   {
@@ -120,8 +121,7 @@ export const appRoutes: VexRoutes = [
   {
     path: 'changepassword',
     component: ChangePasswordComponent,
-    canActivate: [authGuard],
-    data: { privileges: [AdminConstants.RESET_PASSWORD] }
+    canActivate: [authGuard]
   },
 
   // Admin - POS
@@ -196,5 +196,13 @@ export const appRoutes: VexRoutes = [
     component: AllSalesComponent,
     canActivate: [authGuard],
     data: { privileges: [AdminConstants.ADMIN, AdminConstants.STOCK_MOVEMENT_READ] }
+  },
+
+  // Stock - Caisse Sessions
+  {
+    path: 'caisse-sessions',
+    component: AllCaisseSessionsComponent,
+    canActivate: [authGuard],
+    data: { privileges: [AdminConstants.ADMIN, AdminConstants.CAISSE_SESSION_READ] }
   }
 ];

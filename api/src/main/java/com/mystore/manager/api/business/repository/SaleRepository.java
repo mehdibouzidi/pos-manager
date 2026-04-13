@@ -26,4 +26,11 @@ public interface SaleRepository extends JpaRepository<SaleEntity, Integer> {
             @Param("from") Instant from,
             @Param("to") Instant to
     );
+
+    @Query("SELECT COALESCE(SUM(s.totalAmount), 0.0), COUNT(s.id) FROM SaleEntity s WHERE s.pos.id = :posId AND s.saleDate >= :from AND s.saleDate < :to")
+    Object[] findSalesTotalsByPosAndDateBetween(
+            @Param("posId") Integer posId,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
 }

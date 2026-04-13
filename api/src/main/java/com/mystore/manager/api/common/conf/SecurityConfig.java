@@ -89,7 +89,7 @@ public class SecurityConfig {
 
             auth.requestMatchers(HttpMethod.POST, SLASH + USER_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.PUT, SLASH + USER_CONTROLLER + SLASH + UPDATE_EP).hasAnyAuthority(ADMIN);
-            auth.requestMatchers(HttpMethod.PUT, SLASH + USER_CONTROLLER + SLASH + RESET_PASSWORD_EP).hasAnyAuthority(RESET_PASSWORD);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + USER_CONTROLLER + SLASH + RESET_PASSWORD_EP).authenticated();
             auth.requestMatchers(HttpMethod.PUT, SLASH + USER_CONTROLLER + SLASH + DISABLE_EP).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.DELETE, SLASH + USER_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + USER_CONTROLLER + ID_PARAM).hasAnyAuthority(ADMIN);
@@ -152,6 +152,12 @@ public class SecurityConfig {
             // SaleController
             auth.requestMatchers(HttpMethod.POST, SLASH + SALE_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(SALE_CREATE, ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + SALE_CONTROLLER + ID_PARAM).hasAnyAuthority(SALE_READ, ADMIN);
+
+            // CaisseSessionController
+            auth.requestMatchers(HttpMethod.POST, SLASH + CAISSE_SESSION_CONTROLLER + "/open").hasAnyAuthority(CAISSE_SESSION_CREATE, ADMIN);
+            auth.requestMatchers(HttpMethod.PUT, SLASH + CAISSE_SESSION_CONTROLLER + "/close").hasAnyAuthority(CAISSE_SESSION_CLOSE, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + CAISSE_SESSION_CONTROLLER + "/current").hasAnyAuthority(CAISSE_SESSION_READ, CAISSE_SESSION_CREATE, CAISSE_SESSION_CLOSE, ADMIN);
+            auth.requestMatchers(HttpMethod.POST, SLASH + CAISSE_SESSION_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(CAISSE_SESSION_READ, ADMIN);
 
             // DashboardController
             auth.requestMatchers(HttpMethod.GET, SLASH + DASHBOARD_CONTROLLER + "/stats").hasAnyAuthority(DASHBOARD_READ, ADMIN);

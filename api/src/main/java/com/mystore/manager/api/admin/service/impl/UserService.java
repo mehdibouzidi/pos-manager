@@ -4,10 +4,12 @@ package com.mystore.manager.api.admin.service.impl;
 import com.mystore.manager.api.admin.criteria.UserCriteria;
 import com.mystore.manager.api.admin.enums.AdminError;
 import com.mystore.manager.api.admin.mapper.UserMapper;
+import com.mystore.manager.api.admin.model.PosEntity;
 import com.mystore.manager.api.admin.model.ProfilEntity;
 import com.mystore.manager.api.admin.model.UserEntity;
 import com.mystore.manager.api.admin.payload.ChangePasswordPayload;
 import com.mystore.manager.api.admin.payload.UserPayload;
+import com.mystore.manager.api.admin.repository.PosRepository;
 import com.mystore.manager.api.admin.repository.UserRepository;
 import com.mystore.manager.api.admin.service.inter.IProfilService;
 import com.mystore.manager.api.admin.service.inter.IUserService;
@@ -19,6 +21,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,17 +39,19 @@ public class UserService implements IUserService {
     private PasswordEncoder passwordEncoder;
     private JWTService jwtService;
     private final UserMapper mapper;
+    private final PosRepository posRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public UserService(UserRepository userRepository, IProfilService profilService, PasswordEncoder passwordEncoder, JWTService jwtService, UserMapper mapper) {
+    public UserService(UserRepository userRepository, IProfilService profilService, PasswordEncoder passwordEncoder, JWTService jwtService, UserMapper mapper, PosRepository posRepository) {
         this.userRepository = userRepository;
         this.profilService = profilService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.mapper = mapper;
+        this.posRepository = posRepository;
     }
 
     @Override
@@ -88,6 +93,13 @@ public class UserService implements IUserService {
                             .toList();
                     userEntity.getProfils().clear(); // Vider la liste existante
                     userEntity.getProfils().addAll(profils); // Ajouter les nouveaux éléments
+                }
+
+                // Update POS assignment
+                if (payload.getPosId() != null) {
+                    posRepository.findById(payload.getPosId()).ifPresent(userEntity::setPos);
+                } else if (payload.getPosCode() != null && !payload.getPosCode().isEmpty()) {
+                    posRepository.findByCode(payload.getPosCode()).ifPresent(userEntity::setPos);
                 }
 
                 byte[] newPicture = CommonUtil.multipartFileToBytes(payload.getPictureIn());
@@ -165,13 +177,15 @@ public class UserService implements IUserService {
 
     @Override
     public String getUsernameFromToken(String token) {
-        String jwt;
-        String usernameConnected = Strings.EMPTY;
-        if (!token.isEmpty() && token.startsWith(BEARER)) {
-            jwt = token.substring(7);
-            usernameConnected = jwtService.extractUsername(jwt);
+        if (token != null && !token.isEmpty() && token.startsWith(BEARER)) {
+            return jwtService.extractUsername(token.substring(7));
         }
-        return usernameConnected;
+        // Fallback: token not present (e.g. cookie-based auth from POS UI)
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName();
+        }
+        return Strings.EMPTY;
     }
 
     @Override

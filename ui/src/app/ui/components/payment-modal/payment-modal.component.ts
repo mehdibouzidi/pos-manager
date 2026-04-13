@@ -3,6 +3,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
 import { SaleService, SaleRequest } from '../../../../backend/service/business/sale.service';
+import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
 
 @Component({
   selector: 'app-payment-modal',
@@ -219,6 +220,7 @@ export class PaymentModalComponent {
   cartService = inject(CartService);
   private menuService = inject(MenuService);
   private saleService = inject(SaleService);
+  private caisseSessionService = inject(CaisseSessionService);
   private logoBase64 = '';
 
   constructor() {
@@ -234,6 +236,11 @@ export class PaymentModalComponent {
   }
 
   confirmAndPrint(): void {
+    if (!this.caisseSessionService.currentSession()) {
+      this.cartService.showSnack('Ouvrez d\'abord la caisse pour effectuer une vente.');
+      return;
+    }
+
     const now = new Date();
     const items = this.cartService.items();
     const total = this.cartService.total();
