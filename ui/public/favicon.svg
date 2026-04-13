@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="10" fill="#1a1a2e"/>
+  <!-- Cart handle -->
+  <polyline points="6,10 14,10 22,40 52,40" fill="none" stroke="#f0c040" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Cart body -->
+  <polyline points="16,18 54,18 50,38 22,38" fill="none" stroke="#f0c040" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Wheels -->
+  <circle cx="26" cy="48" r="4.5" fill="#f0c040"/>
+  <circle cx="46" cy="48" r="4.5" fill="#f0c040"/>
+</svg>
