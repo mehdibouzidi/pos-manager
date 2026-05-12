@@ -8,6 +8,8 @@ import { TopbarComponent } from '../ui/components/topbar/topbar.component';
 import { OpenCaisseModalComponent } from '../ui/components/open-caisse-modal/open-caisse-modal.component';
 import { CloseCaisseModalComponent } from '../ui/components/close-caisse-modal/close-caisse-modal.component';
 import { CaisseSessionService } from '../../backend/service/business/caisse-session.service';
+import { ConnectivityService } from '../../backend/service/offline/connectivity.service';
+import { PendingQueueService } from '../../backend/service/offline/pending-queue.service';
 
 @Component({
   selector: 'app-pos',
@@ -63,20 +65,31 @@ import { CaisseSessionService } from '../../backend/service/business/caisse-sess
 })
 export class PosComponent implements OnInit {
   private caisseSessionService = inject(CaisseSessionService);
+  private connectivityService = inject(ConnectivityService);
+  private pendingQueue = inject(PendingQueueService);
 
   ngOnInit(): void {
     this.caisseSessionService.getCurrent().subscribe({
       next: (session) => {
         if (session) {
           this.caisseSessionService.setCurrentSession(session);
+          // Seed the offline order counter so offline sales continue from the right number
+          if (session.firstOrderNumber != null) {
+            const currentMax = session.firstOrderNumber + (session.totalSalesCount ?? 0) - 1;
+            this.pendingQueue.seedOrderCounter(Math.max(0, currentMax));
+          }
         } else {
           this.caisseSessionService.setCurrentSession(null);
+          // Only prompt to open when we are sure the backend confirmed no active session
           this.caisseSessionService.showOpenModal();
         }
       },
       error: () => {
         this.caisseSessionService.setCurrentSession(null);
-        this.caisseSessionService.showOpenModal();
+        // If offline and the API is unreachable, don't force the open-caisse modal
+        if (this.connectivityService.isOnline()) {
+          this.caisseSessionService.showOpenModal();
+        }
       }
     });
   }

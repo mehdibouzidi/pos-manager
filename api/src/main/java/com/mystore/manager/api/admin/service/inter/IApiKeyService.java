@@ -12,6 +12,7 @@ public interface IApiKeyService {
     ApiKeyPayload regenerate(Integer id);
     boolean deleteById(Integer id);
     ApiKeyPayload findById(Integer id);
+    ApiKeyPayload findActiveByPosId(Integer posId);
     List<ApiKeyPayload> findAll();
     GlobalPayload<ApiKeyPayload> findByCriteria(ApiKeyCriteria criteria);
 }

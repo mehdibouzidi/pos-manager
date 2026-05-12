@@ -38,4 +38,6 @@ public class PrivilegeConstants {
     public static final String CAISSE_SESSION_CLOSE = "CAISSE_SESSION_CLOSE";
 
     public static final String DASHBOARD_READ = "DASHBOARD_READ";
+
+    public static final String POS_TERMINAL = "POS_TERMINAL";
 }

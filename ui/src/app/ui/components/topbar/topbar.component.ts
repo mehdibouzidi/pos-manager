@@ -7,6 +7,8 @@ import { AuthService } from '../../../../backend/service/admin/auth.service';
 import { ChangePasswordPayload } from '../../../../backend/payloads/admin/changepasswordpayload';
 import { UtilStatic } from '../../../../backend/service/util/UtilStatic';
 import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
+import { ConnectivityService } from '../../../../backend/service/offline/connectivity.service';
+import { SyncService } from '../../../../backend/service/offline/sync.service';
 
 @Component({
   selector: 'app-topbar',
@@ -19,6 +21,44 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       </div>
 
       <div class="topbar-right" #menuAnchor>
+
+        @if (syncService.lastSyncError()) {
+          <span class="sync-error-badge" [title]="syncService.lastSyncError()!">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Sync échouée
+          </span>
+        }
+
+        @if (syncService.pendingCount() > 0 && connectivityService.isOnline() && !syncService.syncing()) {
+          <button class="sync-btn" (click)="syncNow()" title="Synchroniser maintenant">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Synchroniser ({{ syncService.pendingCount() }})
+          </button>
+        }
+
+        @if (connectivityService.isOnline() && !syncService.syncing()) {
+          <span class="online-badge">
+            <span class="online-dot"></span>
+            En ligne
+          </span>
+        }
+
+        @if (!connectivityService.isOnline()) {
+          <span class="offline-badge">
+            <span class="offline-dot"></span>
+            Hors ligne
+            @if (syncService.pendingCount() > 0) {
+              <span class="pending-count">{{ syncService.pendingCount() }}</span>
+            }
+          </span>
+        }
+
+        @if (syncService.syncing()) {
+          <span class="syncing-badge">
+            <span class="syncing-spinner"></span>
+            Synchronisation…
+          </span>
+        }
 
         @if (caisseSessionService.currentSession()) {
           <button class="close-caisse-btn" (click)="closeSession()">
@@ -459,6 +499,118 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Offline / Sync badges ───────────────────────── */
+    .online-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .online-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #16a34a;
+      flex-shrink: 0;
+    }
+
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .offline-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #d97706;
+      flex-shrink: 0;
+    }
+
+    .pending-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      background: #d97706;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .syncing-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .syncing-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(29, 78, 216, 0.3);
+      border-top-color: #1d4ed8;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .sync-error-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #fee2e2;
+      color: #dc2626;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: default;
+    }
+
+    .sync-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      height: 28px;
+      border-radius: 20px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .sync-btn:hover { background: #dbeafe; }
   `]
 })
 export class TopbarComponent {
@@ -467,6 +619,8 @@ export class TopbarComponent {
   private authService = inject(AuthService);
   private elRef = inject(ElementRef);
   caisseSessionService = inject(CaisseSessionService);
+  connectivityService = inject(ConnectivityService);
+  syncService = inject(SyncService);
 
   menuOpen = signal(false);
   showModal = signal(false);
@@ -549,6 +703,10 @@ export class TopbarComponent {
   logout() {
     this.menuOpen.set(false);
     this.authService.logout();
+  }
+
+  syncNow(): void {
+    this.syncService.flush();
   }
 
   closeSession(): void {

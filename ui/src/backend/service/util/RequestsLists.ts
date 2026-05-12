@@ -76,6 +76,9 @@ export class RequestsLists{
         new Request(RequestsLists.PUT, RequestsConstants.CAISSE_SESSION_CLOSE_REQ),
         new Request(RequestsLists.GET, RequestsConstants.CAISSE_SESSION_CURRENT_REQ),
         new Request(RequestsLists.POST, RequestsConstants.CAISSE_SESSION_FINDALL_CRITERIA_REQ),
+
+        //API KEY (provisioning at login)
+        new Request(RequestsLists.GET, RequestsConstants.API_KEY_CURRENT_POS_REQ),
     ];
 
 

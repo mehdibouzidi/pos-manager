@@ -1,16 +1,21 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCommonModule } from '@angular/material/core';
+import { MatCommonModule, MatOptionModule } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Observable, map, startWith } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { ApiKeyPayload } from 'src/app/backend/payloads/admin/api-key-payload';
+import { PosPayload } from 'src/app/backend/payloads/admin/pospayload';
 import { ApiKeyService } from 'src/app/backend/service/admin/api-key.service';
+import { PosService } from 'src/app/backend/service/admin/pos.service';
 
 @Component({
   selector: 'vex-add-api-key',
@@ -18,22 +23,31 @@ import { ApiKeyService } from 'src/app/backend/service/admin/api-key.service';
   templateUrl: './add-api-key.component.html',
   styleUrl: './add-api-key.component.scss',
   imports: [
-    ReactiveFormsModule, MatDialogModule, NgIf, MatButtonModule,
-    MatIconModule, MatDividerModule, MatFormFieldModule,
-    MatInputModule, MatCommonModule, CommonModule, MatSlideToggleModule
+    ReactiveFormsModule, MatDialogModule, NgIf, AsyncPipe, MatButtonModule,
+    MatIconModule, MatDividerModule, MatFormFieldModule, MatAutocompleteModule,
+    MatOptionModule, MatInputModule, MatCommonModule, CommonModule, MatSlideToggleModule
   ]
 })
-export class AddApiKeyComponent {
+export class AddApiKeyComponent implements OnInit {
   generalForm: FormGroup;
   payload = new ApiKeyPayload();
+
+  poses: PosPayload[] = [];
+  posControl = new FormControl();
+  filteredPoses: Observable<PosPayload[]>;
+  selectedPos: PosPayload | null = null;
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<AddApiKeyComponent>,
-    @Inject(MAT_DIALOG_DATA) public data,
-    private service: ApiKeyService
-  ) {
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private service: ApiKeyService,
+    private posService: PosService
+  ) {}
+
+  ngOnInit(): void {
     this.initForm();
+    this.loadPoses();
   }
 
   get f() { return this.generalForm.controls; }
@@ -44,12 +58,49 @@ export class AddApiKeyComponent {
     if (this.generalForm.invalid) return;
     this.payload.description = this.f['description'].value;
     this.payload.active = this.f['active'].value;
+    if (this.selectedPos) {
+      this.payload.posId = this.selectedPos.id;
+    }
     this.service.add(this.payload).subscribe({
       next: (response: ApiKeyPayload) => {
-        if (response != null) this.dialogRef.close();
+        if (response != null) this.dialogRef.close(response);
       },
       error: () => {}
     });
+  }
+
+  onPosSelected(pos: PosPayload): void {
+    this.selectedPos = pos;
+  }
+
+  displayPosName(pos?: PosPayload): string {
+    return pos ? pos.code + ' | ' + pos.name : '';
+  }
+
+  private loadPoses(): void {
+    this.posService.findAll().subscribe({
+      next: (response: any) => {
+        this.poses = (response as PosPayload[]).filter(p => p.active);
+        this.filteredPoses = this.posControl.valueChanges.pipe(
+          startWith(''),
+          map(value => (typeof value === 'string' ? value : value?.name ?? '')),
+          map(name => name ? this.filterPoses(name) : this.poses.slice())
+        );
+      },
+      error: () => {}
+    });
+    // Initialize before data arrives so the template doesn't error
+    this.filteredPoses = this.posControl.valueChanges.pipe(
+      startWith(''),
+      map(() => this.poses.slice())
+    );
+  }
+
+  private filterPoses(value: string): PosPayload[] {
+    const filter = value.toLowerCase();
+    return this.poses.filter(p =>
+      p.name?.toLowerCase().includes(filter) || p.code?.toLowerCase().includes(filter)
+    );
   }
 
   initForm() {

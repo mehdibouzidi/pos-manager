@@ -7,6 +7,7 @@ import { AuthService } from '../../../backend/service/admin/auth.service';
 import { LocalStorageService } from '../../../backend/service/admin/local-storage.service';
 import { LoginPayload } from '../../../backend/payloads/admin/loginpayload';
 import { UtilStatic } from '../../../backend/service/util/UtilStatic';
+import { RequestsConstants } from '../../../backend/service/util/RequestsConstants';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private ls = inject(LocalStorageService);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   usernameOrEmail = '';
   password = '';
@@ -74,6 +76,20 @@ export class LoginComponent {
             this.ls.setItem(UtilStatic.POS_ID, res.posId);
             this.ls.setItem(UtilStatic.POS_CODE, res.posCode);
             this.ls.setItem(UtilStatic.POS_NAME, res.posName);
+            // Fetch and store the API key for offline sync authentication
+            this.http.get<any>(RequestsConstants.API_KEY_CURRENT_POS_REQ).subscribe({
+              next: (apiKeyPayload) => {
+                if (apiKeyPayload?.keyValue) {
+                  localStorage.setItem(UtilStatic.API_KEY, apiKeyPayload.keyValue);
+                  console.info('[Login] API key stored for offline sync.');
+                } else {
+                  console.warn('[Login] No active API key found for this POS terminal (204). Configure one in the admin UI.');
+                }
+              },
+              error: (err) => {
+                console.warn('[Login] Could not fetch API key:', err);
+              }
+            });
           }
           this.router.navigate(['/pos']);
         } else {

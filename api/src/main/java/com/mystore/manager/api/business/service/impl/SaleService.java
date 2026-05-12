@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -66,7 +67,17 @@ public class SaleService implements ISaleService {
         // Create sale
         SaleEntity sale = saleMapper.payloadToEntity(payload, new SaleEntity());
         sale.setOrderNumber(orderNumber);
-        sale.setSaleDate(now);
+
+        // Prefer the offline timestamp provided by the client; fall back to now
+        Instant saleInstant = now;
+        if (payload.getSaleDate() != null && !payload.getSaleDate().isBlank()) {
+            try {
+                saleInstant = Instant.parse(payload.getSaleDate());
+            } catch (DateTimeParseException ignored) {
+                // keep now
+            }
+        }
+        sale.setSaleDate(saleInstant);
         if (sale.getPaymentMethod() == null) {
             sale.setPaymentMethod("CASH");
         }

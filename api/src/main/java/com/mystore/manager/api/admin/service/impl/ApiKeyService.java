@@ -94,6 +94,15 @@ public class ApiKeyService implements IApiKeyService {
     }
 
     @Override
+    public ApiKeyPayload findActiveByPosId(Integer posId) {
+        return apiKeyRepository.findAllByPos_Id(posId).stream()
+                .filter(ApiKeyEntity::isActive)
+                .findFirst()
+                .map(mapper::entityToPayload)
+                .orElse(null);
+    }
+
+    @Override
     public List<ApiKeyPayload> findAll() {
         return mapper.entityListToPayload(apiKeyRepository.findAll(), false);
     }

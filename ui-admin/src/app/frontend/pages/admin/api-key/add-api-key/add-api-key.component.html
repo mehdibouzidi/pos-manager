@@ -11,6 +11,17 @@
             <mat-label>Description</mat-label>
             <input matInput required formControlName="description" placeholder="Ex. Terminal caisse 01">
         </mat-form-field>
+        <mat-form-field class="flex-auto">
+            <mat-label>Point de Vente</mat-label>
+            <input type="text" placeholder="Sélectionnez un terminal POS" matInput
+                [formControl]="posControl" [matAutocomplete]="autoPos">
+            <mat-autocomplete #autoPos="matAutocomplete" [displayWith]="displayPosName" (optionSelected)="onPosSelected($event.option.value)">
+                <mat-option *ngFor="let pos of filteredPoses | async" [value]="pos">
+                    {{ pos.code }} | {{ pos.name }}
+                </mat-option>
+            </mat-autocomplete>
+            <mat-hint>Associez cette clé à un terminal POS pour le mode hors ligne</mat-hint>
+        </mat-form-field>
         <mat-slide-toggle formControlName="active" color="primary">Actif</mat-slide-toggle>
         <p class="text-secondary text-sm">La valeur de la clé sera générée automatiquement.</p>
     </mat-dialog-content>

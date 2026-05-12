@@ -11,6 +11,16 @@
             <mat-label>Description</mat-label>
             <input matInput required formControlName="description">
         </mat-form-field>
+        <mat-form-field class="flex-auto">
+            <mat-label>Point de Vente</mat-label>
+            <input type="text" placeholder="Sélectionnez un terminal POS" matInput
+                [formControl]="posControl" [matAutocomplete]="autoPos">
+            <mat-autocomplete #autoPos="matAutocomplete" [displayWith]="displayPosName" (optionSelected)="onPosSelected($event.option.value)">
+                <mat-option *ngFor="let pos of filteredPoses | async" [value]="pos">
+                    {{ pos.code }} | {{ pos.name }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
         <div class="flex items-center gap-4">
             <div class="flex-auto font-mono text-xs bg-gray-100 rounded p-2 overflow-hidden text-ellipsis whitespace-nowrap">
                 {{ payload.keyValue || '—' }}

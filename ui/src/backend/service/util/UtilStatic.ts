@@ -30,6 +30,8 @@ export class UtilStatic {
   static readonly POS_CODE = 'posCode';
   static readonly POS_NAME = 'posName';
   static readonly SUPER_ADMIN = 'superAdmin';
+  static readonly API_KEY = 'pos-api-key';
+  static readonly OFFLINE_SESSION = 'pos-offline-session';
 
   static isMobile() {
     if (window.screen.width <= 770) {

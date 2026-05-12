@@ -78,5 +78,11 @@ export class RequestsConstants{
      static readonly CAISSE_SESSION_CLOSE_REQ = RequestsConstants.CAISSE_SESSION_REQ + '/close';
      static readonly CAISSE_SESSION_CURRENT_REQ = RequestsConstants.CAISSE_SESSION_REQ + '/current';
      static readonly CAISSE_SESSION_FINDALL_CRITERIA_REQ = RequestsConstants.CAISSE_SESSION_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+
+    //API KEY (POS provisioning)
+     static readonly API_KEY_CURRENT_POS_REQ = RequestsConstants.API_SOURCE + 'api-key/current-pos';
+
+    //SYNC
+     static readonly SYNC_BATCH_REQ = RequestsConstants.API_SOURCE + 'sync/batch';
 }
 

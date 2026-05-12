@@ -3,6 +3,7 @@ package com.mystore.manager.api.admin.controller;
 import com.mystore.manager.api.admin.criteria.ApiKeyCriteria;
 import com.mystore.manager.api.admin.payload.ApiKeyPayload;
 import com.mystore.manager.api.admin.service.inter.IApiKeyService;
+import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,5 +57,17 @@ public class ApiKeyController {
     @PostMapping(path = FIND_ALL_BY_CRITERIA_EP, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GlobalPayload<ApiKeyPayload>> findByCriteria(@RequestBody ApiKeyCriteria criteria) {
         return new ResponseEntity<>(service.findByCriteria(criteria), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/current-pos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiKeyPayload> getCurrentPos() {
+        Integer posId = PosContext.getPosId();
+        if (posId == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        ApiKeyPayload payload = service.findActiveByPosId(posId);
+        return payload != null
+                ? new ResponseEntity<>(payload, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

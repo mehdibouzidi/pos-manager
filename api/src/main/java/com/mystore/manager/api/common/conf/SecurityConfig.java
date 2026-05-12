@@ -1,6 +1,8 @@
 package com.mystore.manager.api.common.conf;
 
+import com.mystore.manager.api.admin.filter.ApiKeyAuthFilter;
 import com.mystore.manager.api.admin.filter.JwtRequestFilter;
+import com.mystore.manager.api.admin.repository.ApiKeyRepository;
 import com.mystore.manager.api.admin.service.impl.JWTService;
 import com.mystore.manager.api.admin.service.impl.MainUserService;
 import org.springframework.context.annotation.Bean;
@@ -36,10 +38,12 @@ public class SecurityConfig {
 
     private final MainUserService userDetailsService;
     private final JWTService jwtService;
+    private final ApiKeyRepository apiKeyRepository;
 
-    public SecurityConfig(MainUserService userDetailsService, JWTService jwtService) {
+    public SecurityConfig(MainUserService userDetailsService, JWTService jwtService, ApiKeyRepository apiKeyRepository) {
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @Bean
@@ -112,6 +116,7 @@ public class SecurityConfig {
             auth.requestMatchers(HttpMethod.GET, SLASH + API_KEY_CONTROLLER + ID_PARAM).hasAnyAuthority(API_KEY_READ, ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + API_KEY_CONTROLLER + SLASH + FIND_ALL_EP).hasAnyAuthority(API_KEY_READ, ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + API_KEY_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(API_KEY_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + API_KEY_CONTROLLER + "/current-pos").authenticated();
 
             //Session Log
             auth.requestMatchers(HttpMethod.GET, SLASH + SESSION_LOG_CONTROLLER + ID_PARAM).hasAnyAuthority(SESSION_LOG_READ, ADMIN);
@@ -161,6 +166,9 @@ public class SecurityConfig {
 
             // DashboardController
             auth.requestMatchers(HttpMethod.GET, SLASH + DASHBOARD_CONTROLLER + "/stats").hasAnyAuthority(DASHBOARD_READ, ADMIN);
+
+            // SyncController
+            auth.requestMatchers(HttpMethod.POST, SLASH + SYNC_CONTROLLER + "/batch").hasAnyAuthority(POS_TERMINAL, ADMIN);
 
         };
     }
@@ -214,8 +222,23 @@ public class SecurityConfig {
         });
 
         http.addFilterBefore(
+                new ApiKeyAuthFilter(apiKeyRepository),
+                JwtRequestFilter.class
+        );
+
+        http.addFilterBefore(
                 new JwtRequestFilter(authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)), userDetailsService, jwtService),
                 UsernamePasswordAuthenticationFilter.class
+        );
+
+        // Stateless REST logout — return 200 and clear the JWT cookie; do NOT redirect to /login?logout
+        http.logout(logout -> logout
+                .logoutUrl("/" + LOGOUT_EP)
+                .logoutSuccessHandler((request, response, authentication) ->
+                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK))
+                .deleteCookies("jwt")
+                .invalidateHttpSession(false)
+                .clearAuthentication(true)
         );
 
         return http.build();

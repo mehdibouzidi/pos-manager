@@ -24,4 +24,6 @@ public class BusinessConstants {
 
     public static final String DASHBOARD_CONTROLLER = "dashboard";
 
+    public static final String SYNC_CONTROLLER = "sync";
+
 }

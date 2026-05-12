@@ -4,6 +4,7 @@ import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
 import { SaleService, SaleRequest } from '../../../../backend/service/business/sale.service';
 import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
+import { ConnectivityService } from '../../../../backend/service/offline/connectivity.service';
 
 @Component({
   selector: 'app-payment-modal',
@@ -257,22 +258,29 @@ export class PaymentModalComponent {
 
     this.saleService.add(saleRequest).subscribe({
       next: (response) => {
-        this.menuService.reloadProducts();
-        this.cartService.showSnack('Vente effectuée avec succès !');
-        this.printAndClose(response.orderNumber, now, items, total);
+        if (response.offline) {
+          // Update local stock immediately — no backend call possible
+          this.menuService.applyOfflineSale(saleRequest.items);
+          this.cartService.showSnack('Vente enregistrée hors ligne — sera synchronisée à la reconnexion.');
+        } else {
+          this.menuService.reloadProducts();
+          this.cartService.showSnack('Vente effectuée avec succès !');
+        }
+        this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false);
       },
-      error: () => this.printAndClose(0, now, items, total)
+      error: () => this.printAndClose(0, now, items, total, false)
     });
   }
 
-  private printAndClose(orderNumber: number, now: Date, items: any[], total: number): void {
+  private printAndClose(orderNumber: number, now: Date, items: any[], total: number, offline = false): void {
+    const orderLabel = `${orderNumber}`;
 
     const receiptHtml = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Ticket #${orderNumber}</title>
+  <title>Ticket #${orderLabel}</title>
   <style>
     @page { size: 72mm auto; margin: 0; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -369,7 +377,8 @@ export class PaymentModalComponent {
     </div>
 
     <div class="order-info">
-      <div class="order-number">COMMANDE #${orderNumber}</div>
+      ${offline ? '<div style="background:#fef3c7;color:#92400e;text-align:center;padding:3px 6px;font-size:9px;font-weight:bold;border-radius:3px;margin-bottom:4px;">MODE HORS LIGNE — BON DE CAISSE</div>' : ''}
+      <div class="order-number">COMMANDE #${orderLabel}</div>
       <div class="date-time">${now.toLocaleDateString('fr-FR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</div>
       <div class="date-time">${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
     </div>
