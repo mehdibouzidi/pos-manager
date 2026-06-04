@@ -27,8 +27,17 @@ import { ProductCardComponent } from '../product-card/product-card.component';
     </div>
   `,
   styles: [`
+    :host {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     .product-grid-container {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -51,6 +60,7 @@ import { ProductCardComponent } from '../product-card/product-card.component';
       padding: 16px 0;
       overflow-y: auto;
       flex: 1;
+      min-height: 0;
     }
 
     .products-grid::-webkit-scrollbar {

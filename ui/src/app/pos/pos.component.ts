@@ -10,6 +10,7 @@ import { CloseCaisseModalComponent } from '../ui/components/close-caisse-modal/c
 import { CaisseSessionService } from '../../backend/service/business/caisse-session.service';
 import { ConnectivityService } from '../../backend/service/offline/connectivity.service';
 import { PendingQueueService } from '../../backend/service/offline/pending-queue.service';
+import { MenuService } from '../back/services/menu.service';
 
 @Component({
   selector: 'app-pos',
@@ -56,6 +57,7 @@ import { PendingQueueService } from '../../backend/service/offline/pending-queue
     }
     .main-content {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -67,8 +69,11 @@ export class PosComponent implements OnInit {
   private caisseSessionService = inject(CaisseSessionService);
   private connectivityService = inject(ConnectivityService);
   private pendingQueue = inject(PendingQueueService);
+  private menuService = inject(MenuService);
 
   ngOnInit(): void {
+    // Refresh product catalogue (including currentStock) each time the POS screen loads
+    this.menuService.loadData();
     this.caisseSessionService.getCurrent().subscribe({
       next: (session) => {
         if (session) {
