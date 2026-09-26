@@ -77,6 +77,9 @@ public class SaleService implements ISaleService {
             }
         }
 
+        if (payload.getPaymentMethod() != null && !"CASH".equalsIgnoreCase(payload.getPaymentMethod())) {
+            throw new CRUDException("Seul le paiement en espèces est accepté.");
+        }
         List<SaleItemPayload> items = payload.getItems() != null ? payload.getItems() : List.of();
         if (items.isEmpty()) {
             throw new CRUDException("Vente sans article.");
@@ -125,9 +128,8 @@ public class SaleService implements ISaleService {
         sale.setLocalOrderNumber(payload.getLocalOrderNumber());
         // Total is recomputed from the lines, never trusted from the client
         sale.setTotalAmount(total.setScale(2, RoundingMode.HALF_UP).doubleValue());
-        if (sale.getPaymentMethod() == null) {
-            sale.setPaymentMethod("CASH");
-        }
+        // Business rule: the shop only accepts cash
+        sale.setPaymentMethod("CASH");
         sale.setCaisseSession(session);
         sale = saleRepository.save(sale);
 

@@ -73,6 +73,25 @@ export class CaisseSessionService {
     });
   }
 
+  /**
+   * Keeps the running totals of the current session up to date after each sale (online or offline),
+   * so that an offline close shows and prints the right expected balance and variance.
+   * The server totals replace them at the next online load.
+   */
+  recordSale(amount: number, orderNumber?: number): void {
+    const current = this._currentSession();
+    if (!current) return;
+    const updated: CaisseSessionPayload = {
+      ...current,
+      totalSalesAmount: Math.round(((current.totalSalesAmount ?? 0) + amount) * 100) / 100,
+      totalSalesCount: (current.totalSalesCount ?? 0) + 1,
+      firstOrderNumber: current.firstOrderNumber ?? orderNumber,
+      lastOrderNumber: orderNumber ?? current.lastOrderNumber
+    };
+    this._currentSession.set(updated);
+    this.queue.saveOfflineSession(updated);
+  }
+
   open(payload: { openingBalance: number }): Observable<CaisseSessionPayload> {
     const localId = this.queue.generateUuid();
     const openedAt = new Date().toISOString();
@@ -155,9 +174,11 @@ export class CaisseSessionService {
 
   private closeOffline(payload: { closingBalance: number; notes?: string }, localId: string, closedAt: string): Observable<CaisseSessionPayload> {
     const offlineSession = this.queue.getOfflineSession() ?? {};
+    const expected = (offlineSession.openingBalance ?? 0) + (offlineSession.totalSalesAmount ?? 0);
     const syntheticSession: CaisseSessionPayload = {
       ...offlineSession,
       closingBalance: payload.closingBalance,
+      variance: Math.round((payload.closingBalance - expected) * 100) / 100,
       notes: payload.notes,
       closedAt,
       status: 'CLOSED'

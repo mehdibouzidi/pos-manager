@@ -284,6 +284,7 @@ export class PaymentModalComponent {
     this.saleService.add(saleRequest).subscribe({
       next: (response) => {
         this.submitting.set(false);
+        this.caisseSessionService.recordSale(total, response.orderNumber);
         if (response.offline) {
           // Update local stock immediately — no backend call possible
           this.menuService.applyOfflineSale(saleRequest.items);

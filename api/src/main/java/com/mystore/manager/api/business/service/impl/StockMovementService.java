@@ -9,6 +9,7 @@ import com.mystore.manager.api.business.repository.ProductRepository;
 import com.mystore.manager.api.business.repository.StockMovementRepository;
 import com.mystore.manager.api.business.service.inter.IStockMovementService;
 import com.mystore.manager.api.common.context.PosContext;
+import com.mystore.manager.api.common.exception.CRUDException;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,16 +46,13 @@ public class StockMovementService implements IStockMovementService {
     @Override
     @Transactional
     public StockMovementPayload save(StockMovementPayload payload) {
+        validate(payload);
         StockMovementEntity entity = mapper.payloadToEntity(payload, new StockMovementEntity());
-        if (Objects.nonNull(payload.getProductId())) {
-            Optional<ProductEntity> productOpt = productRepository.findById(payload.getProductId());
-            if (productOpt.isPresent()) {
-                ProductEntity product = productOpt.get();
-                entity.setProduct(product);
-                updateProductStock(product, payload.getMovementType(), payload.getQuantity());
-            }
-        }
+        ProductEntity product = productRepository.findById(payload.getProductId())
+                .orElseThrow(() -> new CRUDException("Produit introuvable (id " + payload.getProductId() + ")."));
+        entity.setProduct(product);
         entity = repository.save(entity);
+        applyToStock(product.getId(), entity.getMovementType(), entity.getQuantity(), 1);
         return mapper.entityToPayload(entity);
     }
 
@@ -62,24 +60,43 @@ public class StockMovementService implements IStockMovementService {
     @Transactional
     public StockMovementPayload update(StockMovementPayload payload) {
         Optional<StockMovementEntity> entityOpt = repository.findById(payload.getId());
-        if (entityOpt.isPresent()) {
-            StockMovementEntity entity = entityOpt.get();
-            entity = mapper.payloadToEntity(payload, entity);
-            entity = repository.save(entity);
-            return mapper.entityToPayload(entity);
+        if (entityOpt.isEmpty()) return null;
+        StockMovementEntity entity = entityOpt.get();
+        if (isSale(entity.getMovementType())) {
+            throw new CRUDException("Un mouvement issu d'une vente ne peut pas être modifié.");
         }
-        return null;
+        // Cancel the previous effect on stock, then apply the new one (quantity, type or product may change)
+        Integer oldProductId = entity.getProduct() != null ? entity.getProduct().getId() : null;
+        applyToStock(oldProductId, entity.getMovementType(), entity.getQuantity(), -1);
+
+        entity = mapper.payloadToEntity(payload, entity);
+        if (payload.getProductId() != null && !payload.getProductId().equals(oldProductId)) {
+            entity.setProduct(productRepository.findById(payload.getProductId())
+                    .orElseThrow(() -> new CRUDException("Produit introuvable (id " + payload.getProductId() + ").")));
+        }
+        if (entity.getQuantity() == null || entity.getQuantity() <= 0) {
+            throw new CRUDException("La quantité doit être strictement positive.");
+        }
+        entity = repository.save(entity);
+        applyToStock(entity.getProduct() != null ? entity.getProduct().getId() : null,
+                entity.getMovementType(), entity.getQuantity(), 1);
+        return mapper.entityToPayload(entity);
     }
 
     @Override
     @Transactional
     public boolean deleteById(Integer id) {
-        try {
-            repository.deleteById(id);
-            return true;
-        } catch (Exception e) {
-            return false;
+        Optional<StockMovementEntity> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+        StockMovementEntity entity = entityOpt.get();
+        if (isSale(entity.getMovementType())) {
+            throw new CRUDException("Un mouvement issu d'une vente ne peut pas être supprimé.");
         }
+        // Deleting a movement cancels its effect on the product stock
+        applyToStock(entity.getProduct() != null ? entity.getProduct().getId() : null,
+                entity.getMovementType(), entity.getQuantity(), -1);
+        repository.delete(entity);
+        return true;
     }
 
     @Override
@@ -149,13 +166,30 @@ public class StockMovementService implements IStockMovementService {
         return predicates;
     }
 
-    private void updateProductStock(ProductEntity product, String movementType, Double quantity) {
-        if (movementType == null || quantity == null) return;
-        Double current = Objects.requireNonNullElse(product.getCurrentStock(), 0.0);
-        switch (movementType.toUpperCase()) {
-            case "ENTRY" -> product.setCurrentStock(current + quantity);
-            case "LOSS", "SALE" -> product.setCurrentStock(current - quantity);
-        }
-        productRepository.save(product);
+    private static void validate(StockMovementPayload payload) {
+        if (payload.getProductId() == null) throw new CRUDException("Produit obligatoire.");
+        if (payload.getMovementType() == null || payload.getMovementType().isBlank()) throw new CRUDException("Type de mouvement obligatoire.");
+        if (payload.getQuantity() == null || payload.getQuantity() <= 0) throw new CRUDException("La quantité doit être strictement positive.");
+    }
+
+    private static boolean isSale(String movementType) {
+        return "SALE".equalsIgnoreCase(movementType);
+    }
+
+    /** Effect of a movement on stock: ENTRY adds, LOSS and SALE remove, other types (ADJUSTMENT…) do not change it. */
+    private static double signedQuantity(String movementType, Double quantity) {
+        if (movementType == null || quantity == null) return 0;
+        return switch (movementType.toUpperCase()) {
+            case "ENTRY" -> quantity;
+            case "LOSS", "SALE" -> -quantity;
+            default -> 0;
+        };
+    }
+
+    /** direction = 1 to apply the movement, -1 to cancel it. */
+    private void applyToStock(Integer productId, String movementType, Double quantity, int direction) {
+        double delta = direction * signedQuantity(movementType, quantity);
+        if (productId == null || delta == 0) return;
+        productRepository.addToStock(productId, delta);
     }
 }

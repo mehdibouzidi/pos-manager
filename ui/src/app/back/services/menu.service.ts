@@ -35,7 +35,7 @@ export class MenuService {
     private offlineStorage: OfflineStorageService,
     private syncService: SyncService
   ) {
-    this.loadData();
+    // Initial load is triggered by the POS screen (PosComponent.ngOnInit)
     // Reload products from API after each successful sync
     this.syncService.syncCompleted$.subscribe(() => this.reloadProducts());
   }
@@ -55,9 +55,7 @@ export class MenuService {
         const prods = products as Product[];
         this._categories.set(cats);
         this._products.set(prods);
-        if (cats.length > 0) {
-          this._selectedCategoryId.set(cats[0].id);
-        }
+        this.keepSelectedCategory(cats);
         this._loading.set(false);
         // Persist menu data (products + categories) for offline use
         const posId = parseInt(localStorage.getItem(UtilStatic.POS_ID) ?? '0', 10);
@@ -81,9 +79,7 @@ export class MenuService {
     this.offlineStorage.getMenuData(posId).then(({ products, categories }) => {
       this._products.set(products);
       this._categories.set(categories);
-      if (categories.length > 0 && this._selectedCategoryId() === null) {
-        this._selectedCategoryId.set(categories[0].id);
-      }
+      this.keepSelectedCategory(categories);
       this._loading.set(false);
     }).catch(() => {
       this._loading.set(false);
@@ -110,7 +106,7 @@ export class MenuService {
     const updated = this._products().map(p => {
       const item = items.find(i => i.productId === p.id);
       if (!item) return p;
-      return { ...p, currentStock: p.currentStock - item.quantity };
+      return { ...p, currentStock: Math.max(0, (p.currentStock ?? 0) - item.quantity) };
     });
     this._products.set(updated);
     // Persist updated stock to cache
@@ -118,6 +114,17 @@ export class MenuService {
     if (posId > 0) {
       this.offlineStorage.saveMenuData(posId, updated, this._categories()).catch(() => {});
     }
+  }
+
+  /** Keeps the cashier's current tab after a reload; first category only when none (or a deleted one) was selected. */
+  private keepSelectedCategory(categories: ProductCategory[]): void {
+    const selected = this._selectedCategoryId();
+    if (selected !== null && categories.some(c => c.id === selected)) return;
+    this._selectedCategoryId.set(categories.length > 0 ? categories[0].id : null);
+  }
+
+  productById(id: number): Product | undefined {
+    return this._products().find(p => p.id === id);
   }
 
   selectCategory(categoryId: number): void {

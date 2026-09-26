@@ -2,6 +2,7 @@ package com.mystore.manager.api.business.repository;
 
 import com.mystore.manager.api.business.model.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,6 +18,11 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Integer> 
     // Explicit order: without it PostgreSQL returns rows in physical order, which changes
     // every time a row is updated (e.g. stock decremented by a sale) and reshuffles the POS grid.
     List<ProductEntity> findAllByPos_IdOrderByIdAsc(Integer posId);
+
+    /** Atomic stock change: concurrent movements (two tills, a sale during a stock entry) cannot overwrite each other. */
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE ProductEntity p SET p.currentStock = COALESCE(p.currentStock, 0) + :delta WHERE p.id = :id")
+    int addToStock(@Param("id") Integer id, @Param("delta") Double delta);
 
     @Query(value = "WITH movements AS (SELECT product_fk, pos_fk, SUM(quantity) AS in_quantity, 0::numeric AS out_quantity FROM business.op_supplier_reception_note_item GROUP BY product_fk, pos_fk UNION ALL SELECT product_fk, pos_fk, 0::numeric AS in_quantity, SUM(quantity) AS out_quantity FROM business.data_product_out GROUP BY product_fk, pos_fk), movement_totals AS (SELECT product_fk, pos_fk, SUM(in_quantity) AS total_in, SUM(out_quantity) AS total_out FROM movements GROUP BY product_fk, pos_fk) SELECT product.id AS product_id, CAST(product.code AS TEXT) AS product_code, product.name AS product_name, pos.id AS pos_id, CAST(pos.code AS TEXT) AS pos_code, pos.name AS pos_name, COALESCE(movement_totals.total_in, 0) - COALESCE(movement_totals.total_out, 0) AS net_quantity, unit.code AS unit_code FROM movement_totals JOIN business.data_product AS product ON movement_totals.product_fk = product.id JOIN admin.admin_pos AS pos ON movement_totals.pos_fk = pos.id LEFT JOIN business.data_unit AS unit ON product.unit_fk = unit.id WHERE pos.id = :posId", nativeQuery = true)
     List<Object[]> findNetQuantitiesByPosId(@Param("posId") Long posId);
