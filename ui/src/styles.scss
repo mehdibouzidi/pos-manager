@@ -1,6 +1,6 @@
-/* Global Styles for Self-Ordering Kiosk */
+/* POS Manager — global tokens and base styles */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 * {
   margin: 0;
@@ -9,37 +9,94 @@
 }
 
 :root {
-  --primary-orange: #f97316;
-  --primary-orange-light: #fed7aa;
-  --primary-orange-dark: #ea580c;
-  --bg-light: #fef7ed;
-  --bg-white: #ffffff;
-  --text-dark: #1f2937;
-  --text-gray: #6b7280;
-  --text-light: #9ca3af;
-  --border-color: #e5e7eb;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* Single accent (brand orange, slightly desaturated) */
+  --accent: #e2621b;
+  --accent-strong: #c4520f;
+  --accent-soft: #fbeadf;
+  --accent-ink: #8a3a0c;
+
+  /* Warm neutral family (one gray hue everywhere) */
+  --surface: #ffffff;
+  --surface-muted: #f4f2ef;
+  --surface-sunken: #ebe8e4;
+  --bg: #f7f5f2;
+  --ink: #1f1b17;
+  --ink-soft: #5f5750;
+  --ink-faint: #9a918a;
+  --line: #e6e2dd;
+
+  /* Status */
+  --ok: #2f7d4f;
+  --ok-soft: #e4f2e9;
+  --warn: #a15c07;
+  --warn-soft: #fbf0dc;
+  --danger: #b4372b;
+  --danger-soft: #f9e5e2;
+
+  /* Shadows tinted with the warm background */
+  --shadow-sm: 0 1px 2px rgba(60, 40, 20, 0.06);
+  --shadow-md: 0 6px 16px -6px rgba(60, 40, 20, 0.14);
+  --shadow-lg: 0 24px 48px -16px rgba(60, 40, 20, 0.28);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xl: 22px;
+
+  /* z-index scale */
+  --z-dropdown: 50;
+  --z-overlay: 100;
+  --z-modal: 110;
+  --z-toast: 120;
+
+  /* Legacy aliases still used by some components */
+  --primary-orange: var(--accent);
+  --primary-orange-dark: var(--accent-strong);
+  --primary-orange-light: var(--accent-soft);
+  --bg-light: var(--surface-muted);
+  --bg-white: var(--surface);
+  --text-dark: var(--ink);
+  --text-gray: var(--ink-soft);
+  --text-light: var(--ink-faint);
+  --border-color: var(--line);
 }
 
 html, body {
   height: 100%;
-  font-family: 'Poppins', sans-serif;
-  background-color: var(--bg-light);
-  color: var(--text-dark);
+  font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
   font-family: inherit;
+  color: inherit;
   cursor: pointer;
   border: none;
-  outline: none;
+  background: none;
+}
+
+input, textarea {
+  font-family: inherit;
+}
+
+/* Visible focus for keyboard users only */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* Money and counters: figures of equal width so columns line up */
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 img {

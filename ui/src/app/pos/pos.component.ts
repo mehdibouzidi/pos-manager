@@ -1,8 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { SidebarComponent } from '../ui/components/sidebar/sidebar.component';
 import { ProductGridComponent } from '../ui/components/product-grid/product-grid.component';
-import { CartButtonComponent } from '../ui/components/cart-button/cart-button.component';
-import { CartSidebarComponent } from '../ui/components/cart-sidebar/cart-sidebar.component';
+import { TicketPanelComponent } from '../ui/components/ticket-panel/ticket-panel.component';
 import { PaymentModalComponent } from '../ui/components/payment-modal/payment-modal.component';
 import { TopbarComponent } from '../ui/components/topbar/topbar.component';
 import { OpenCaisseModalComponent } from '../ui/components/open-caisse-modal/open-caisse-modal.component';
@@ -17,49 +16,51 @@ import { MenuService } from '../back/services/menu.service';
     TopbarComponent,
     SidebarComponent,
     ProductGridComponent,
-    CartButtonComponent,
-    CartSidebarComponent,
+    TicketPanelComponent,
     PaymentModalComponent,
     OpenCaisseModalComponent,
     CloseCaisseModalComponent
   ],
   template: `
-    <div class="page-wrapper">
+    <div class="page">
       <app-topbar />
-      <div class="kiosk-container">
+      <div class="workspace">
         <app-sidebar />
-        <main class="main-content">
+        <main class="catalog">
           <app-product-grid />
         </main>
+        <app-ticket-panel class="ticket" />
       </div>
     </div>
-    <app-cart-button />
-    <app-cart-sidebar />
     <app-payment-modal />
     <app-open-caisse-modal />
     <app-close-caisse-modal />
   `,
   styles: [`
-    .page-wrapper {
+    .page {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100dvh;
     }
-    .kiosk-container {
-      display: flex;
+
+    /* Categories | products | ticket, always visible: one tap per product, one tap to cash in */
+    .workspace {
       flex: 1;
-      padding: 20px;
-      gap: 24px;
-      background: var(--bg-light);
-      overflow: hidden;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) clamp(300px, 28vw, 380px);
+      gap: 16px;
+      padding: 16px 16px 16px 12px;
     }
-    .main-content {
-      flex: 1;
+
+    .catalog {
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: 24px;
-      overflow: hidden;
+    }
+
+    .ticket {
+      min-height: 0;
     }
   `]
 })

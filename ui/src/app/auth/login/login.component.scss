@@ -3,7 +3,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  font-family: 'Poppins', sans-serif;
+  font-family: inherit;
   border-radius: 0;
   background: #fff;
 }
@@ -94,7 +94,7 @@
   .time-greeting {
     font-size: 1.4rem;
     font-weight: 700;
-    background: linear-gradient(90deg, #f97316, #ea580c);
+    background: var(--accent);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -108,7 +108,7 @@
   margin-bottom: 32px;
 
   .highlight {
-    color: #f97316;
+    color: var(--accent);
   }
 }
 
@@ -127,10 +127,10 @@
   input {
     width: 100%;
     border: none;
-    border-bottom: 2px solid #fed7aa;
+    border-bottom: 2px solid var(--line);
     padding: 8px 0;
     font-size: 0.95rem;
-    font-family: 'Poppins', sans-serif;
+    font-family: inherit;
     color: #1f2937;
     background: transparent;
     outline: none;
@@ -141,7 +141,7 @@
     }
 
     &:focus {
-      border-bottom-color: #f97316;
+      border-bottom-color: var(--accent);
     }
 
     &:disabled {
@@ -203,7 +203,7 @@
     input[type='checkbox'] {
       width: 15px;
       height: 15px;
-      accent-color: #f97316;
+      accent-color: var(--accent);
       cursor: pointer;
     }
   }
@@ -215,7 +215,7 @@
   padding: 14px;
   border: none;
   border-radius: 6px;
-  background: linear-gradient(90deg, #f97316, #ea580c);
+  background: var(--accent);
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;

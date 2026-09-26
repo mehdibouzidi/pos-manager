@@ -17,7 +17,17 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
   template: `
     <header class="topbar">
       <div class="topbar-left">
-        <span class="app-name">POS Manager</span>
+        <span class="app-name">El Afia <span class="app-sub">Caisse</span></span>
+        @if (caisseSessionService.currentSession(); as s) {
+          <span class="session-info num">
+            <span class="session-dot"></span>
+            Ouverte{{ s.openedAt ? ' à ' + (s.openedAt | date:'HH:mm') : '' }}
+            · {{ s.totalSalesCount ?? 0 }} vente{{ (s.totalSalesCount ?? 0) > 1 ? 's' : '' }}
+            · {{ (s.totalSalesAmount ?? 0) | number:'1.2-2' }} DA
+          </span>
+        } @else {
+          <span class="session-info session-info--closed">Caisse fermée</span>
+        }
       </div>
 
       <div class="topbar-right" #menuAnchor>
@@ -69,7 +79,6 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
 
         @if (caisseSessionService.currentSession()) {
           <button class="close-caisse-btn" (click)="closeSession()">
-            <span class="close-caisse-dot"></span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
@@ -86,10 +95,11 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
               {{ posName }}
             </span>
           }
+          <span class="avatar" aria-hidden="true">{{ initials }}</span>
           <span class="username">{{ fullName }}</span>
         </div>
 
-        <button class="menu-btn" (click)="toggleMenu()" [class.active]="menuOpen()">
+        <button class="menu-btn" (click)="toggleMenu()" [class.active]="menuOpen()" aria-label="Menu utilisateur">
           <span class="menu-dot"></span>
           <span class="menu-dot"></span>
           <span class="menu-dot"></span>
@@ -121,7 +131,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     <!-- Change Password Modal -->
     @if (showModal()) {
       <div class="modal-backdrop" (click)="closeModal()">
-        <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h3>Modifier le mot de passe</h3>
             <button class="close-btn" (click)="closeModal()">✕</button>
@@ -176,44 +186,95 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      height: 56px;
-      background: white;
-      box-shadow: var(--shadow-sm);
-      border-bottom: 1px solid var(--border-color);
+      gap: 16px;
+      padding: 0 16px 0 20px;
+      height: 60px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
       position: relative;
-      z-index: 100;
+      z-index: var(--z-dropdown);
       flex-shrink: 0;
     }
 
-    .app-name {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--primary-orange);
-      letter-spacing: 0.5px;
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
     }
 
-    .topbar-left-divider {
-      display: none;
+    .app-name {
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .app-sub {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .session-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-info--closed { color: var(--ink-faint); }
+
+    /* Narrow screens (10" tablets): keep the session summary and actions, drop secondary labels */
+    @media (max-width: 1180px) {
+      .username, .store-badge { display: none; }
+    }
+
+    .session-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      flex-shrink: 0;
     }
 
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       position: relative;
     }
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+      font-size: 12px;
+      font-weight: 800;
     }
 
     .username {
-      font-weight: 500;
-      font-size: 0.9rem;
-      color: var(--text-dark);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
       white-space: nowrap;
     }
 
@@ -221,45 +282,36 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: var(--primary-orange-light);
-      color: var(--primary-orange-dark);
-      font-size: 0.75rem;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+      color: var(--ink-soft);
+      font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
     }
 
-    /* ── Close caisse button ─────────────────────────── */
+    /* ── Close caisse button: secondary, the ticket stays the main action ── */
     .close-caisse-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 0 18px;
+      padding: 0 14px;
       height: 36px;
       border-radius: var(--radius-sm);
-      background: #dc2626;
-      color: white;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.2px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1.5px var(--line);
+      font-size: 13px;
+      font-weight: 700;
       white-space: nowrap;
-      transition: background 0.15s, box-shadow 0.15s;
-      box-shadow: 0 1px 4px rgba(220, 38, 38, 0.35);
+      transition: box-shadow 0.15s, color 0.15s, background-color 0.15s;
     }
 
     .close-caisse-btn:hover {
-      background: #b91c1c;
-      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
-    }
-
-    .close-caisse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.7);
-      flex-shrink: 0;
-      animation: pulse 2s ease-in-out infinite;
+      color: var(--danger);
+      background: var(--danger-soft);
+      box-shadow: inset 0 0 0 1.5px transparent;
     }
 
     @keyframes pulse {
@@ -270,7 +322,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     .topbar-divider {
       width: 1px;
       height: 24px;
-      background: var(--border-color);
+      background: var(--line);
       flex-shrink: 0;
     }
 
@@ -280,40 +332,37 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 3px;
       width: 36px;
       height: 36px;
       border-radius: var(--radius-sm);
-      background: transparent;
-      transition: background 0.2s;
-      padding: 0;
+      transition: background-color 0.2s;
     }
 
     .menu-btn:hover,
     .menu-btn.active {
-      background: var(--primary-orange-light);
+      background: var(--surface-muted);
     }
 
     .menu-dot {
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: var(--text-gray);
+      background: var(--ink-soft);
     }
 
     /* ── Dropdown ────────────────────────────────────── */
     .dropdown {
       position: absolute;
-      top: calc(100% + 8px);
+      top: calc(100% + 10px);
       right: 0;
-      background: white;
-      border: 1px solid var(--border-color);
+      background: var(--surface);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-lg);
-      min-width: 220px;
-      overflow: hidden;
+      min-width: 230px;
+      padding: 6px;
       animation: fadeIn 0.15s ease;
-      z-index: 200;
+      z-index: var(--z-dropdown);
     }
 
     @keyframes fadeIn {
@@ -327,42 +376,37 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       gap: 10px;
       width: 100%;
       text-align: left;
-      padding: 12px 16px;
-      font-size: 0.9rem;
-      color: var(--text-dark);
-      background: transparent;
-      transition: background 0.15s;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: background-color 0.15s;
     }
 
     .dropdown-item:hover {
-      background: var(--primary-orange-light);
-      color: var(--primary-orange-dark);
+      background: var(--surface-muted);
     }
 
     .dropdown-divider {
       height: 1px;
-      background: var(--border-color);
-      margin: 4px 0;
+      background: var(--line);
+      margin: 4px 6px;
     }
 
-    .dropdown-item--danger {
-      color: #dc2626;
-    }
+    .dropdown-item--danger { color: var(--danger); }
 
-    .dropdown-item--danger:hover {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
+    .dropdown-item--danger:hover { background: var(--danger-soft); }
 
     /* ── Modal ───────────────────────────────────────── */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(31, 27, 23, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: var(--z-modal);
     }
 
     .modal {
@@ -456,8 +500,8 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       border-radius: var(--radius-sm);
     }
 
-    .msg.error   { background: #fee2e2; color: #dc2626; }
-    .msg.success { background: #dcfce7; color: #16a34a; }
+    .msg.error   { background: var(--danger-soft); color: var(--danger); }
+    .msg.success { background: var(--ok-soft); color: var(--ok); }
 
     .modal-footer {
       display: flex;
@@ -507,117 +551,78 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Offline / Sync badges ───────────────────────── */
-    .online-badge {
+    /* ── Connectivity / sync status ───────────────────── */
+    .online-badge, .offline-badge, .syncing-badge, .sync-error-badge, .sync-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      background: #dcfce7;
-      color: #15803d;
-      font-size: 0.78rem;
-      font-weight: 600;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
       white-space: nowrap;
     }
 
-    .online-dot {
+    .online-badge { color: var(--ok); }
+
+    .online-dot, .offline-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #16a34a;
       flex-shrink: 0;
     }
+
+    .online-dot { background: var(--ok); }
 
     .offline-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      background: #fef3c7;
-      color: #92400e;
-      font-size: 0.78rem;
-      font-weight: 600;
-      white-space: nowrap;
+      background: var(--warn-soft);
+      color: var(--warn);
     }
 
-    .offline-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #d97706;
-      flex-shrink: 0;
-    }
+    .offline-dot { background: var(--warn); }
 
     .pending-count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-grid;
+      place-items: center;
       min-width: 18px;
       height: 18px;
-      padding: 0 4px;
+      padding: 0 5px;
       border-radius: 9px;
-      background: #d97706;
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 700;
+      background: var(--warn);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
     }
 
     .syncing-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      font-size: 0.78rem;
-      font-weight: 600;
-      white-space: nowrap;
+      background: var(--surface-muted);
+      color: var(--ink-soft);
     }
 
     .syncing-spinner {
       width: 12px;
       height: 12px;
-      border: 2px solid rgba(29, 78, 216, 0.3);
-      border-top-color: #1d4ed8;
+      border: 2px solid var(--line);
+      border-top-color: var(--ink-soft);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       flex-shrink: 0;
     }
 
     .sync-error-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: #fee2e2;
-      color: #dc2626;
-      font-size: 0.78rem;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: default;
+      background: var(--danger-soft);
+      color: var(--danger);
+      cursor: help;
     }
 
     .sync-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      height: 28px;
-      border-radius: 20px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-      font-size: 0.78rem;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: background 0.15s;
+      background: var(--surface-muted);
+      color: var(--ink);
+      transition: background-color 0.15s;
     }
 
-    .sync-btn:hover { background: #dbeafe; }
+    .sync-btn:hover { background: var(--surface-sunken); }
   `]
 })
 export class TopbarComponent {

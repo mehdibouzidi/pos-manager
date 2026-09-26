@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Catégorie sans photo">
+  <rect width="88" height="88" rx="18" fill="#ebe8e4"/>
+  <!-- shelf with items -->
+  <rect x="22" y="28" width="14" height="18" rx="3" fill="#ffffff" stroke="#b8aea6" stroke-width="2.5"/>
+  <rect x="40" y="22" width="10" height="24" rx="3" fill="#ffffff" stroke="#b8aea6" stroke-width="2.5"/>
+  <circle cx="60" cy="38" r="7" fill="#ffffff" stroke="#b8aea6" stroke-width="2.5"/>
+  <path d="M16 48h56" stroke="#b8aea6" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 60h40" stroke="#e2621b" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

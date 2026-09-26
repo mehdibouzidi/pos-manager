@@ -17,12 +17,19 @@ export class MenuService {
   private _products = signal<Product[]>([]);
   private _selectedCategoryId = signal<number | null>(null);
   private _loading = signal<boolean>(false);
+  private _query = signal<string>('');
 
   readonly categories = this._categories.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly selectedCategoryId = this._selectedCategoryId.asReadonly();
+  readonly query = this._query.asReadonly();
 
+  /** A search looks across every category (name or code); otherwise the selected category is shown. */
   readonly filteredProducts = computed(() => {
+    const q = normalize(this._query().trim());
+    if (q) {
+      return this._products().filter(p => normalize(p.name).includes(q) || normalize(p.code ?? '').includes(q));
+    }
     const catId = this._selectedCategoryId();
     if (catId === null) return this._products();
     return this._products().filter(p => p.categoryId === catId);
@@ -127,7 +134,18 @@ export class MenuService {
     return this._products().find(p => p.id === id);
   }
 
+  setQuery(query: string): void {
+    this._query.set(query);
+  }
+
+  /** Exact code match (barcode scanners type the code then Enter). */
+  productByCode(code: string): Product | undefined {
+    const c = code.trim().toLowerCase();
+    return c ? this._products().find(p => (p.code ?? '').toLowerCase() === c) : undefined;
+  }
+
   selectCategory(categoryId: number): void {
+    this._query.set('');
     this._selectedCategoryId.set(categoryId);
   }
 
@@ -138,4 +156,9 @@ export class MenuService {
   getFilteredProducts(): Product[] {
     return this.filteredProducts();
   }
+}
+
+/** Case and accent insensitive comparison ("cafe" finds "Café"). */
+function normalize(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }

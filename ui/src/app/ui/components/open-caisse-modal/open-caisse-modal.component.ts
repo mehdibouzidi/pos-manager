@@ -10,7 +10,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
   template: `
     @if (caisseSessionService.openModalVisible()) {
       <div class="caisse-overlay">
-        <div class="caisse-modal">
+        <div class="caisse-modal" role="dialog" aria-modal="true">
           <div class="modal-header">
             <div class="modal-icon">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -24,7 +24,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
           <div class="modal-body">
             <div class="field-group">
-              <label>Fond d'ouverture (Da)</label>
+              <label>Fond d'ouverture (DA)</label>
               <input
                 type="number"
                 [(ngModel)]="openingBalance"
@@ -60,8 +60,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     .caisse-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 2000;
+      background: rgba(31, 27, 23, 0.55);
+      z-index: var(--z-modal);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -73,7 +73,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       padding: 36px;
       width: 400px;
       max-width: 90vw;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow-lg);
     }
 
     .modal-header {
@@ -143,8 +143,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 0.85rem;
-      background: #fee2e2;
-      color: #dc2626;
+      background: var(--danger-soft);
+      color: var(--danger);
     }
 
     .modal-footer {

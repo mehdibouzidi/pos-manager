@@ -24,7 +24,6 @@ export class LoginComponent {
 
   usernameOrEmail = '';
   password = '';
-  remember = false;
   showPassword = false;
   loading = signal(false);
   errorMessage = signal('');

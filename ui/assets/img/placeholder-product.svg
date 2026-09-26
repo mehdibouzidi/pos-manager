@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Produit sans photo">
+  <rect width="160" height="120" fill="#f4f2ef"/>
+  <circle cx="80" cy="64" r="44" fill="#ebe8e4"/>
+  <!-- shopping bag -->
+  <path d="M58 46h44l4 44a6 6 0 0 1-6 6.6H60a6 6 0 0 1-6-6.6z" fill="#ffffff" stroke="#b8aea6" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M68 52v-8a12 12 0 0 1 24 0v8" fill="none" stroke="#b8aea6" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="68" cy="54" r="2.5" fill="#b8aea6"/>
+  <circle cx="92" cy="54" r="2.5" fill="#b8aea6"/>
+  <path d="M70 76h20" stroke="#e2621b" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

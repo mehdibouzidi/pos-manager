@@ -12,12 +12,10 @@ const round2 = (value: number) => Math.round(value * 100) / 100;
 export class CartService {
   private menuService = inject(MenuService);
   private _items = signal<CartItem[]>([]);
-  private _isCartOpen = signal<boolean>(false);
   private _isPaymentOpen = signal<boolean>(false);
   private _snackMessage = signal<string | null>(null);
 
   readonly items = this._items.asReadonly();
-  readonly isCartOpen = this._isCartOpen.asReadonly();
   readonly isPaymentOpen = this._isPaymentOpen.asReadonly();
   readonly snackMessage = this._snackMessage.asReadonly();
 
@@ -30,6 +28,11 @@ export class CartService {
   );
 
   readonly total = computed(() => this.subtotal());
+
+  /** Quantity of a product in the current ticket (reactive when read inside a computed / template). */
+  quantityOf(productId: number): number {
+    return this._items().find(item => item.product.id === productId)?.quantity ?? 0;
+  }
 
   /**
    * Stock of the product as currently known by the grid (refreshed after each sale / sync),
@@ -123,18 +126,6 @@ export class CartService {
     // Restart the timer: an older message's timer must not hide the new one early
     clearTimeout(this.snackTimer);
     this.snackTimer = setTimeout(() => this._snackMessage.set(null), 3000);
-  }
-
-  toggleCart(): void {
-    this._isCartOpen.set(!this._isCartOpen());
-  }
-
-  openCart(): void {
-    this._isCartOpen.set(true);
-  }
-
-  closeCart(): void {
-    this._isCartOpen.set(false);
   }
 
   openPayment(): void {

@@ -1,112 +1,101 @@
 import { Component, inject } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { MenuService } from '../../../back/services/menu.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [NgClass],
   template: `
-    <aside class="sidebar">
-      <div class="logo">
-        <span class="logo-icon">🛒</span>
-      </div>
-      <nav class="categories">
-        @if (menuService.loading()) {
-          <div class="loading">Chargement...</div>
-        } @else {
-          @for (category of menuService.categories(); track category.id) {
-            <button
-              class="category-item"
-              [ngClass]="{ 'active': category.id === menuService.selectedCategoryId() }"
-              (click)="menuService.selectCategory(category.id)"
-            >
-              @if (category.photo) {
-                <img class="category-img" [src]="'data:image/jpeg;base64,' + category.photo" [alt]="category.name">
-              } @else {
-                <span class="category-icon">📦</span>
-              }
-              <span class="category-name">{{ category.name }}</span>
-            </button>
-          }
+    <nav class="rail" aria-label="Catégories">
+      @if (menuService.loading() && menuService.categories().length === 0) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="skeleton"></div>
         }
-      </nav>
-    </aside>
+      } @else {
+        @for (category of menuService.categories(); track category.id) {
+          <button
+            class="category"
+            [class.active]="!menuService.query() && category.id === menuService.selectedCategoryId()"
+            [attr.aria-current]="category.id === menuService.selectedCategoryId() ? 'true' : null"
+            (click)="menuService.selectCategory(category.id)"
+          >
+            <img class="thumb"
+                 [src]="category.photo ? 'data:image/jpeg;base64,' + category.photo : 'assets/img/placeholder-category.svg'"
+                 [alt]="''">
+            <span class="label">{{ category.name }}</span>
+          </button>
+        }
+      }
+    </nav>
   `,
   styles: [`
-    .sidebar {
-      width: 140px;
-      background: white;
-      border-radius: var(--radius-xl);
-      padding: 20px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: var(--shadow-md);
+    :host {
+      display: block;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .rail {
+      width: 112px;
       height: 100%;
       overflow-y: auto;
-    }
-
-    .logo {
-      display: flex;
-      justify-content: center;
-      padding: 16px 0;
-      margin-bottom: 8px;
-    }
-
-    .logo-icon {
-      font-size: 32px;
-    }
-
-    .categories {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      padding: 4px 2px 12px;
+      scrollbar-width: none;
     }
 
-    .category-item {
+    .rail::-webkit-scrollbar { display: none; }
+
+    .category {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      padding: 14px 8px;
-      background: transparent;
+      gap: 8px;
+      padding: 12px 8px 14px;
+      border-radius: var(--radius-lg);
+      color: var(--ink-soft);
+      text-align: center;
+      transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .category:hover {
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .category.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow-md), inset 3px 0 0 var(--accent);
+    }
+
+    .thumb {
+      width: 44px;
+      height: 44px;
       border-radius: var(--radius-md);
-      transition: all 0.2s ease;
-      text-align: center;
-    }
-
-    .category-item:hover {
-      background: var(--bg-light);
-    }
-
-    .category-item.active {
-      background: var(--primary-orange);
-      color: white;
-    }
-
-    .category-icon {
-      font-size: 24px;
-    }
-
-    .category-img {
-      width: 40px;
-      height: 40px;
       object-fit: cover;
-      border-radius: var(--radius-sm);
     }
 
-    .category-name {
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 1.2;
+
+
+    .label {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+      text-wrap: balance;
     }
 
-    .loading {
-      font-size: 11px;
-      color: var(--text-gray);
-      text-align: center;
-      padding: 16px 0;
+    .skeleton {
+      height: 88px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(90deg, var(--surface-sunken), var(--surface-muted), var(--surface-sunken));
+      background-size: 200% 100%;
+      animation: shimmer 1.2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to { background-position: -200% 0; }
     }
   `]
 })

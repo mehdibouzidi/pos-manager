@@ -10,7 +10,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
   template: `
     @if (caisseSessionService.closeModalVisible()) {
       <div class="caisse-overlay" (click)="cancel()">
-        <div class="caisse-modal" (click)="$event.stopPropagation()">
+        <div class="caisse-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <div class="modal-icon modal-icon--close">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -27,11 +27,11 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
               <div class="session-stats">
                 <div class="stat-row">
                   <span class="stat-label">Fond d'ouverture</span>
-                  <span class="stat-value">{{ s.openingBalance | number:'1.2-2' }} Da</span>
+                  <span class="stat-value">{{ s.openingBalance | number:'1.2-2' }} DA</span>
                 </div>
                 <div class="stat-row">
                   <span class="stat-label">Ventes de la session</span>
-                  <span class="stat-value highlight">{{ (s.totalSalesAmount ?? 0) | number:'1.2-2' }} Da</span>
+                  <span class="stat-value highlight">{{ (s.totalSalesAmount ?? 0) | number:'1.2-2' }} DA</span>
                 </div>
                 <div class="stat-row">
                   <span class="stat-label">Nombre de ventes</span>
@@ -45,7 +45,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
                 }
                 <div class="stat-row stat-row--total">
                   <span class="stat-label">Solde attendu</span>
-                  <span class="stat-value">{{ ((s.openingBalance ?? 0) + (s.totalSalesAmount ?? 0)) | number:'1.2-2' }} Da</span>
+                  <span class="stat-value">{{ ((s.openingBalance ?? 0) + (s.totalSalesAmount ?? 0)) | number:'1.2-2' }} DA</span>
                 </div>
               </div>
             }
@@ -53,7 +53,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
             <div class="divider"></div>
 
             <div class="field-group">
-              <label>Montant compté (Da)</label>
+              <label>Montant compté (DA)</label>
               <input
                 type="number"
                 [(ngModel)]="closingBalance"
@@ -68,7 +68,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
             @if (closingBalance !== null) {
               <div class="variance-row" [class.variance-positive]="variance >= 0" [class.variance-negative]="variance < 0">
                 <span>Écart</span>
-                <span>{{ variance | number:'1.2-2' }} Da</span>
+                <span>{{ variance | number:'1.2-2' }} DA</span>
               </div>
             }
 
@@ -108,8 +108,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     .caisse-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 2000;
+      background: rgba(31, 27, 23, 0.45);
+      z-index: var(--z-modal);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -123,7 +123,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       max-width: 90vw;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow-lg);
     }
 
     .modal-header {
@@ -147,8 +147,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     }
 
     .modal-icon--close {
-      background: #fee2e2;
-      color: #dc2626;
+      background: var(--danger-soft);
+      color: var(--danger);
     }
 
     .modal-header h2 {
@@ -277,13 +277,13 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     }
 
     .variance-positive {
-      background: #dcfce7;
-      color: #16a34a;
+      background: var(--ok-soft);
+      color: var(--ok);
     }
 
     .variance-negative {
-      background: #fee2e2;
-      color: #dc2626;
+      background: var(--danger-soft);
+      color: var(--danger);
     }
 
     .msg.error {
@@ -291,8 +291,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 0.85rem;
-      background: #fee2e2;
-      color: #dc2626;
+      background: var(--danger-soft);
+      color: var(--danger);
     }
 
     .modal-footer {
@@ -323,7 +323,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       gap: 8px;
       padding: 12px;
       border-radius: 10px;
-      background: #dc2626;
+      background: var(--danger);
       color: white;
       font-size: 0.95rem;
       font-weight: 600;
@@ -331,7 +331,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
     }
 
     .btn-confirm:hover:not(:disabled) {
-      background: #b91c1c;
+      background: #93291f;
       transform: translateY(-1px);
     }
 
@@ -494,7 +494,7 @@ export class CloseCaisseModalComponent {
     </div>
   </div>
 
-  ${session.notes ? `<div class="section"><div class="row"><span>Notes :</span></div><div style="font-size:9px;margin-top:3px;">${session.notes}</div></div>` : ''}
+  ${session.notes ? `<div class="section"><div class="row"><span>Notes :</span></div><div style="font-size:9px;margin-top:3px;">${escapeHtml(session.notes)}</div></div>` : ''}
 
   <div class="footer">
     <div>Caissier : ${session.createdByFullName ?? '-'}</div>
@@ -510,4 +510,9 @@ export class CloseCaisseModalComponent {
       win.document.close();
     }
   }
+}
+
+/** Notes are typed by the cashier: never inject them as raw HTML in the Z ticket window. */
+function escapeHtml(value: string): string {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }

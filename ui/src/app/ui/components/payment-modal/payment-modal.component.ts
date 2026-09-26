@@ -1,238 +1,308 @@
-import { Component, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
 import { SaleService, SaleRequest } from '../../../../backend/service/business/sale.service';
 import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
-import { ConnectivityService } from '../../../../backend/service/offline/connectivity.service';
+
+/** Algerian banknotes, used for the quick "received" buttons */
+const NOTES = [200, 500, 1000, 2000];
 
 @Component({
   selector: 'app-payment-modal',
   standalone: true,
-  imports: [DecimalPipe, DatePipe],
+  imports: [DecimalPipe],
   template: `
     @if (cartService.snackMessage()) {
-      <div class="snackbar snackbar-success">{{ cartService.snackMessage() }}</div>
+      <div class="toast" role="status">{{ cartService.snackMessage() }}</div>
     }
     @if (cartService.isPaymentOpen()) {
-      <div class="payment-overlay" (click)="cartService.closePayment()"></div>
-      <div class="payment-modal">
-        <div class="modal-header">
-          <h2>Confirmer la commande</h2>
-          <button class="close-btn" (click)="cartService.closePayment()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
+      <div class="overlay" (click)="close()"></div>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+        <header class="head">
+          <h2 id="pay-title">Encaissement</h2>
+          <button class="icon-btn" (click)="close()" aria-label="Fermer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
+        </header>
+
+        <div class="due">
+          <span>À payer</span>
+          <strong class="num">{{ cartService.total() | number:'1.2-2' }}<small> DA</small></strong>
+          <span class="meta num">{{ cartService.itemCount() }} article{{ cartService.itemCount() > 1 ? 's' : '' }} · espèces</span>
         </div>
 
-        <div class="order-summary">
-          <div class="items-list">
-            @for (item of cartService.items(); track item.product.id) {
-              <div class="summary-item">
-                <span class="item-qty">{{ item.quantity }}x</span>
-                <span class="item-name">{{ item.product.name }}</span>
-                <span class="item-total">{{ item.product.retailPrice * item.quantity | number:'1.0-2' }} Da</span>
-              </div>
-            }
+        <label class="field">
+          <span>Montant reçu</span>
+          <div class="input-wrap">
+            <input #receivedInput class="num" type="number" inputmode="decimal" min="0" step="0.01"
+                   placeholder="Montant exact"
+                   [value]="received() ?? ''"
+                   (input)="setReceived(receivedInput.value)"
+                   (keydown.enter)="confirmAndPrint()" />
+            <span class="suffix">DA</span>
           </div>
-          
-          <div class="totals">
-            <div class="total-row grand-total">
-              <span>Total</span>
-              <span>{{ cartService.total() | number:'1.0-2' }} Da</span>
-            </div>
-          </div>
+        </label>
+
+        <div class="quick">
+          <button [class.on]="received() === null" (click)="received.set(null)">Exact</button>
+          @for (amount of quickAmounts(); track amount) {
+            <button class="num" [class.on]="received() === amount" (click)="received.set(amount)">
+              {{ amount | number:'1.0-0' }}
+            </button>
+          }
+        </div>
+
+        <div class="change" [class.short]="missing() > 0">
+          @if (missing() > 0) {
+            <span>Manque</span>
+            <strong class="num">{{ missing() | number:'1.2-2' }} DA</strong>
+          } @else {
+            <span>À rendre</span>
+            <strong class="num">{{ change() | number:'1.2-2' }} DA</strong>
+          }
         </div>
 
         @if (saleError()) {
-          <div class="sale-error">{{ saleError() }}</div>
+          <div class="error" role="alert">{{ saleError() }}</div>
         }
 
-        <button class="confirm-btn" (click)="confirmAndPrint()" [disabled]="submitting()">
-          {{ submitting() ? 'Enregistrement…' : 'Confirmer & Imprimer le reçu' }}
+        <button class="confirm" (click)="confirmAndPrint()" [disabled]="submitting() || missing() > 0">
+          {{ submitting() ? 'Enregistrement…' : 'Valider et imprimer le ticket' }}
         </button>
       </div>
     }
   `,
   styles: [`
-    .snackbar {
+    .toast {
       position: fixed;
-      bottom: 32px;
+      bottom: 28px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 14px 28px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      z-index: 2000;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    .snackbar-success {
-      background: #16a34a;
+      z-index: var(--z-toast);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      background: var(--ink);
       color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      white-space: nowrap;
+      animation: toast-in 0.25s ease-out;
     }
 
-    .payment-overlay {
+    @keyframes toast-in {
+      from { opacity: 0; transform: translate(-50%, 8px); }
+    }
+
+    .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 1000;
+      background: rgba(31, 27, 23, 0.45);
+      z-index: var(--z-overlay);
+      animation: fade 0.2s ease-out;
     }
 
-    .payment-modal {
+    @keyframes fade { from { opacity: 0; } }
+
+    .dialog {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 420px;
-      max-width: 90vw;
-      max-height: 90vh;
+      width: min(440px, calc(100vw - 32px));
+      max-height: calc(100dvh - 32px);
       overflow-y: auto;
-      background: white;
+      z-index: var(--z-modal);
+      background: var(--surface);
       border-radius: var(--radius-xl);
-      padding: 28px;
-      z-index: 1001;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--shadow-lg);
+      padding: 20px 24px 24px;
+      animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
     }
 
-    .modal-header {
+    @keyframes pop {
+      from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); }
+    }
+
+    .head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
-    .modal-header h2 {
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .close-btn {
-      background: transparent;
-      color: var(--text-gray);
-      padding: 8px;
-      border-radius: var(--radius-sm);
-      transition: all 0.2s;
-    }
-
-    .close-btn:hover {
-      background: var(--bg-light);
-      color: var(--text-dark);
-    }
-
-    .order-summary {
-      background: var(--bg-light);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .items-list {
-      margin-bottom: 16px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .summary-item {
-      display: flex;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px dashed var(--border-color);
-      font-size: 14px;
-    }
-
-    .summary-item:last-child {
-      border-bottom: none;
-    }
-
-    .item-qty {
-      width: 36px;
-      color: var(--primary-orange);
-      font-weight: 600;
-    }
-
-    .item-name {
-      flex: 1;
-      color: var(--text-dark);
-    }
-
-    .item-total {
-      font-weight: 600;
-      color: var(--text-dark);
-    }
-
-    .totals {
-      border-top: 2px solid var(--border-color);
-      padding-top: 12px;
-    }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 14px;
-      color: var(--text-gray);
-    }
-
-    .total-row.grand-total {
+    h2 {
       font-size: 18px;
       font-weight: 700;
-      color: var(--text-dark);
-      border-top: 1px solid var(--border-color);
-      margin-top: 8px;
-      padding-top: 12px;
     }
 
-    .payment-info {
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--ink-soft);
+      transition: background-color 0.2s;
+    }
+
+    .icon-btn:hover { background: var(--surface-muted); }
+
+    .due {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 18px 16px;
+      background: var(--surface-muted);
+      border-radius: var(--radius-lg);
+      margin-bottom: 18px;
+    }
+
+    .due > span:first-child {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+
+    .due strong {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .due strong small {
+      font-size: 16px;
+      color: var(--ink-soft);
+      letter-spacing: 0;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--ink-faint);
+      font-weight: 600;
+    }
+
+    .field > span {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 16px;
-      background: #ecfdf5;
+      height: 52px;
+      padding: 0 14px;
       border-radius: var(--radius-md);
-      margin-bottom: 20px;
-      color: #059669;
-      font-weight: 600;
+      background: var(--surface);
+      box-shadow: inset 0 0 0 1.5px var(--line);
+      transition: box-shadow 0.2s;
     }
 
-    .cash-icon {
-      font-size: 24px;
+    .input-wrap:focus-within { box-shadow: inset 0 0 0 2px var(--accent); }
+
+    .input-wrap input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
     }
 
-    .confirm-btn {
-      width: 100%;
-      padding: 16px;
-      background: var(--primary-orange);
-      color: white;
-      border-radius: var(--radius-md);
+    .input-wrap input::placeholder {
       font-size: 16px;
+      font-weight: 500;
+      color: var(--ink-faint);
+    }
+
+    .suffix {
+      font-weight: 700;
+      color: var(--ink-faint);
+    }
+
+    .quick {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      gap: 8px;
+      margin: 10px 0 16px;
+    }
+
+    .quick button {
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink-soft);
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .quick button:hover { background: var(--surface-sunken); color: var(--ink); }
+
+    .quick button.on {
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+      box-shadow: inset 0 0 0 1.5px var(--accent);
+    }
+
+    .change {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--ok-soft);
+      color: var(--ok);
       font-weight: 600;
-      transition: all 0.2s;
+      margin-bottom: 16px;
     }
 
-    .confirm-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+    .change strong {
+      font-size: 22px;
+      font-weight: 800;
     }
 
-    .sale-error {
+    .change.short {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .error {
       margin-bottom: 12px;
       padding: 10px 12px;
       border-radius: var(--radius-md);
-      background: #fdecea;
-      color: #b3261e;
+      background: var(--danger-soft);
+      color: var(--danger);
       font-size: 14px;
+      font-weight: 600;
     }
 
-    .confirm-btn:hover:not(:disabled) {
-      background: var(--primary-orange-dark);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
+    .confirm {
+      width: 100%;
+      height: 56px;
+      border-radius: var(--radius-md);
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 10px 20px -10px rgba(196, 82, 15, 0.7);
+      transition: background-color 0.2s;
+    }
+
+    .confirm:hover:not(:disabled) { background: var(--accent-strong); }
+
+    .confirm:disabled {
+      background: var(--surface-sunken);
+      color: var(--ink-faint);
+      box-shadow: none;
+      cursor: not-allowed;
     }
   `]
 })
@@ -242,9 +312,37 @@ export class PaymentModalComponent {
   private saleService = inject(SaleService);
   private caisseSessionService = inject(CaisseSessionService);
   private logoBase64 = '';
+
+  @ViewChild('receivedInput') receivedInput?: ElementRef<HTMLInputElement>;
+
   /** Blocks double submission: each click would otherwise create its own sale. */
   submitting = signal(false);
   saleError = signal<string | null>(null);
+  /** Cash handed over by the customer; null = exact amount */
+  received = signal<number | null>(null);
+
+  change = computed(() => {
+    const r = this.received();
+    return r === null ? 0 : Math.max(0, Math.round((r - this.cartService.total()) * 100) / 100);
+  });
+
+  missing = computed(() => {
+    const r = this.received();
+    return r === null ? 0 : Math.max(0, Math.round((this.cartService.total() - r) * 100) / 100);
+  });
+
+  /** Next banknote amounts at or above the total (e.g. total 1 775 → 2 000, 2 500, 3 000…) */
+  quickAmounts = computed(() => {
+    const total = this.cartService.total();
+    const amounts = new Set<number>();
+    for (const note of NOTES) {
+      const rounded = Math.ceil(total / note) * note;
+      for (const amount of [rounded, rounded + note]) {
+        if (amount > total) amounts.add(amount);
+      }
+    }
+    return [...amounts].sort((a, b) => a - b).slice(0, 4);
+  });
 
   constructor() {
     fetch('assets/logo/logoElAfia.png')
@@ -256,10 +354,29 @@ export class PaymentModalComponent {
       }))
       .then(b64 => this.logoBase64 = b64)
       .catch(() => {});
+
+    // Fresh state and focus on the amount field each time the dialog opens
+    effect(() => {
+      if (this.cartService.isPaymentOpen()) {
+        this.received.set(null);
+        this.saleError.set(null);
+        setTimeout(() => this.receivedInput?.nativeElement.focus());
+      }
+    }, { allowSignalWrites: true });
+  }
+
+  setReceived(value: string): void {
+    const n = parseFloat(value.replace(',', '.'));
+    this.received.set(Number.isFinite(n) && n > 0 ? n : null);
+  }
+
+  close(): void {
+    if (this.submitting()) return;
+    this.cartService.closePayment();
   }
 
   confirmAndPrint(): void {
-    if (this.submitting()) return;
+    if (this.submitting() || this.missing() > 0) return;
     if (!this.caisseSessionService.currentSession()) {
       this.cartService.showSnack('Ouvrez d\'abord la caisse pour effectuer une vente.');
       return;
@@ -288,12 +405,12 @@ export class PaymentModalComponent {
         if (response.offline) {
           // Update local stock immediately — no backend call possible
           this.menuService.applyOfflineSale(saleRequest.items);
-          this.cartService.showSnack('Vente enregistrée hors ligne — sera synchronisée à la reconnexion.');
+          this.cartService.showSnack('Vente enregistrée hors ligne. Elle sera synchronisée au retour du réseau.');
         } else {
           this.menuService.reloadProducts();
-          this.cartService.showSnack('Vente effectuée avec succès !');
+          this.cartService.showSnack(`Vente n° ${response.orderNumber} enregistrée`);
         }
-        this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false);
+        this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false, this.received());
       },
       // Sale rejected by the server (network failures are already queued offline by SaleService):
       // no ticket, cart kept so the cashier can fix and retry.
@@ -304,8 +421,10 @@ export class PaymentModalComponent {
     });
   }
 
-  private printAndClose(orderNumber: number, now: Date, items: any[], total: number, offline = false): void {
+  private printAndClose(orderNumber: number, now: Date, items: any[], total: number, offline = false,
+                        received: number | null = null): void {
     const orderLabel = `${orderNumber}`;
+    const change = received !== null ? Math.max(0, received - total) : null;
 
     const receiptHtml = `
 <!DOCTYPE html>
@@ -419,10 +538,10 @@ export class PaymentModalComponent {
       ${items.map(item => `
         <div class="item">
           <div class="item-details">
-            <div class="item-name">${item.product.name}</div>
-            <div class="item-qty">${item.quantity} x ${item.product.retailPrice.toFixed(2)} Da</div>
+            <div class="item-name">${escapeHtml(item.product.name)}</div>
+            <div class="item-qty">${item.quantity} x ${da(item.product.retailPrice)}</div>
           </div>
-          <div class="item-price">${(item.product.retailPrice * item.quantity).toFixed(2)} Da</div>
+          <div class="item-price">${da(item.product.retailPrice * item.quantity)}</div>
         </div>
       `).join('')}
     </div>
@@ -430,8 +549,11 @@ export class PaymentModalComponent {
     <div class="totals">
       <div class="total-row grand-total">
         <span>TOTAL :</span>
-        <span>${total.toFixed(2)} Da</span>
+        <span>${da(total)}</span>
       </div>
+      ${received !== null ? `
+      <div class="total-row"><span>Reçu :</span><span>${da(received)}</span></div>
+      <div class="total-row"><span>Rendu :</span><span>${da(change!)}</span></div>` : ''}
     </div>
 
     <div class="payment-method">
@@ -459,7 +581,18 @@ export class PaymentModalComponent {
     }
 
     this.cartService.clearCart();
-    this.cartService.closePayment();
-    this.cartService.closeCart();
+    this.close();
   }
+}
+
+const daFormat = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Amount formatted for the printed ticket: "1 450,00 DA". */
+function da(value: number): string {
+  return `${daFormat.format(value)} DA`;
+}
+
+/** Product names come from the back-office: never inject them as raw HTML in the ticket window. */
+function escapeHtml(value: string): string {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }
