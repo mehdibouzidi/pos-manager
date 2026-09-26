@@ -11,6 +11,7 @@ import com.mystore.manager.api.common.util.CommonUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -116,10 +117,10 @@ public class ProductService implements com.mystore.manager.api.business.service.
     public List<ProductPayload> findAll() {
         List<ProductEntity> entities;
         if (PosContext.isSuperAdmin()) {
-            entities = repository.findAll();
+            entities = repository.findAll(Sort.by("id"));
         } else {
             Integer posId = PosContext.getPosId();
-            entities = posId != null ? repository.findAllByPos_Id(posId) : List.of();
+            entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
         }
         return mapper.entityListToPayload(entities, false);
     }

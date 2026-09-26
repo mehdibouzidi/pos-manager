@@ -12,6 +12,7 @@ import com.mystore.manager.api.common.util.CommonUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -74,10 +75,10 @@ public class ProductCategoryService implements IProductCategoryService {
     public List<ProductCategoryPayload> findAll() {
         List<ProductCategoryEntity> entities;
         if (PosContext.isSuperAdmin()) {
-            entities = repository.findAll();
+            entities = repository.findAll(Sort.by("id"));
         } else {
             Integer posId = PosContext.getPosId();
-            entities = posId != null ? repository.findAllByPos_Id(posId) : List.of();
+            entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
         }
         return mapper.entityListToPayload(entities, false);
     }
