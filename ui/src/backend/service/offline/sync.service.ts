@@ -35,15 +35,22 @@ export class SyncService {
 
   private _syncing = signal<boolean>(false);
   private _pendingCount = signal<number>(0);
+  private _failedCount = signal<number>(0);
   private _lastSyncError = signal<string | null>(null);
 
   private _syncCompleted = new Subject<void>();
-  /** Emits each time a batch sync completes successfully (at least one op processed) */
+  /** Emits each time a sync run completes (at least one op processed) */
   readonly syncCompleted$ = this._syncCompleted.asObservable();
 
   readonly syncing = this._syncing.asReadonly();
+  /** Operations still waiting to be sent */
   readonly pendingCount = this._pendingCount.asReadonly();
+  /** Operations rejected by the server, kept locally for review / manual retry */
+  readonly failedCount = this._failedCount.asReadonly();
   readonly lastSyncError = this._lastSyncError.asReadonly();
+
+  /** Single in-flight run: every trigger (startup, reconnect, timer, button) shares it. */
+  private inFlight: Promise<void> | null = null;
 
   constructor(
     private http: HttpClient,
@@ -63,7 +70,7 @@ export class SyncService {
 
     // Periodic retry — catches cases where online$ didn't fire
     setInterval(() => {
-      if (this._pendingCount() > 0 && this.connectivity.isOnline() && !this._syncing()) {
+      if (this._pendingCount() > 0 && this.connectivity.isOnline()) {
         this.flush();
       }
     }, SYNC_INTERVAL_MS);
@@ -71,25 +78,39 @@ export class SyncService {
 
   async refreshPendingCount(): Promise<number> {
     const ops = await this.queue.getPendingOps();
-    this._pendingCount.set(ops.length);
-    return ops.length;
+    const pending = ops.filter(op => !op.failed).length;
+    this._pendingCount.set(pending);
+    this._failedCount.set(ops.length - pending);
+    return pending;
   }
 
-  async flush(): Promise<void> {
-    if (this._syncing()) return;
+  /** Sends pending operations. Concurrent calls return the run already in progress. */
+  flush(): Promise<void> {
+    if (!this.inFlight) {
+      this.inFlight = this.doFlush().finally(() => this.inFlight = null);
+    }
+    return this.inFlight;
+  }
 
+  /** Puts server-rejected operations back in the queue and tries again. */
+  async retryFailed(): Promise<void> {
+    await this.queue.retryFailed();
+    await this.refreshPendingCount();
+    return this.flush();
+  }
+
+  private async doFlush(): Promise<void> {
     try {
-      const ops = await this.queue.getPendingOps();
-      console.log(`[SyncService] flush() — ${ops.length} op(s) en attente`);
+      const ops = (await this.queue.getPendingOps()).filter(op => !op.failed);
 
       if (ops.length === 0) {
         this._lastSyncError.set(null); // clear stale error when nothing left to sync
+        await this.refreshPendingCount();
         return;
       }
 
       // If API key missing, try to fetch it now (JWT cookie may still be valid)
       let apiKey = localStorage.getItem(UtilStatic.API_KEY);
-      console.log(`[SyncService] apiKey: ${apiKey ? 'présente' : 'MANQUANTE'}`);
       if (!apiKey) {
         apiKey = await this.tryFetchApiKey();
       }
@@ -100,29 +121,29 @@ export class SyncService {
 
       this._syncing.set(true);
       this._lastSyncError.set(null);
+      const headers = new HttpHeaders({ 'X-Api-Key': apiKey });
+      let processedAny = false;
+      let rejected = 0;
 
       try {
-        const batchRequest = this.buildBatchRequest(ops);
-        const headers = new HttpHeaders({ 'X-Api-Key': apiKey });
-        console.log('[SyncService] POST /sync/batch →', batchRequest);
+        // One batch per caisse session, in chronological order: the server attaches
+        // sales to the session open at that point, so sessions must not be mixed.
+        for (const group of this.groupBySession(ops)) {
+          const result = await lastValueFrom(
+            this.http.post<SyncBatchResult>(RequestsConstants.SYNC_BATCH_REQ, this.buildBatchRequest(group), { headers })
+          );
+          if (!result) break;
 
-        const result = await lastValueFrom(
-          this.http.post<SyncBatchResult>(RequestsConstants.SYNC_BATCH_REQ, batchRequest, { headers })
-        );
-        console.log('[SyncService] Réponse sync:', result);
+          const { processed, failures } = this.resolveResults(group, result);
+          await this.queue.deletePendingOps(processed);
+          // Rejections are deterministic (unknown product, no open session…): replaying them
+          // automatically would block or misattribute later sessions, so they are set aside.
+          await this.queue.markFailed(failures);
+          processedAny = processedAny || processed.length > 0;
+          rejected += failures.length;
 
-        if (result) {
-          const processedIds = this.resolveProcessedIds(ops, result);
-          await this.queue.deletePendingOps(processedIds);
-
-          const failedSales = result.salesResults?.filter(r => !r.success) ?? [];
-          if (failedSales.length > 0) {
-            this._lastSyncError.set(`${failedSales.length} vente(s) en échec lors de la synchro.`);
-          }
-
-          // Clear offline session if close was successful
-          if (result.closeSessionResult && !result.closeSessionError) {
-            this.queue.clearOfflineSession();
+          const closeOk = group.some(op => op.type === 'CLOSE_SESSION') && result.closeSessionResult && !result.closeSessionError;
+          if (closeOk) {
             // Seed counter from max server-assigned order number so next offline
             // session continues from the right number instead of resetting to 1
             const maxSyncedOrder = Math.max(
@@ -135,17 +156,22 @@ export class SyncService {
               this.queue.resetOrderCounter();
             }
           }
-
-          // Notify subscribers (e.g. MenuService) to refresh stock
-          this._syncCompleted.next();
+        }
+        if (rejected > 0) {
+          this._lastSyncError.set(`${rejected} opération(s) refusée(s) par le serveur lors de la synchro.`);
         }
       } catch (err: any) {
+        if (err?.status === 0) this.connectivity.markOffline();
         const msg = err?.error?.message ?? err?.message ?? 'Erreur réseau lors de la synchronisation.';
         this._lastSyncError.set(msg);
         console.error('[SyncService] Sync failed:', err);
       } finally {
         this._syncing.set(false);
         await this.refreshPendingCount();
+        if (processedAny) {
+          // Notify subscribers (e.g. MenuService, CaisseSessionService) to refresh from the server
+          this._syncCompleted.next();
+        }
       }
 
     } catch (outerErr) {
@@ -153,14 +179,34 @@ export class SyncService {
     }
   }
 
+  /** Splits the queue (ordered by insertion) into OPEN … SALE* … CLOSE groups. */
+  private groupBySession(ops: PendingOperation[]): PendingOperation[][] {
+    const sorted = [...ops].sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+    const groups: PendingOperation[][] = [];
+    let current: PendingOperation[] = [];
+    for (const op of sorted) {
+      if (op.type === 'OPEN_SESSION' && current.length > 0) {
+        groups.push(current);
+        current = [];
+      }
+      current.push(op);
+      if (op.type === 'CLOSE_SESSION') {
+        groups.push(current);
+        current = [];
+      }
+    }
+    if (current.length > 0) groups.push(current);
+    return groups;
+  }
+
   private buildBatchRequest(ops: PendingOperation[]): SyncBatchRequest {
     const request: SyncBatchRequest = {};
     const sales: any[] = [];
 
     for (const op of ops) {
-      if (op.type === 'OPEN_SESSION') request.openSession = op.payload;
-      else if (op.type === 'SALE') sales.push(op.payload);
-      else if (op.type === 'CLOSE_SESSION') request.closeSession = op.payload;
+      if (op.type === 'OPEN_SESSION') request.openSession = { localId: op.localId, ...op.payload };
+      else if (op.type === 'SALE') sales.push({ localId: op.localId, ...op.payload });
+      else if (op.type === 'CLOSE_SESSION') request.closeSession = { localId: op.localId, ...op.payload };
     }
 
     if (sales.length > 0) request.sales = sales;
@@ -186,22 +232,27 @@ export class SyncService {
     }
   }
 
-  private resolveProcessedIds(ops: PendingOperation[], result: SyncBatchResult): number[] {
-    const ids: number[] = [];
+  private resolveResults(ops: PendingOperation[], result: SyncBatchResult):
+      { processed: number[]; failures: Array<{ op: PendingOperation; error: string }> } {
+    const processed: number[] = [];
+    const failures: Array<{ op: PendingOperation; error: string }> = [];
 
     for (const op of ops) {
       if (op.id == null) continue;
 
-      if (op.type === 'OPEN_SESSION' && result.openSessionResult && !result.openSessionError) {
-        ids.push(op.id);
+      if (op.type === 'OPEN_SESSION') {
+        if (result.openSessionResult && !result.openSessionError) processed.push(op.id);
+        else failures.push({ op, error: result.openSessionError ?? 'Ouverture de caisse refusée.' });
       } else if (op.type === 'SALE') {
         const saleResult = result.salesResults?.find(r => r.localId === op.localId);
-        if (saleResult?.success) ids.push(op.id);
-      } else if (op.type === 'CLOSE_SESSION' && result.closeSessionResult && !result.closeSessionError) {
-        ids.push(op.id);
+        if (saleResult?.success) processed.push(op.id);
+        else failures.push({ op, error: saleResult?.error ?? 'Vente refusée.' });
+      } else if (op.type === 'CLOSE_SESSION') {
+        if (result.closeSessionResult && !result.closeSessionError) processed.push(op.id);
+        else failures.push({ op, error: result.closeSessionError ?? 'Fermeture de caisse refusée.' });
       }
     }
 
-    return ids;
+    return { processed, failures };
   }
 }

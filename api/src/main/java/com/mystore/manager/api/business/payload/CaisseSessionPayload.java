@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CaisseSessionPayload extends GlobalUserDatePayload {
+    private String localId;
     private String openedAt;
     private String closedAt;
     private Double openingBalance;

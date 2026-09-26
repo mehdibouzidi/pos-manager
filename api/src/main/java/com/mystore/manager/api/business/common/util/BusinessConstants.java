@@ -1,5 +1,9 @@
 package com.mystore.manager.api.business.common.util;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public class BusinessConstants {
 
     // Schema Constants
@@ -25,5 +29,17 @@ public class BusinessConstants {
     public static final String DASHBOARD_CONTROLLER = "dashboard";
 
     public static final String SYNC_CONTROLLER = "sync";
+
+    /** Business timezone: order numbers restart every day at local midnight, not UTC midnight. */
+    public static final ZoneId BUSINESS_ZONE = ZoneId.of("Africa/Algiers");
+
+    /** [start, end) of the business day containing the given instant. */
+    public static Instant[] businessDayBounds(Instant instant) {
+        LocalDate day = instant.atZone(BUSINESS_ZONE).toLocalDate();
+        return new Instant[]{
+                day.atStartOfDay(BUSINESS_ZONE).toInstant(),
+                day.plusDays(1).atStartOfDay(BUSINESS_ZONE).toInstant()
+        };
+    }
 
 }

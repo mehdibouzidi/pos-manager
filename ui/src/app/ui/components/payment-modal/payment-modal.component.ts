@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
@@ -45,8 +45,12 @@ import { ConnectivityService } from '../../../../backend/service/offline/connect
           </div>
         </div>
 
-        <button class="confirm-btn" (click)="confirmAndPrint()">
-          Confirmer &amp; Imprimer le reçu
+        @if (saleError()) {
+          <div class="sale-error">{{ saleError() }}</div>
+        }
+
+        <button class="confirm-btn" (click)="confirmAndPrint()" [disabled]="submitting()">
+          {{ submitting() ? 'Enregistrement…' : 'Confirmer & Imprimer le reçu' }}
         </button>
       </div>
     }
@@ -210,7 +214,22 @@ import { ConnectivityService } from '../../../../backend/service/offline/connect
       transition: all 0.2s;
     }
 
-    .confirm-btn:hover {
+    .confirm-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .sale-error {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: #fdecea;
+      color: #b3261e;
+      font-size: 14px;
+    }
+
+    .confirm-btn:hover:not(:disabled) {
       background: var(--primary-orange-dark);
       transform: translateY(-2px);
       box-shadow: var(--shadow-lg);
@@ -223,6 +242,9 @@ export class PaymentModalComponent {
   private saleService = inject(SaleService);
   private caisseSessionService = inject(CaisseSessionService);
   private logoBase64 = '';
+  /** Blocks double submission: each click would otherwise create its own sale. */
+  submitting = signal(false);
+  saleError = signal<string | null>(null);
 
   constructor() {
     fetch('assets/logo/logoElAfia.png')
@@ -237,6 +259,7 @@ export class PaymentModalComponent {
   }
 
   confirmAndPrint(): void {
+    if (this.submitting()) return;
     if (!this.caisseSessionService.currentSession()) {
       this.cartService.showSnack('Ouvrez d\'abord la caisse pour effectuer une vente.');
       return;
@@ -256,8 +279,11 @@ export class PaymentModalComponent {
       }))
     };
 
+    this.submitting.set(true);
+    this.saleError.set(null);
     this.saleService.add(saleRequest).subscribe({
       next: (response) => {
+        this.submitting.set(false);
         if (response.offline) {
           // Update local stock immediately — no backend call possible
           this.menuService.applyOfflineSale(saleRequest.items);
@@ -268,7 +294,12 @@ export class PaymentModalComponent {
         }
         this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false);
       },
-      error: () => this.printAndClose(0, now, items, total, false)
+      // Sale rejected by the server (network failures are already queued offline by SaleService):
+      // no ticket, cart kept so the cashier can fix and retry.
+      error: (err) => {
+        this.submitting.set(false);
+        this.saleError.set(err?.error?.message ?? 'La vente n\'a pas pu être enregistrée. Aucun ticket imprimé.');
+      }
     });
   }
 

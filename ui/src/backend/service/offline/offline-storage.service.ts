@@ -8,6 +8,9 @@ export interface PendingOperation {
   localId: string;
   timestamp: string;
   localOrderNumber?: number;
+  /** Rejected by the server: kept for review, excluded from automatic sync. */
+  failed?: boolean;
+  error?: string;
 }
 
 const DB_NAME = 'pos-offline-db';
@@ -102,6 +105,18 @@ export class OfflineStorageService {
       const tx = db.transaction(STORE_PENDING, 'readwrite');
       const store = tx.objectStore(STORE_PENDING);
       ids.forEach(id => store.delete(id));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async putPendingOps(ops: PendingOperation[]): Promise<void> {
+    if (ops.length === 0) return;
+    const db = await this.db();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_PENDING, 'readwrite');
+      const store = tx.objectStore(STORE_PENDING);
+      ops.forEach(op => store.put(op));
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });

@@ -10,6 +10,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class SalePayload extends GlobalUserDatePayload {
     private String localId;
+    private Integer localOrderNumber;
     private Integer orderNumber;
     private String saleDate;
     private Double totalAmount;

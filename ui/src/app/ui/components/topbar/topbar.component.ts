@@ -29,6 +29,13 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
           </span>
         }
 
+        @if (syncService.failedCount() > 0 && connectivityService.isOnline() && !syncService.syncing()) {
+          <button class="sync-btn" (click)="retryFailed()"
+                  title="Opérations refusées par le serveur (conservées sur ce poste). Cliquez pour les renvoyer.">
+            Renvoyer les refusées ({{ syncService.failedCount() }})
+          </button>
+        }
+
         @if (syncService.pendingCount() > 0 && connectivityService.isOnline() && !syncService.syncing()) {
           <button class="sync-btn" (click)="syncNow()" title="Synchroniser maintenant">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -707,6 +714,10 @@ export class TopbarComponent {
 
   syncNow(): void {
     this.syncService.flush();
+  }
+
+  retryFailed(): void {
+    this.syncService.retryFailed();
   }
 
   closeSession(): void {

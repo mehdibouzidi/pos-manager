@@ -30,6 +30,14 @@ public class SaleEntity extends AbstractBusinessAudit {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
+    /** Client-generated id, used to make offline sync idempotent. */
+    @Column(name = "local_id", length = 64)
+    private String localId;
+
+    /** Order number printed on the ticket by the till (may differ from orderNumber for offline sales). */
+    @Column(name = "local_order_number")
+    private Integer localOrderNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "caisse_session_fk")
     private CaisseSessionEntity caisseSession;

@@ -1,5 +1,6 @@
 import { HttpClient, HttpRequest } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
+import { ConnectivityService } from '../offline/connectivity.service';
 import { RequestsConstants } from '../util/RequestsConstants';
 import { RequestsLists } from '../util/RequestsLists';
 import { UtilStatic } from '../util/UtilStatic';
@@ -19,12 +20,14 @@ import { firstValueFrom } from 'rxjs';
 export class AuthService {
   public token: string | null = null;
   public isLoggedIn: boolean = false;
+  private loggingOut = false;
 
   constructor(
     private ls: LocalStorageService,
     private http: HttpClient,
     private userService: UserService,
-    private router: Router) { 
+    private router: Router,
+    private injector: Injector) { 
   }
 
   login(loginPayload: LoginPayload){
@@ -49,15 +52,17 @@ export class AuthService {
   }
   
   logout(){
+    // Several requests failing on an expired session all call logout(): run it once
+    if (this.loggingOut) return;
+    this.loggingOut = true;
+    const done = () => {
+      this.loggingOut = false;
+      this.ls.clearAuth();
+      this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
+    };
     this.http.post(RequestsConstants.LOGOUT_REQ, {}, { withCredentials: true }).subscribe({
-      complete: () => {
-        this.ls.clear();
-        this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
-      },
-      error: () => {
-        this.ls.clear();
-        this.router.navigate([UtilStatic.SLASH + AdminConstants.LOGIN]);
-      }
+      complete: done,
+      error: done
     });
   }
   
@@ -137,7 +142,10 @@ export class AuthService {
     const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
     if (!expStr) return false;
     if (Date.now() > parseInt(expStr, 10)) {
-      this.ls.clear();
+      // Offline the login page is unusable: keep the till working (sales are queued and synced
+      // with the terminal API key). The next authenticated request once back online logs out.
+      if (!this.injector.get(ConnectivityService).isOnline()) return true;
+      this.ls.clearAuth();
       return false;
     }
     return true;

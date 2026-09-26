@@ -49,4 +49,12 @@ public class CaisseSessionEntity extends AbstractBusinessAudit {
 
     @Column(name = "notes", length = 500)
     private String notes;
+
+    /** Client-generated id of the open operation (offline sync idempotency). */
+    @Column(name = "local_id", length = 64)
+    private String localId;
+
+    /** Client-generated id of the close operation (offline sync idempotency). */
+    @Column(name = "close_local_id", length = 64)
+    private String closeLocalId;
 }

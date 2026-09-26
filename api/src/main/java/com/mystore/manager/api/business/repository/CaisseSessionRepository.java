@@ -10,4 +10,8 @@ import java.util.Optional;
 public interface CaisseSessionRepository extends JpaRepository<CaisseSessionEntity, Integer> {
 
     Optional<CaisseSessionEntity> findByPos_IdAndStatus(Integer posId, String status);
+
+    Optional<CaisseSessionEntity> findByPos_IdAndLocalId(Integer posId, String localId);
+
+    Optional<CaisseSessionEntity> findByPos_IdAndCloseLocalId(Integer posId, String closeLocalId);
 }

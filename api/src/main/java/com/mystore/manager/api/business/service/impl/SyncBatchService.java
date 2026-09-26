@@ -8,6 +8,7 @@ import com.mystore.manager.api.business.payload.SyncBatchResultPayload;
 import com.mystore.manager.api.business.service.inter.ICaisseSessionService;
 import com.mystore.manager.api.business.service.inter.ISaleService;
 import com.mystore.manager.api.business.service.inter.ISyncBatchService;
+import com.mystore.manager.api.common.exception.CRUDException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +30,21 @@ public class SyncBatchService implements ISyncBatchService {
     @Override
     public SyncBatchResultPayload process(SyncBatchRequestPayload payload) {
         SyncBatchResultPayload result = new SyncBatchResultPayload();
+        // Each operation runs in its own transaction and is idempotent on its localId:
+        // replaying the same batch (lost response, retry) never duplicates sales or sessions.
 
         // 1. Open caisse session if requested
         if (payload.getOpenSession() != null) {
             try {
                 result.setOpenSessionResult(caisseSessionService.open(payload.getOpenSession()));
+            } catch (CRUDException e) {
+                if (CaisseSessionService.ALREADY_OPEN_MSG.equals(e.getMessage())) {
+                    // The till opened a session offline while another one was still open on the server:
+                    // continue in the existing session instead of failing forever (and reopening a ghost later).
+                    result.setOpenSessionResult(caisseSessionService.getCurrent());
+                } else {
+                    result.setOpenSessionError(e.getMessage());
+                }
             } catch (Exception e) {
                 result.setOpenSessionError(e.getMessage());
             }

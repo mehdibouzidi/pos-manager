@@ -38,34 +38,37 @@ export class PendingQueueService {
 
   // ── Queue operations ────────────────────────────────────────────────────────
 
-  async queueOpenSession(payload: { openingBalance: number }): Promise<void> {
+  // localId travels in the payload so the server can deduplicate replays;
+  // openedAt / closedAt / saleDate keep the real time of the operation, not the sync time.
+
+  async queueOpenSession(payload: { openingBalance: number }, openedAt: string, localId = this.generateUuid()): Promise<void> {
     await this.storage.addPendingOp({
       type: 'OPEN_SESSION',
-      payload,
-      localId: this.generateUuid(),
-      timestamp: new Date().toISOString()
+      payload: { ...payload, localId, openedAt },
+      localId,
+      timestamp: openedAt
     });
   }
 
-  async queueSale(payload: SaleRequest): Promise<number> {
+  async queueSale(payload: SaleRequest, localId = this.generateUuid()): Promise<number> {
     const localOrderNumber = this.getNextLocalOrderNumber();
-    const localId = this.generateUuid();
+    const now = new Date().toISOString();
     await this.storage.addPendingOp({
       type: 'SALE',
-      payload: { ...payload, localId, saleDate: new Date().toISOString() },
+      payload: { ...payload, localId, localOrderNumber, saleDate: now },
       localId,
-      timestamp: new Date().toISOString(),
+      timestamp: now,
       localOrderNumber
     });
     return localOrderNumber;
   }
 
-  async queueCloseSession(payload: { closingBalance: number; notes?: string }): Promise<void> {
+  async queueCloseSession(payload: { closingBalance: number; notes?: string }, closedAt: string, localId = this.generateUuid()): Promise<void> {
     await this.storage.addPendingOp({
       type: 'CLOSE_SESSION',
-      payload,
-      localId: this.generateUuid(),
-      timestamp: new Date().toISOString()
+      payload: { ...payload, localId, closedAt },
+      localId,
+      timestamp: closedAt
     });
   }
 
@@ -75,6 +78,17 @@ export class PendingQueueService {
 
   async deletePendingOps(ids: number[]): Promise<void> {
     return this.storage.deletePendingOps(ids);
+  }
+
+  /** Marks operations rejected by the server: they are kept locally but no longer sent automatically. */
+  async markFailed(failures: Array<{ op: PendingOperation; error: string }>): Promise<void> {
+    return this.storage.putPendingOps(failures.map(f => ({ ...f.op, failed: true, error: f.error })));
+  }
+
+  /** Puts rejected operations back in the automatic sync (e.g. after the cashier reopened the caisse). */
+  async retryFailed(): Promise<void> {
+    const failed = (await this.storage.getPendingOps()).filter(op => op.failed);
+    return this.storage.putPendingOps(failed.map(op => ({ ...op, failed: false, error: undefined })));
   }
 
   // ── Offline session in localStorage ────────────────────────────────────────
@@ -95,7 +109,10 @@ export class PendingQueueService {
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
-  private generateUuid(): string {
+  generateUuid(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);

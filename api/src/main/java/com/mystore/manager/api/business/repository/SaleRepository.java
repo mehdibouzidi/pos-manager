@@ -8,11 +8,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SaleRepository extends JpaRepository<SaleEntity, Integer> {
 
     List<SaleEntity> findAllByPos_Id(Integer posId);
+
+    Optional<SaleEntity> findByPos_IdAndLocalId(Integer posId, String localId);
+
+    @Query("SELECT COALESCE(MAX(s.orderNumber), 0) FROM SaleEntity s WHERE s.caisseSession.id = :sessionId")
+    int findMaxOrderNumberBySession(@Param("sessionId") Integer sessionId);
 
     @Query("SELECT COALESCE(MAX(s.orderNumber), 0) FROM SaleEntity s WHERE s.pos.id = :posId AND s.saleDate >= :from AND s.saleDate < :to")
     int findMaxOrderNumberByPosAndDate(

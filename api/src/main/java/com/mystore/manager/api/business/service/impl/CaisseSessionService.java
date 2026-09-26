@@ -1,7 +1,9 @@
 package com.mystore.manager.api.business.service.impl;
 
+import com.mystore.manager.api.admin.repository.PosRepository;
 import com.mystore.manager.api.business.common.criteria.CaisseSessionCriteria;
 import com.mystore.manager.api.business.common.mapper.CaisseSessionMapper;
+import com.mystore.manager.api.business.common.util.BusinessConstants;
 import com.mystore.manager.api.business.model.CaisseSessionEntity;
 import com.mystore.manager.api.business.payload.CaisseSessionPayload;
 import com.mystore.manager.api.business.repository.CaisseSessionRepository;
@@ -22,9 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +41,9 @@ public class CaisseSessionService implements ICaisseSessionService {
     private final CaisseSessionRepository repository;
     private final SaleRepository saleRepository;
     private final CaisseSessionMapper mapper;
+    private final PosRepository posRepository;
+
+    public static final String ALREADY_OPEN_MSG = "Une session de caisse est déjà ouverte pour ce terminal.";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -46,10 +51,12 @@ public class CaisseSessionService implements ICaisseSessionService {
     @Autowired
     public CaisseSessionService(CaisseSessionRepository repository,
                                 SaleRepository saleRepository,
-                                CaisseSessionMapper mapper) {
+                                CaisseSessionMapper mapper,
+                                PosRepository posRepository) {
         this.repository = repository;
         this.saleRepository = saleRepository;
         this.mapper = mapper;
+        this.posRepository = posRepository;
     }
 
     @Override
@@ -58,21 +65,29 @@ public class CaisseSessionService implements ICaisseSessionService {
         Integer posId = PosContext.getPosId();
 
         if (posId != null) {
+            posRepository.lockById(posId);
+            // Idempotency: an open operation already received (sync retry) is returned as is
+            if (hasText(payload.getLocalId())) {
+                Optional<CaisseSessionEntity> same = repository.findByPos_IdAndLocalId(posId, payload.getLocalId());
+                if (same.isPresent()) return mapper.entityToPayload(same.get());
+            }
             Optional<CaisseSessionEntity> existing = repository.findByPos_IdAndStatus(posId, STATUS_OPEN);
             if (existing.isPresent()) {
-                throw new CRUDException("Une session de caisse est déjà ouverte pour ce terminal.");
+                throw new CRUDException(ALREADY_OPEN_MSG);
             }
         }
 
         CaisseSessionEntity entity = mapper.payloadToEntity(payload, new CaisseSessionEntity());
-        entity.setOpenedAt(Instant.now());
+        // Offline sessions are synced later: keep the real opening time sent by the till
+        Instant openedAt = parseClientInstant(payload.getOpenedAt());
+        entity.setOpenedAt(openedAt);
         entity.setStatus(STATUS_OPEN);
+        entity.setLocalId(payload.getLocalId());
 
-        // Capture first order number: next order number after current max today
-        Instant startOfDay = LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant startOfNextDay = startOfDay.plus(1, ChronoUnit.DAYS);
+        // Capture first order number: next order number after current max of the business day
+        Instant[] day = BusinessConstants.businessDayBounds(openedAt);
         int currentMax = (posId != null)
-                ? saleRepository.findMaxOrderNumberByPosAndDate(posId, startOfDay, startOfNextDay)
+                ? saleRepository.findMaxOrderNumberByPosAndDate(posId, day[0], day[1])
                 : 0;
         entity.setFirstOrderNumber(currentMax + 1);
 
@@ -85,6 +100,15 @@ public class CaisseSessionService implements ICaisseSessionService {
     public CaisseSessionPayload close(CaisseSessionPayload payload) {
         Integer posId = PosContext.getPosId();
 
+        if (posId != null) {
+            posRepository.lockById(posId);
+            // Idempotency: a close operation already received (sync retry) is returned as is
+            if (hasText(payload.getLocalId())) {
+                Optional<CaisseSessionEntity> same = repository.findByPos_IdAndCloseLocalId(posId, payload.getLocalId());
+                if (same.isPresent()) return mapper.entityToPayload(same.get());
+            }
+        }
+
         Optional<CaisseSessionEntity> sessionOpt = (posId != null)
                 ? repository.findByPos_IdAndStatus(posId, STATUS_OPEN)
                 : Optional.empty();
@@ -94,8 +118,10 @@ public class CaisseSessionService implements ICaisseSessionService {
         }
 
         CaisseSessionEntity entity = sessionOpt.get();
-        Instant closedAt = Instant.now();
+        Instant closedAt = parseClientInstant(payload.getClosedAt());
+        if (closedAt.isBefore(entity.getOpenedAt())) closedAt = Instant.now();
         entity.setClosedAt(closedAt);
+        entity.setCloseLocalId(payload.getLocalId());
 
         // Closing balance & notes from payload
         if (Objects.nonNull(payload.getClosingBalance())) {
@@ -105,13 +131,8 @@ public class CaisseSessionService implements ICaisseSessionService {
             entity.setNotes(payload.getNotes());
         }
 
-        // Capture last order number
-        Instant startOfDay = LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant startOfNextDay = startOfDay.plus(1, ChronoUnit.DAYS);
-        int lastOrderNumber = (posId != null)
-                ? saleRepository.findMaxOrderNumberByPosAndDate(posId, startOfDay, startOfNextDay)
-                : 0;
-        entity.setLastOrderNumber(lastOrderNumber);
+        // Capture last order number from the session's own sales (a session may span midnight)
+        entity.setLastOrderNumber(saleRepository.findMaxOrderNumberBySession(entity.getId()));
 
         // Compute sales totals using the session FK (reliable, no time-range guesswork)
         List<Object[]> totalsList = saleRepository.findSalesTotalsBySession(entity.getId());
@@ -132,7 +153,24 @@ public class CaisseSessionService implements ICaisseSessionService {
         return mapper.entityToPayload(entity);
     }
 
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
+    }
+
+    /** Timestamp sent by the till (ISO-8601), falling back to now when absent, invalid or in the future. */
+    private static Instant parseClientInstant(String value) {
+        Instant now = Instant.now();
+        if (!hasText(value)) return now;
+        try {
+            Instant parsed = Instant.parse(value);
+            return parsed.isAfter(now) ? now : parsed;
+        } catch (DateTimeParseException e) {
+            return now;
+        }
+    }
+
     @Override
+    @Transactional
     public CaisseSessionPayload getCurrent() {
         Integer posId = PosContext.getPosId();
         if (posId == null) return null;
