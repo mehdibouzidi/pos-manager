@@ -1,0 +1,57 @@
+
+/* Close buttons in the table toolbar: compact pills, red = destructive */
+.close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  border-radius: 9999px;
+  border: 1px solid rgb(239 68 68 / 0.35);
+  background: #fff;
+  color: rgb(220 38 38);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+.close-btn:hover {
+  background: rgb(254 242 242);
+  border-color: rgb(239 68 68 / 0.6);
+}
+.close-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.25);
+}
+.close-btn__icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+.close-btn__count {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(254 226 226);
+  color: rgb(185 28 28);
+  font-size: 12px;
+  font-weight: 700;
+}
+.close-btn--solid {
+  background: rgb(220 38 38);
+  border-color: rgb(220 38 38);
+  color: #fff;
+}
+.close-btn--solid:hover {
+  background: rgb(185 28 28);
+  border-color: rgb(185 28 28);
+}
+.close-btn--solid .close-btn__count {
+  background: rgb(255 255 255 / 0.22);
+  color: #fff;
+}

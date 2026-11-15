@@ -158,7 +158,7 @@
                     <td *matCellDef="let row" mat-cell class="whitespace-nowrap">{{ row.retailPrice != null ? (row.retailPrice | number:'1.2-2') + ' Da' : '' }}</td>
                 </ng-container>
                 <ng-container matColumnDef="displayedInPos">
-                    <th *matHeaderCellDef class="uppercase text-center" mat-header-cell>Affiché En Caisse</th>
+                    <th *matHeaderCellDef class="uppercase text-center th-wrap" mat-header-cell>Affiché<br>En Caisse</th>
                     <td *matCellDef="let row" mat-cell class="text-center align-middle">
                         <mat-icon *ngIf="row.displayedInPos !== false && row.categoryDisplayedInPos !== false"
                             svgIcon="mat:check_circle" class="block mx-auto text-green-600" matTooltip="Affiché en caisse"></mat-icon>

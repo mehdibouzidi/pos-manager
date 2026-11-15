@@ -214,7 +214,8 @@ export class AllProductsComponent {
       label: 'Nom',
       property: 'name',
       type: 'text',
-      visible: true
+      visible: true,
+      cssClasses: ['cell-wrap']
     },
     { label: 'Catégorie', property: 'categoryName', type: 'badge', visible: true },
     { label: 'Affiché En Caisse', property: 'displayedInPos', type: 'badge', visible: true },
@@ -222,13 +223,13 @@ export class AllProductsComponent {
       label: 'Stock Min',
       property: 'minStock',
       type: 'text',
-      visible: true
+      visible: false
     },
     {
       label: 'Stock Max',
       property: 'maxStock',
       type: 'text',
-      visible: true
+      visible: false
     },
     {
       label: 'Stock Réel',
@@ -246,7 +247,7 @@ export class AllProductsComponent {
       label: 'Marque',
       property: 'brand',
       type: 'child',
-      visible: true
+      visible: false
     },
     {
       label: 'Créé le',

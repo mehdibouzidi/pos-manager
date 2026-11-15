@@ -1,6 +1,6 @@
 <vex-page-layout>
   <vex-page-layout-header class="pb-16 flex flex-col items-start justify-center">
-    <div class="w-full flex flex-col sm:flex-row justify-between container">
+    <div class="w-full flex flex-col sm:flex-row justify-between px-6">
       <div>
         <h1 class="title mt-0 mb-1">Clôtures de Caisse</h1>
         <vex-breadcrumbs [crumbs]="['Stock', 'Clôtures de Caisse']"></vex-breadcrumbs>
@@ -8,7 +8,7 @@
     </div>
   </vex-page-layout-header>
 
-  <vex-page-layout-content class="-mt-6 container">
+  <vex-page-layout-content class="-mt-6 px-6 w-full">
     <div class="card overflow-auto -mt-16">
 
       <!-- Filters -->
@@ -41,15 +41,19 @@
         </h2>
         <span class="flex-1"></span>
         <ng-container *ngIf="canClose()">
-          <button *ngIf="!selection.isEmpty()" mat-stroked-button color="warn" class="ml-4 flex-none" type="button"
+          <!-- Contextual primary action: only while caisses are checked -->
+          <button *ngIf="!selection.isEmpty()" type="button" class="close-btn close-btn--solid ml-3 flex-none"
             (click)="closeSelection()" matTooltip="Clôturer les caisses cochées">
-            <mat-icon svgIcon="mat:lock" class="icon-sm mr-1"></mat-icon>
-            Clôturer la sélection ({{ selection.selected.length }})
+            <mat-icon svgIcon="mat:lock" class="close-btn__icon"></mat-icon>
+            <span>Clôturer la sélection</span>
+            <span class="close-btn__count">{{ selection.selected.length }}</span>
           </button>
-          <button mat-flat-button color="warn" class="ml-4 flex-none" type="button" (click)="closeAllOpen()"
-            matTooltip="Clôturer toutes les caisses encore ouvertes">
-            <mat-icon svgIcon="mat:lock" class="icon-sm mr-1"></mat-icon>
-            Clôturer toutes les caisses ouvertes
+          <!-- Secondary action, hidden when nothing is open -->
+          <button *ngIf="openCount > 0" type="button" class="close-btn ml-3 flex-none"
+            (click)="closeAllOpen()" matTooltip="Clôturer toutes les caisses encore ouvertes (tous terminaux)">
+            <mat-icon svgIcon="mat:lock_clock" class="close-btn__icon"></mat-icon>
+            <span>Clôturer les caisses ouvertes</span>
+            <span class="close-btn__count">{{ openCount }}</span>
           </button>
         </ng-container>
         <button [matMenuTriggerFor]="columnFilterMenu" class="ml-4 flex-none" mat-icon-button matTooltip="Colonnes" type="button">

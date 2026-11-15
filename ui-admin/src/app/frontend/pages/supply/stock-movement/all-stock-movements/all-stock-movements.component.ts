@@ -237,7 +237,7 @@ export class AllStockMovementsComponent implements OnInit {
   @Input()
   columns: TableColumn<StockMovementPayload>[] = [
     { label: 'Produit',   property: 'productName',  type: 'text',   visible: true },
-    { label: 'Catégorie', property: 'categoryName', type: 'text',   visible: true },
+    { label: 'Catégorie', property: 'categoryName', type: 'text',   visible: false },
     { label: 'Type',      property: 'movementType', type: 'text',   visible: true },
     { label: 'Quantité',  property: 'quantity',     type: 'text',   visible: true },
     { label: 'Motif',     property: 'reason',       type: 'text',   visible: true },

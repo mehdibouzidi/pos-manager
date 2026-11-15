@@ -78,6 +78,7 @@ export class AllCaisseSessionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadOpenCount();
     this.setupTable();
     this.search();
   }
@@ -147,21 +148,22 @@ export class AllCaisseSessionsComponent implements OnInit {
     this.openCloseDialog({ sessions: this.selection.selected });
   }
 
-  /** Counts every open caisse (all pages, ignoring filters) before asking for confirmation. */
-  closeAllOpen(): void {
+  /** Number of open caisses (all pages, ignoring filters), shown on the "close all" button. */
+  openCount = 0;
+
+  loadOpenCount(): void {
+    if (!this.canClose()) return;
     const countCriteria = new CaisseSessionCriteria();
     countCriteria.status = 'OPEN';
     countCriteria.size = 1;
     this.service.findAllByCriteria(countCriteria).subscribe({
-      next: (res: GlobalPayload<CaisseSessionPayload>) => {
-        const openCount = res?.totalNumberOfElements ?? 0;
-        if (openCount === 0) {
-          this.snackBar.open('Aucune caisse ouverte.', 'OK', { duration: 3000 });
-          return;
-        }
-        this.openCloseDialog({ sessions: [], all: true, openCount });
-      }
+      next: (res: GlobalPayload<CaisseSessionPayload>) => this.openCount = res?.totalNumberOfElements ?? 0
     });
+  }
+
+  closeAllOpen(): void {
+    if (this.openCount === 0) return;
+    this.openCloseDialog({ sessions: [], all: true, openCount: this.openCount });
   }
 
   private openCloseDialog(data: AdminCloseCaisseData): void {
@@ -172,6 +174,7 @@ export class AllCaisseSessionsComponent implements OnInit {
         const n = closed.length;
         this.snackBar.open(`${n} caisse${n > 1 ? 's' : ''} clôturée${n > 1 ? 's' : ''}.`, 'OK', { duration: 3000 });
         this.search();
+        this.loadOpenCount();
       });
   }
 

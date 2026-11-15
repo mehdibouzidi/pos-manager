@@ -164,7 +164,7 @@
                     <th *matHeaderCellDef class="uppercase" mat-header-cell>Modifié</th>
                     <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
                 </ng-container>
-                <ng-container matColumnDef="actions">
+                <ng-container matColumnDef="actions" stickyEnd>
                         <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
                         <td *matCellDef="let row" mat-cell>
                             <div class="flex">

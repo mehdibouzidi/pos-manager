@@ -80,7 +80,7 @@
 
                     <!-- Actions Column -->
                     <ng-container matColumnDef="displayedInPos">
-                    <th *matHeaderCellDef class="uppercase text-center" mat-header-cell>Affiché En Caisse</th>
+                    <th *matHeaderCellDef class="uppercase text-center th-wrap" mat-header-cell>Affiché<br>En Caisse</th>
                     <td *matCellDef="let row" mat-cell class="text-center align-middle">
                         <mat-icon *ngIf="row.displayedInPos !== false; else hiddenCat"
                             svgIcon="mat:check_circle" class="block mx-auto text-green-600" matTooltip="Affichée en caisse"></mat-icon>
@@ -98,7 +98,7 @@
                     <th *matHeaderCellDef class="uppercase" mat-header-cell>Modifié</th>
                     <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
                 </ng-container>
-                <ng-container matColumnDef="actions">
+                <ng-container matColumnDef="actions" stickyEnd>
                         <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
                         <td *matCellDef="let row" mat-cell>
                             <div class="flex">

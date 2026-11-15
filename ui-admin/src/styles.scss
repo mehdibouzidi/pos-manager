@@ -75,7 +75,7 @@ th{
 .table-filter mat-checkbox,
 .table-filter button {
   margin-right: 16px !important; /* Add space to the right of each component */
-  flex: 1 1 200px !important; /* Allow components to grow and shrink */
+  flex: 1 1 160px !important; /* Allow components to grow and shrink */
   margin-top: 0 !important; /* Ensure consistent top margin */
   margin-bottom: 0 !important; /* Ensure consistent bottom margin */
   padding-top: 0 !important; /* Ensure consistent top padding */
@@ -86,13 +86,13 @@ th{
 
 .table-filter mat-form-field,
 .table-filter vex-autocomplete-select {
-  min-width: 200px !important; /* Minimum width for form fields */
+  min-width: 150px !important; /* Compact enough for 5 filters on one line */
 }
 
 /* Date filters (Du / Au): narrower so a full filter row fits on one line */
 .table-filter mat-form-field.date-filter {
-  flex: 0 1 165px !important;
-  min-width: 150px !important;
+  flex: 0 1 150px !important;
+  min-width: 140px !important;
 }
 
 /* Autocomplete select wrapper: the inner field fills the slot, without its own extra spacing */
@@ -255,6 +255,31 @@ form h5, .component-header h5{
 .mat-mdc-table .mat-mdc-table-sticky {
   background-color: var(--mat-table-background-color, #fff);
 }
-.mat-mdc-table .mat-mdc-table-sticky-border-elem-right {
-  box-shadow: -6px 0 6px -6px rgba(0, 0, 0, 0.15);
+/* Pinned actions column: visible separation from the cells scrolling underneath */
+.mat-mdc-table .mat-mdc-table-sticky.mat-column-actions {
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: -6px 0 8px -4px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- Data tables: one line per cell, compact padding ----------
+ * Values (amounts, dates, codes, badges) never wrap; long free texts opt in with .cell-wrap.
+ * Wide tables scroll horizontally inside their card, actions stay visible (stickyEnd). */
+.mat-mdc-table .mat-mdc-header-cell,
+.mat-mdc-table .mat-mdc-cell {
+  white-space: nowrap;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.mat-mdc-table .mat-mdc-header-cell:first-of-type,
+.mat-mdc-table .mat-mdc-cell:first-of-type {
+  padding-left: 20px;
+}
+.mat-mdc-table .mat-mdc-cell.cell-wrap {
+  white-space: normal;
+  min-width: 180px;
+  max-width: 280px;
+}
+.mat-mdc-table .mat-mdc-header-cell.th-wrap {
+  white-space: normal;
+  line-height: 1.2;
 }
