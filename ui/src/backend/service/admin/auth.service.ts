@@ -27,7 +27,18 @@ export class AuthService {
     private http: HttpClient,
     private userService: UserService,
     private router: Router,
-    private injector: Injector) { 
+    private injector: Injector) {
+    // Sessions end at a fixed hour each night: log out as soon as it is reached, even if the
+    // till is idle, rather than letting the next sale fail. Offline, the till keeps working
+    // (sales are queued) and the logout happens once the backend is reachable again.
+    setInterval(() => this.logoutIfSessionExpired(), 60_000);
+  }
+
+  private logoutIfSessionExpired(): void {
+    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
+    if (!expStr || Date.now() <= parseInt(expStr, 10)) return;
+    if (!this.injector.get(ConnectivityService).isOnline()) return;
+    this.logout();
   }
 
   login(loginPayload: LoginPayload){

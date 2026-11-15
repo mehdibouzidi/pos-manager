@@ -381,6 +381,12 @@ export class PaymentModalComponent {
       this.cartService.showSnack('Ouvrez d\'abord la caisse pour effectuer une vente.');
       return;
     }
+    if (this.caisseSessionService.isFromPreviousDay()) {
+      // Yesterday's caisse was never closed: today's sales must not land in it
+      this.cartService.closePayment();
+      this.caisseSessionService.showCloseModal();
+      return;
+    }
 
     const now = new Date();
     const items = this.cartService.items();

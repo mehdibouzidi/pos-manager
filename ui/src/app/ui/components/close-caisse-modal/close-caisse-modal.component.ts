@@ -9,7 +9,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
   imports: [CommonModule, FormsModule, DecimalPipe],
   template: `
     @if (caisseSessionService.closeModalVisible()) {
-      <div class="caisse-overlay" (click)="cancel()">
+      <div class="caisse-overlay" (click)="!mandatory() && cancel()">
         <div class="caisse-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <div class="modal-icon modal-icon--close">
@@ -19,10 +19,18 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
               </svg>
             </div>
             <h2>Clôture de caisse</h2>
-            <button class="close-btn" (click)="cancel()">✕</button>
+            @if (!mandatory()) {
+              <button class="close-btn" (click)="cancel()">✕</button>
+            }
           </div>
 
           <div class="modal-body">
+            @if (mandatory() && session(); as s) {
+              <div class="msg error" style="margin-bottom: 16px;">
+                La caisse ouverte le {{ s.openedAt | date:'dd/MM/yyyy à HH:mm' }} n'a pas été clôturée.
+                Clôturez-la avant de commencer la journée.
+              </div>
+            }
             @if (session(); as s) {
               <div class="session-stats">
                 <div class="stat-row">
@@ -88,7 +96,9 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
           </div>
 
           <div class="modal-footer">
-            <button class="btn-cancel" (click)="cancel()">Annuler</button>
+            @if (!mandatory()) {
+              <button class="btn-cancel" (click)="cancel()">Annuler</button>
+            }
             <button class="btn-confirm" (click)="confirm()" [disabled]="saving() || closingBalance === null">
               @if (saving()) {
                 <span class="spinner"></span>
@@ -366,6 +376,8 @@ export class CloseCaisseModalComponent {
   private logoBase64 = '';
 
   session = this.caisseSessionService.currentSession;
+  /** Yesterday's caisse left open: closing it is required, the modal cannot be dismissed. */
+  mandatory = () => this.caisseSessionService.isFromPreviousDay();
 
   constructor() {
     fetch('assets/logo/logoElAfia.png')
@@ -408,6 +420,7 @@ export class CloseCaisseModalComponent {
       notes: this.notes || undefined
     }).subscribe({
       next: (closedSession) => {
+        const wasPreviousDay = this.caisseSessionService.isFromPreviousDay();
         this.caisseSessionService.setCurrentSession(null);
         this.caisseSessionService.hideCloseModal();
         this.saving.set(false);
@@ -415,6 +428,8 @@ export class CloseCaisseModalComponent {
         this.closingBalance = null;
         this.notes = '';
         this.variance = 0;
+        // Yesterday's caisse is closed: go straight to opening today's
+        if (wasPreviousDay) this.caisseSessionService.showOpenModal();
       },
       error: (err) => {
         const msg = err?.error?.message ?? 'Impossible de clôturer la caisse. Réessayez.';

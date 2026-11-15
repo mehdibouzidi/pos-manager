@@ -22,6 +22,8 @@ export class UtilStatic {
 
   static readonly TOKEN = 'pos-token';
   static readonly SESSION_EXP = 'session-exp';
+  /** Local hour at which a business day ends (same as app.session.cutoffHour on the API). */
+  static readonly DAY_CUTOFF_HOUR = 4;
   static readonly USERNAME = 'username';
   static readonly PRIVILEGES = 'privileges';
   static readonly FIRSTNAME = 'firstname';

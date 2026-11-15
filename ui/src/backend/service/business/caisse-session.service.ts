@@ -5,6 +5,7 @@ import { RequestsConstants } from '../util/RequestsConstants';
 import { ConnectivityService } from '../offline/connectivity.service';
 import { PendingQueueService } from '../offline/pending-queue.service';
 import { SyncService } from '../offline/sync.service';
+import { UtilStatic } from '../util/UtilStatic';
 
 export interface CaisseSessionPayload {
   id?: number;
@@ -35,6 +36,22 @@ export class CaisseSessionService {
   readonly openModalVisible = this._openModalVisible.asReadonly();
   readonly closeModalVisible = this._closeModalVisible.asReadonly();
 
+  /**
+   * The open caisse belongs to a previous business day (not closed last night): it must be
+   * closed before any new sale, and before a new caisse can be opened for today.
+   * A method rather than a computed(): the answer also depends on the current time.
+   */
+  isFromPreviousDay(): boolean {
+    const openedAt = this._currentSession()?.openedAt;
+    return !!openedAt && CaisseSessionService.businessDay(new Date(openedAt)) < CaisseSessionService.businessDay(new Date());
+  }
+
+  /** Business day of a date: the day only changes at the cutoff hour (e.g. 4 a.m.), not at midnight. */
+  private static businessDay(date: Date): string {
+    const d = new Date(date.getTime() - UtilStatic.DAY_CUTOFF_HOUR * 3_600_000);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   constructor(
     private http: HttpClient,
     private connectivity: ConnectivityService,
@@ -55,6 +72,9 @@ export class CaisseSessionService {
     this.getCurrent().subscribe({
       next: (session) => {
         this._currentSession.set(session);
+        if (session && this.isFromPreviousDay()) {
+          this.showCloseModal();
+        }
         if (session) {
           // Seed the offline order counter so offline sales continue from the right number
           if (session.firstOrderNumber != null) {
@@ -68,6 +88,7 @@ export class CaisseSessionService {
       error: () => {
         const local = this.queue.getOfflineSession();
         this._currentSession.set(local);
+        if (local && this.isFromPreviousDay()) this.showCloseModal();
         if (!local && promptIfNone) this.showOpenModal();
       }
     });
