@@ -15,6 +15,9 @@ public class ProductCriteria extends PaginationCriteria {
     private String code;
     private String name;
     private Integer posId;
+    private Integer categoryId;
+    /** null = all; true = shown in the till; false = hidden (by itself or by its category). */
+    private Boolean displayedInPos;
 
     public Map<String, String> toMap(){
         Map<String, String> columnsValues = new HashMap<>();
@@ -26,6 +29,9 @@ public class ProductCriteria extends PaginationCriteria {
         }
         if(Objects.nonNull(name)){
             columnsValues.put("name",name);
+        }
+        if(Objects.nonNull(categoryId)){
+            columnsValues.put("category.id", categoryId.toString());
         }
         if(Objects.nonNull(posId)){
             columnsValues.put("pos.id", posId.toString());

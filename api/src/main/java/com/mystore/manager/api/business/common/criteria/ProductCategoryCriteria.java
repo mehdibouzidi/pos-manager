@@ -15,6 +15,8 @@ public class ProductCategoryCriteria extends PaginationCriteria {
     private Integer id;
     private String code;
     private String name;
+    /** null = all; true/false = shown/hidden in the till. */
+    private Boolean displayedInPos;
 
     public Map<String, String> toMap() {
         Map<String, String> columnsValues = new HashMap<>();

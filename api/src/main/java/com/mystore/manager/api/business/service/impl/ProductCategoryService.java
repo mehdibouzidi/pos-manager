@@ -73,6 +73,11 @@ public class ProductCategoryService implements IProductCategoryService {
 
     @Override
     public List<ProductCategoryPayload> findAll() {
+        return findAll(false);
+    }
+
+    @Override
+    public List<ProductCategoryPayload> findAll(boolean displayedOnly) {
         List<ProductCategoryEntity> entities;
         if (PosContext.isSuperAdmin()) {
             entities = repository.findAll(Sort.by("id"));
@@ -80,18 +85,21 @@ public class ProductCategoryService implements IProductCategoryService {
             Integer posId = PosContext.getPosId();
             entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
         }
+        if (displayedOnly) {
+            entities = entities.stream().filter(ProductCategoryEntity::isDisplayedInPos).toList();
+        }
         return mapper.entityListToPayload(entities, false);
     }
 
     @Override
     public GlobalPayload<ProductCategoryPayload> findAllByCriteria(ProductCategoryCriteria criteria) {
-        return CommonUtil.fetchPage(
-                entityManager,
-                "ProductCategoryEntity",
-                criteria,
-                criteria.toMap(),
-                mapper,
-                query -> {}
-        );
+        if (criteria.getDisplayedInPos() == null) {
+            return CommonUtil.fetchPage(entityManager, "ProductCategoryEntity", criteria, criteria.toMap(), mapper, query -> {});
+        }
+        String where = CommonUtil.appendConditions(
+                CommonUtil.selectCritQueryBuilderWithoutSort("ProductCategoryEntity", criteria.toMap(), criteria, true),
+                List.of("en.displayedInPos = " + criteria.getDisplayedInPos()));
+        return CommonUtil.fetchPage(entityManager, where + CommonUtil.getSort(criteria), CommonUtil.toCountQuery(where),
+                criteria, mapper, query -> {});
     }
 }

@@ -149,6 +149,7 @@ public class SaleService implements ISaleService {
             movPayload.setMovementType("SALE");
             movPayload.setQuantity(itemPayload.getQuantity());
             movPayload.setReason("Vente #" + sale.getOrderNumber());
+            movPayload.setSaleId(sale.getId());
             stockMovementService.save(movPayload);
         }
 

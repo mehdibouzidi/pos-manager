@@ -21,5 +21,8 @@ public interface IProductCategoryService {
 
     List<ProductCategoryPayload> findAll();
 
+    /** displayedOnly: only categories shown in the till. */
+    List<ProductCategoryPayload> findAll(boolean displayedOnly);
+
     GlobalPayload<ProductCategoryPayload> findAllByCriteria(ProductCategoryCriteria criteria);
 }

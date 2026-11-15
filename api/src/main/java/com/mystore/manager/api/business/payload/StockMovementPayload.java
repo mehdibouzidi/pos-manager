@@ -17,4 +17,11 @@ public class StockMovementPayload extends GlobalUserDatePayload {
     private Double retailPrice;
     private String reason;
     private String movementDate;
+
+    // SALE movements: originating sale and its caisse session (read-only)
+    private Integer saleId;
+    private Integer saleOrderNumber;
+    private Integer caisseSessionId;
+    private String caisseSessionOpenedAt;
+    private String caisseSessionStatus;
 }

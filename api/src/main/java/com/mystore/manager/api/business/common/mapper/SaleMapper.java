@@ -28,6 +28,7 @@ public class SaleMapper {
         if (Objects.nonNull(entity)) {
             payload = GlobalUserDateAuditMapper.entityToPayload(entity, payload);
             payload.setOrderNumber(entity.getOrderNumber());
+            payload.setLocalOrderNumber(entity.getLocalOrderNumber());
             if (Objects.nonNull(entity.getSaleDate())) {
                 payload.setSaleDate(CommonUtil.instantToDateTime(entity.getSaleDate()));
             }

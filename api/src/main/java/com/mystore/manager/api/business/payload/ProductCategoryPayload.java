@@ -8,4 +8,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductCategoryPayload extends GlobalDataPayload {
     private String photo; // base64 encoded
+    /** Shown in the till; null on update = unchanged. */
+    private Boolean displayedInPos;
 }

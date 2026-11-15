@@ -3,8 +3,11 @@ package com.mystore.manager.api.business.service.impl;
 import com.mystore.manager.api.admin.repository.PosRepository;
 import com.mystore.manager.api.business.common.criteria.CaisseSessionCriteria;
 import com.mystore.manager.api.business.common.mapper.CaisseSessionMapper;
+import com.mystore.manager.api.business.common.mapper.SaleMapper;
+import com.mystore.manager.api.business.payload.SalePayload;
 import com.mystore.manager.api.business.common.util.BusinessConstants;
 import com.mystore.manager.api.business.model.CaisseSessionEntity;
+import com.mystore.manager.api.business.payload.CaisseSessionAdminCloseRequest;
 import com.mystore.manager.api.business.payload.CaisseSessionPayload;
 import com.mystore.manager.api.business.repository.CaisseSessionRepository;
 import com.mystore.manager.api.business.repository.SaleRepository;
@@ -47,6 +50,9 @@ public class CaisseSessionService implements ICaisseSessionService {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private SaleMapper saleMapper;
 
     @Autowired
     public CaisseSessionService(CaisseSessionRepository repository,
@@ -118,17 +124,77 @@ public class CaisseSessionService implements ICaisseSessionService {
         }
 
         CaisseSessionEntity entity = sessionOpt.get();
-        Instant closedAt = parseClientInstant(payload.getClosedAt());
+        entity.setCloseLocalId(payload.getLocalId());
+        entity = closeEntity(entity, parseClientInstant(payload.getClosedAt()), payload.getClosingBalance(), payload.getNotes());
+        return mapper.entityToPayload(entity);
+    }
+
+    public static final String ADMIN_CLOSE_NOTE = "Clôturée depuis l'administration";
+
+    @Override
+    @Transactional
+    public List<CaisseSessionPayload> closeFromAdmin(CaisseSessionAdminCloseRequest request) {
+        boolean superAdmin = PosContext.isSuperAdmin();
+        Integer posId = PosContext.getPosId();
+        if (!superAdmin && posId == null) {
+            throw new CRUDException("Aucun point de vente associé à cet utilisateur.");
+        }
+
+        List<CaisseSessionEntity> targets;
+        if (request.isAll()) {
+            targets = superAdmin ? repository.findAllByStatus(STATUS_OPEN) : repository.findAllByPos_IdAndStatus(posId, STATUS_OPEN);
+        } else {
+            if (request.getIds() == null || request.getIds().isEmpty()) {
+                throw new CRUDException("Aucune caisse sélectionnée.");
+            }
+            targets = repository.findAllById(request.getIds()).stream()
+                    // Other POS' sessions are invisible to a non-super-admin: silently out of scope
+                    .filter(s -> superAdmin || (s.getPos() != null && posId.equals(s.getPos().getId())))
+                    .filter(s -> STATUS_OPEN.equals(s.getStatus()))
+                    .toList();
+        }
+        if (targets.isEmpty()) {
+            throw new CRUDException("Aucune caisse ouverte à clôturer.");
+        }
+        // A counted amount only makes sense for one caisse; a bulk close leaves the balance "not counted"
+        Double closingBalance = targets.size() == 1 ? request.getClosingBalance() : null;
+        String extra = request.getNotes() != null && !request.getNotes().isBlank() ? " — " + request.getNotes().trim() : "";
+        String notes = ADMIN_CLOSE_NOTE + (closingBalance == null ? " (montant non compté)" : "") + extra;
+
+        List<CaisseSessionPayload> closed = new ArrayList<>();
+        for (CaisseSessionEntity entity : targets) {
+            if (entity.getPos() != null) posRepository.lockById(entity.getPos().getId());
+            closed.add(mapper.entityToPayload(closeEntity(entity, Instant.now(), closingBalance, notes)));
+        }
+        return closed;
+    }
+
+    @Override
+    @Transactional
+    public List<SalePayload> findSales(Integer sessionId) {
+        CaisseSessionEntity session = repository.findById(sessionId)
+                .orElseThrow(() -> new CRUDException("Session de caisse introuvable."));
+        if (!PosContext.isSuperAdmin()) {
+            Integer posId = PosContext.getPosId();
+            if (posId == null || session.getPos() == null || !posId.equals(session.getPos().getId())) {
+                throw new CRUDException("Session de caisse introuvable.");
+            }
+        }
+        return saleRepository.findAllByCaisseSession_IdOrderBySaleDateAscIdAsc(sessionId).stream()
+                .map(saleMapper::entityToPayload)
+                .toList();
+    }
+
+    /** Closes the session: totals and last order number from its own sales, variance when a balance is given. */
+    private CaisseSessionEntity closeEntity(CaisseSessionEntity entity, Instant closedAt, Double closingBalance, String notes) {
         if (closedAt.isBefore(entity.getOpenedAt())) closedAt = Instant.now();
         entity.setClosedAt(closedAt);
-        entity.setCloseLocalId(payload.getLocalId());
 
-        // Closing balance & notes from payload
-        if (Objects.nonNull(payload.getClosingBalance())) {
-            entity.setClosingBalance(new BigDecimal(payload.getClosingBalance().toString()));
+        if (Objects.nonNull(closingBalance)) {
+            entity.setClosingBalance(new BigDecimal(closingBalance.toString()));
         }
-        if (Objects.nonNull(payload.getNotes())) {
-            entity.setNotes(payload.getNotes());
+        if (Objects.nonNull(notes)) {
+            entity.setNotes(notes.length() > 500 ? notes.substring(0, 500) : notes);
         }
 
         // Capture last order number from the session's own sales (a session may span midnight)
@@ -149,8 +215,7 @@ public class CaisseSessionService implements ICaisseSessionService {
         }
 
         entity.setStatus(STATUS_CLOSED);
-        entity = repository.save(entity);
-        return mapper.entityToPayload(entity);
+        return repository.save(entity);
     }
 
     private static boolean hasText(String s) {

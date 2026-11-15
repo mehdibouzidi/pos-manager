@@ -30,4 +30,9 @@ public class StockMovementEntity extends AbstractBusinessAudit {
 
     @Column(name = "movement_date")
     private Instant movementDate;
+
+    /** Sale that produced this movement (SALE movements only). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sale_fk")
+    private SaleEntity sale;
 }

@@ -3,6 +3,7 @@ package com.mystore.manager.api.business.service.impl;
 import com.mystore.manager.api.business.common.criteria.StockMovementCriteria;
 import com.mystore.manager.api.business.common.mapper.StockMovementMapper;
 import com.mystore.manager.api.business.model.ProductEntity;
+import com.mystore.manager.api.business.model.SaleEntity;
 import com.mystore.manager.api.business.model.StockMovementEntity;
 import com.mystore.manager.api.business.payload.StockMovementPayload;
 import com.mystore.manager.api.business.repository.ProductRepository;
@@ -12,6 +13,9 @@ import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.exception.CRUDException;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import jakarta.persistence.EntityManager;
+import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.Instant;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -28,6 +32,8 @@ import java.util.Optional;
 
 @Service
 public class StockMovementService implements IStockMovementService {
+
+    private static final ZoneId LOCAL_ZONE = ZoneId.of("Africa/Algiers");
 
     private final StockMovementRepository repository;
     private final ProductRepository productRepository;
@@ -51,6 +57,7 @@ public class StockMovementService implements IStockMovementService {
         ProductEntity product = productRepository.findById(payload.getProductId())
                 .orElseThrow(() -> new CRUDException("Produit introuvable (id " + payload.getProductId() + ")."));
         entity.setProduct(product);
+        if (payload.getSaleId() != null) entity.setSale(entityManager.getReference(SaleEntity.class, payload.getSaleId()));
         entity = repository.save(entity);
         applyToStock(product.getId(), entity.getMovementType(), entity.getQuantity(), 1);
         return mapper.entityToPayload(entity);
@@ -159,6 +166,18 @@ public class StockMovementService implements IStockMovementService {
         }
         if (criteria.getMovementType() != null && !criteria.getMovementType().isEmpty()) {
             predicates.add(cb.equal(root.get("movementType"), criteria.getMovementType().toUpperCase()));
+        }
+        // Whole local days (Algiers time), both bounds inclusive
+        if (criteria.getFromDate() != null && !criteria.getFromDate().isBlank()) {
+            Instant from = LocalDate.parse(criteria.getFromDate()).atStartOfDay(LOCAL_ZONE).toInstant();
+            predicates.add(cb.greaterThanOrEqualTo(root.get("movementDate"), from));
+        }
+        if (criteria.getToDate() != null && !criteria.getToDate().isBlank()) {
+            Instant to = LocalDate.parse(criteria.getToDate()).plusDays(1).atStartOfDay(LOCAL_ZONE).toInstant();
+            predicates.add(cb.lessThan(root.get("movementDate"), to));
+        }
+        if (criteria.getCaisseSessionId() != null) {
+            predicates.add(cb.equal(root.get("sale").get("caisseSession").get("id"), criteria.getCaisseSessionId()));
         }
         if (criteria.getReason() != null && !criteria.getReason().isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get("reason")), "%" + criteria.getReason().toLowerCase() + "%"));

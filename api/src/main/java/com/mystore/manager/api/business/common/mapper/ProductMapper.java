@@ -24,6 +24,7 @@ public class ProductMapper implements IMapper<ProductPayload, ProductEntity> {
         if (Objects.nonNull(payload.getMaxStock()))       entity.setMaxStock(payload.getMaxStock());
         if (Objects.nonNull(payload.getMinStock()))       entity.setMinStock(payload.getMinStock());
         if (Objects.nonNull(payload.getRetailPrice()))    entity.setRetailPrice(payload.getRetailPrice());
+        if (Objects.nonNull(payload.getDisplayedInPos())) entity.setDisplayedInPos(payload.getDisplayedInPos());
         if (Objects.nonNull(payload.getCategoryId())) {
             ProductCategoryEntity category = categoryRepository.findById(payload.getCategoryId()).orElse(null);
             entity.setCategory(category);
@@ -41,12 +42,14 @@ public class ProductMapper implements IMapper<ProductPayload, ProductEntity> {
             payload.setMaxStock(entity.getMaxStock());
             payload.setMinStock(entity.getMinStock());
             payload.setRetailPrice(entity.getRetailPrice());
+            payload.setDisplayedInPos(entity.isDisplayedInPos());
             if (Objects.nonNull(entity.getCurrentStock())) {
                 payload.setCurrentStock(java.math.BigDecimal.valueOf(entity.getCurrentStock()));
             }
             if (Objects.nonNull(entity.getCategory())) {
                 payload.setCategoryId(entity.getCategory().getId());
                 payload.setCategoryName(entity.getCategory().getName());
+                payload.setCategoryDisplayedInPos(entity.getCategory().isDisplayedInPos());
             }
             if (Objects.nonNull(entity.getPhoto())) {
                 payload.setPhoto(Base64.getEncoder().encodeToString(entity.getPhoto()));

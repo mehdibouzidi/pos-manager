@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface SaleRepository extends JpaRepository<SaleEntity, Integer> {
 
     List<SaleEntity> findAllByPos_Id(Integer posId);
+    List<SaleEntity> findAllByCaisseSession_IdOrderBySaleDateAscIdAsc(Integer caisseSessionId);
 
     Optional<SaleEntity> findByPos_IdAndLocalId(Integer posId, String localId);
 

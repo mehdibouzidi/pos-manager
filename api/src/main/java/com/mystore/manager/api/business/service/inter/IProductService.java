@@ -23,6 +23,9 @@ public interface IProductService {
 
     List<ProductPayload> findAll();
 
+    /** displayedOnly: only products shown in the till (product and its category both displayed). */
+    List<ProductPayload> findAll(boolean displayedOnly);
+
     boolean uploadCsv(MultipartFile file) throws IOException;
 
     List<ProductPayload> deleteMultiple(List<ProductPayload> payloads);

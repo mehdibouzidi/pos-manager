@@ -4,12 +4,15 @@ import com.mystore.manager.api.business.model.CaisseSessionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CaisseSessionRepository extends JpaRepository<CaisseSessionEntity, Integer> {
 
     Optional<CaisseSessionEntity> findByPos_IdAndStatus(Integer posId, String status);
+    List<CaisseSessionEntity> findAllByPos_IdAndStatus(Integer posId, String status);
+    List<CaisseSessionEntity> findAllByStatus(String status);
 
     Optional<CaisseSessionEntity> findByPos_IdAndLocalId(Integer posId, String localId);
 

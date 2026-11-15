@@ -32,6 +32,17 @@ public class StockMovementMapper implements IMapper<StockMovementPayload, StockM
             payload.setQuantity(entity.getQuantity());
             payload.setReason(entity.getReason());
             if (Objects.nonNull(entity.getMovementDate())) payload.setMovementDate(CommonUtil.instantToDateTime(entity.getMovementDate()));
+            if (Objects.nonNull(entity.getSale())) {
+                payload.setSaleId(entity.getSale().getId());
+                payload.setSaleOrderNumber(entity.getSale().getOrderNumber());
+                if (Objects.nonNull(entity.getSale().getCaisseSession())) {
+                    payload.setCaisseSessionId(entity.getSale().getCaisseSession().getId());
+                    payload.setCaisseSessionStatus(entity.getSale().getCaisseSession().getStatus());
+                    if (Objects.nonNull(entity.getSale().getCaisseSession().getOpenedAt())) {
+                        payload.setCaisseSessionOpenedAt(CommonUtil.instantToDateTime(entity.getSale().getCaisseSession().getOpenedAt()));
+                    }
+                }
+            }
             if (Objects.nonNull(entity.getProduct())) {
                 payload.setProductId(entity.getProduct().getId());
                 payload.setProductCode(entity.getProduct().getCode());

@@ -161,8 +161,11 @@ public class SecurityConfig {
             // CaisseSessionController
             auth.requestMatchers(HttpMethod.POST, SLASH + CAISSE_SESSION_CONTROLLER + "/open").hasAnyAuthority(CAISSE_SESSION_CREATE, ADMIN);
             auth.requestMatchers(HttpMethod.PUT, SLASH + CAISSE_SESSION_CONTROLLER + "/close").hasAnyAuthority(CAISSE_SESSION_CLOSE, ADMIN);
+            // Closing other sessions from the admin UI: not for till terminals (API key)
+            auth.requestMatchers(HttpMethod.PUT, SLASH + CAISSE_SESSION_CONTROLLER + "/admin-close").hasAnyAuthority(ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + CAISSE_SESSION_CONTROLLER + "/current").hasAnyAuthority(CAISSE_SESSION_READ, CAISSE_SESSION_CREATE, CAISSE_SESSION_CLOSE, ADMIN);
             auth.requestMatchers(HttpMethod.POST, SLASH + CAISSE_SESSION_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(CAISSE_SESSION_READ, ADMIN);
+            auth.requestMatchers(HttpMethod.GET, SLASH + CAISSE_SESSION_CONTROLLER + "/*/sales").hasAnyAuthority(CAISSE_SESSION_READ, ADMIN);
 
             // DashboardController
             auth.requestMatchers(HttpMethod.GET, SLASH + DASHBOARD_CONTROLLER + "/stats").hasAnyAuthority(DASHBOARD_READ, ADMIN);

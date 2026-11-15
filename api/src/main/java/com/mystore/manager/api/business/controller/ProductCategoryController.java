@@ -53,8 +53,9 @@ public class ProductCategoryController {
     }
 
     @GetMapping(path = FIND_ALL_EP, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ProductCategoryPayload>> findAll() {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<ProductCategoryPayload>> findAll(
+            @RequestParam(name = "displayedOnly", defaultValue = "false") boolean displayedOnly) {
+        return new ResponseEntity<>(service.findAll(displayedOnly), HttpStatus.OK);
     }
 
     @PostMapping(path = FIND_ALL_BY_CRITERIA_EP, produces = MediaType.APPLICATION_JSON_VALUE)

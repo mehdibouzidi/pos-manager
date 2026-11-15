@@ -39,6 +39,10 @@ public class ProductEntity extends AbstractBusinessGlobalData {
     @Column(name = "photo", columnDefinition = "bytea")
     private byte[] photo;
 
+    /** Shown in the till (POS UI). A hidden category hides all its products. */
+    @Column(name = "displayed_in_pos", nullable = false)
+    private boolean displayedInPos = true;
+
     @Override
     public String toString() {
         return "ProductEntity{" +

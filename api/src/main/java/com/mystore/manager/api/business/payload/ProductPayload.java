@@ -17,4 +17,8 @@ public class ProductPayload extends GlobalDataPayload {
     private Integer categoryId;
     private String categoryName;
     private String photo; // base64 encoded
+    /** Shown in the till; null on update = unchanged. */
+    private Boolean displayedInPos;
+    /** Read-only: false when the product's category is hidden (the product is then hidden too). */
+    private Boolean categoryDisplayedInPos;
 }

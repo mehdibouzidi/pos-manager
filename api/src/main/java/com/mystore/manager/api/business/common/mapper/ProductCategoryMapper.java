@@ -19,6 +19,7 @@ public class ProductCategoryMapper implements IMapper<ProductCategoryPayload, Pr
         if (Objects.nonNull(payload.getPhoto())) {
             entity.setPhoto(Base64.getDecoder().decode(payload.getPhoto()));
         }
+        if (Objects.nonNull(payload.getDisplayedInPos())) entity.setDisplayedInPos(payload.getDisplayedInPos());
         return entity;
     }
 
@@ -26,6 +27,7 @@ public class ProductCategoryMapper implements IMapper<ProductCategoryPayload, Pr
         ProductCategoryPayload payload = new ProductCategoryPayload();
         if (Objects.nonNull(entity)) {
             payload = BusinessGlobalDataMapper.entityToPayload(entity, payload);
+            payload.setDisplayedInPos(entity.isDisplayedInPos());
             if (Objects.nonNull(entity.getPhoto())) {
                 payload.setPhoto(Base64.getEncoder().encodeToString(entity.getPhoto()));
             }

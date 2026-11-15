@@ -101,26 +101,41 @@ public class ProductService implements com.mystore.manager.api.business.service.
     @Override
     public GlobalPayload<ProductPayload> findAllByCriteria(ProductCriteria criteria) {
 
-        GlobalPayload<ProductPayload> result = CommonUtil.fetchPage(
-                entityManager,
-                "ProductEntity",
-                criteria,
-                criteria.toMap(),
-                mapper,
-                query -> {}
-        );
-        
-        return result;
+        if (criteria.getDisplayedInPos() == null) {
+            return CommonUtil.fetchPage(entityManager, "ProductEntity", criteria, criteria.toMap(), mapper, query -> {});
+        }
+        // Effective visibility in the till: the product AND its category (if any) must be displayed.
+        // Subquery rather than en.category.displayedInPos, whose implicit inner join would drop products without category.
+        String hiddenCategory = "EXISTS (SELECT c.id FROM ProductCategoryEntity c WHERE c = en.category AND c.displayedInPos = false)";
+        String condition = criteria.getDisplayedInPos()
+                ? "(en.displayedInPos = true AND NOT " + hiddenCategory + ")"
+                : "(en.displayedInPos = false OR " + hiddenCategory + ")";
+        String where = CommonUtil.appendConditions(
+                CommonUtil.selectCritQueryBuilderWithoutSort("ProductEntity", criteria.toMap(), criteria, true),
+                List.of(condition));
+        return CommonUtil.fetchPage(entityManager, where + CommonUtil.getSort(criteria), CommonUtil.toCountQuery(where),
+                criteria, mapper, query -> {});
     }
     
     @Override
     public List<ProductPayload> findAll() {
+        return findAll(false);
+    }
+
+    @Override
+    public List<ProductPayload> findAll(boolean displayedOnly) {
         List<ProductEntity> entities;
         if (PosContext.isSuperAdmin()) {
             entities = repository.findAll(Sort.by("id"));
         } else {
             Integer posId = PosContext.getPosId();
             entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
+        }
+        if (displayedOnly) {
+            // A hidden category hides all its products
+            entities = entities.stream()
+                    .filter(p -> p.isDisplayedInPos() && (p.getCategory() == null || p.getCategory().isDisplayedInPos()))
+                    .toList();
         }
         return mapper.entityListToPayload(entities, false);
     }

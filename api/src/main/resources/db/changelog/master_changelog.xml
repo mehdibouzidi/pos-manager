@@ -58,6 +58,10 @@
     <include file="db/changelog/sql/V2053_add_caisse_session_fk_to_sale.sql"/>
     <!-- Offline sync idempotency (local_id) + one OPEN session per POS -->
     <include file="db/changelog/sql/V2054_offline_sync_idempotency.sql"/>
+    <!-- Stock movement → sale link (caisse column/filter on the admin sales page) -->
+    <include file="db/changelog/sql/V2055_add_sale_fk_to_stock_movement.sql"/>
+    <!-- Show/hide categories and products in the till -->
+    <include file="db/changelog/sql/V2056_add_displayed_in_pos.sql"/>
 
 </databaseChangeLog>
     

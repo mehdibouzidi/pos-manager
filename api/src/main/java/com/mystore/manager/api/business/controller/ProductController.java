@@ -79,8 +79,9 @@ public class ProductController {
     }
 
     @GetMapping(path = FIND_ALL_EP, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ProductPayload>> findAllByBlogPostId() {
-        return new ResponseEntity(service.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<ProductPayload>> findAllByBlogPostId(
+            @RequestParam(name = "displayedOnly", defaultValue = "false") boolean displayedOnly) {
+        return new ResponseEntity(service.findAll(displayedOnly), HttpStatus.OK);
     }
 
     @PostMapping(path = FIND_ALL_BY_CRITERIA_EP, produces = MediaType.APPLICATION_JSON_VALUE)

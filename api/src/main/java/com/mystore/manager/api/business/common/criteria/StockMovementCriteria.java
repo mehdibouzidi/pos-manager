@@ -15,4 +15,8 @@ public class StockMovementCriteria extends PaginationCriteria {
     private Integer posId;
     private String movementType;
     private String reason;
+    private Integer caisseSessionId;
+    /** yyyy-MM-dd, inclusive, Algiers local day (filters movementDate). */
+    private String fromDate;
+    private String toDate;
 }
