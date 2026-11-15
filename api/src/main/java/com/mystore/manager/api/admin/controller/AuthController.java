@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 import static com.mystore.manager.api.admin.util.AdminConstants.*;
@@ -59,9 +60,6 @@ public class AuthController {
 
     @Autowired
     private RsaKeyService rsaKeyService;
-
-    @Value("${app.jwtExpirationInMs}")
-    private int jwtExpirationInMs;
 
     @Value("${app.cookieSecure:false}")
     private boolean cookieSecure;
@@ -149,7 +147,9 @@ public class AuthController {
         // Pass POS info to JWT generation
         Integer posId = pos != null ? pos.getId() : null;
         String posCode = pos != null ? pos.getCode() : null;
-        final String jwt = jwtService.generateToken(userDetails, posId, posCode, userEntity.isSuperAdmin());
+        final Instant now = Instant.now();
+        final Instant sessionExpiry = jwtService.computeSessionExpiry(now);
+        final String jwt = jwtService.generateToken(userDetails, posId, posCode, userEntity.isSuperAdmin(), sessionExpiry);
 
         UserPayload user = userService.findByUsernameOrEmail(userDetails.getUsername());
 
@@ -174,13 +174,13 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(cookieSecure)
                     .path("/")
-                    .maxAge(Duration.ofMillis(jwtExpirationInMs))
+                    .maxAge(Duration.between(now, sessionExpiry))
                     .sameSite(cookieSameSite)
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
             // Return expiry timestamp so the frontend can manage session without reading the token
-            result.setTokenExpiry(System.currentTimeMillis() + jwtExpirationInMs);
+            result.setTokenExpiry(sessionExpiry.toEpochMilli());
 
             sessionLogService.recordLogin(userEntity, pos, request.getRemoteAddr());
         }

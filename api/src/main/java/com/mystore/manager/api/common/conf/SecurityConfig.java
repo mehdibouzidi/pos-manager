@@ -221,6 +221,12 @@ public class SecurityConfig {
             auth.anyRequest().authenticated();
         });
 
+        // Unauthenticated (missing/expired JWT, unknown API key) → 401, so clients can tell an
+        // expired session apart from a missing privilege (403) and send the user back to login.
+        http.exceptionHandling(ex -> ex.authenticationEntryPoint(
+                new org.springframework.security.web.authentication.HttpStatusEntryPoint(
+                        org.springframework.http.HttpStatus.UNAUTHORIZED)));
+
         http.addFilterBefore(
                 new ApiKeyAuthFilter(apiKeyRepository),
                 JwtRequestFilter.class

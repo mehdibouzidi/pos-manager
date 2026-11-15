@@ -9,6 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +28,15 @@ public class JWTService {
     @Value("${app.jwtSecret}")
     private String SECRET_KEY;
 
-    @Value("${app.jwtExpirationInMs}")
-    private int jwtExpirationInMs;
+    /** Local hour at which every session ends, forcing users to log in again each morning. */
+    @Value("${app.session.cutoffHour:4}")
+    private int sessionCutoffHour;
+
+    @Value("${app.session.zone:Africa/Algiers}")
+    private String sessionZone;
+
+    /** A login closer than this to the cutoff is carried over to the next day's cutoff. */
+    private static final Duration MIN_SESSION = Duration.ofHours(1);
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -67,7 +78,24 @@ public class JWTService {
         return generateToken(userDetails, null, null, false);
     }
     
+    /**
+     * Sessions do not last a fixed duration: they all end at the next cutoff hour (local time),
+     * so a till never gets locked out mid-service and everyone logs in again each morning.
+     */
+    public Instant computeSessionExpiry(Instant now) {
+        ZoneId zone = ZoneId.of(sessionZone);
+        ZonedDateTime cutoff = now.atZone(zone).withHour(sessionCutoffHour).withMinute(0).withSecond(0).withNano(0);
+        while (!cutoff.toInstant().isAfter(now.plus(MIN_SESSION))) {
+            cutoff = cutoff.plusDays(1);
+        }
+        return cutoff.toInstant();
+    }
+
     public String generateToken(UserDetails userDetails, Integer posId, String posCode, boolean superAdmin) {
+        return generateToken(userDetails, posId, posCode, superAdmin, computeSessionExpiry(Instant.now()));
+    }
+
+    public String generateToken(UserDetails userDetails, Integer posId, String posCode, boolean superAdmin, Instant expiresAt) {
         Map<String, Object> claims = new HashMap<>();
         boolean isAdmin = false;
         boolean isActive = userDetails.isEnabled();
@@ -92,13 +120,12 @@ public class JWTService {
             claims.put("posCode", posCode);
         }
 
-        return createToken(claims, userDetails.getUsername());
+        return createToken(claims, userDetails.getUsername(), Date.from(expiresAt));
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String createToken(Map<String, Object> claims, String subject, Date expiryDate) {
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder().setClaims(claims).setSubject(subject)
                 .setIssuedAt(now)
