@@ -11,23 +11,15 @@
 <mat-dialog-content>
   <form [formGroup]="generalForm" class="flex flex-col gap-4 pt-4">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Produit</mat-label>
-      <mat-select formControlName="productId">
-        <mat-option *ngFor="let p of products" [value]="p.id">
-          {{ p.name }} ({{ p.code }})
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="f['productId'].hasError('required')">Le produit est obligatoire</mat-error>
-    </mat-form-field>
+    <vex-autocomplete-select appearance="outline" label="Produit" formControlName="productId" [required]="true"
+      placeholder="Rechercher un produit..." [options]="productOptions"
+      [error]="f['productId'].touched && f['productId'].hasError('required') ? 'Le produit est obligatoire' : null">
+    </vex-autocomplete-select>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Type de mouvement</mat-label>
-      <mat-select formControlName="movementType">
-        <mat-option *ngFor="let t of movementTypes" [value]="t.value">{{ t.label }}</mat-option>
-      </mat-select>
-      <mat-error *ngIf="f['movementType'].hasError('required')">Le type est obligatoire</mat-error>
-    </mat-form-field>
+    <vex-autocomplete-select appearance="outline" label="Type de mouvement" formControlName="movementType" [required]="true"
+      placeholder="Rechercher un type..." [options]="movementTypes"
+      [error]="f['movementType'].touched && f['movementType'].hasError('required') ? 'Le type est obligatoire' : null">
+    </vex-autocomplete-select>
 
     <mat-form-field appearance="outline">
       <mat-label>Quantité</mat-label>

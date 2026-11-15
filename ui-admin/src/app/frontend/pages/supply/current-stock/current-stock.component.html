@@ -99,17 +99,17 @@
 
         <ng-container matColumnDef="retailPrice">
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="uppercase">Prix Détail</th>
-          <td mat-cell *matCellDef="let row">{{ row.retailPrice | number:'1.2-2' }}</td>
+          <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.retailPrice | number:'1.2-2' }} Da</td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <ng-container matColumnDef="stockValue">
           <th mat-header-cell *matHeaderCellDef class="uppercase">Valeur en Stock</th>
           <td mat-cell *matCellDef="let row">
-            <span class="font-semibold text-primary">{{ getStockValue(row) | number:'1.2-2' }}</span>
+            <span class="font-semibold text-primary whitespace-nowrap">{{ getStockValue(row) | number:'1.2-2' }} Da</span>
           </td>
           <td mat-footer-cell *matFooterCellDef>
-            <span class="font-bold text-primary">{{ totalStockValue | number:'1.2-2' }}</span>
+            <span class="font-bold text-primary whitespace-nowrap">{{ totalStockValue | number:'1.2-2' }} Da</span>
           </td>
         </ng-container>
 

@@ -25,7 +25,7 @@
       <h3 class="text-sm font-semibold text-secondary uppercase tracking-wide mb-3">Mouvement</h3>
       <div class="grid grid-cols-2 gap-2 text-sm">
         <span class="text-secondary">Type</span>
-        <span class="text-xs font-semibold px-2 py-1 rounded-full w-fit" [ngClass]="getMovementTypeClass(element.movementType)">
+        <span class="text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap w-fit" [ngClass]="getMovementTypeClass(element.movementType)">
           {{ getMovementTypeLabel(element.movementType) }}
         </span>
         <span class="text-secondary">Quantité</span>

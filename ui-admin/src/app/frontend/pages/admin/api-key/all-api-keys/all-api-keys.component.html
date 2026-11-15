@@ -42,7 +42,15 @@
                         </ng-container>
                     </ng-container>
 
-                    <ng-container matColumnDef="actions">
+                    <ng-container matColumnDef="createdAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Créé</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.createdByFullName" [username]="row.createdByUsername" [date]="row.createdAt"></vex-audit-cell></td>
+                </ng-container>
+                <ng-container matColumnDef="updatedAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Modifié</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
                         <th *matHeaderCellDef mat-header-cell></th>
                         <td *matCellDef="let row" mat-cell>
                             <div class="flex">

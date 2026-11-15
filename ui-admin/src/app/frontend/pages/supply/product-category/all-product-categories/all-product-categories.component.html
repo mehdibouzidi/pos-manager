@@ -25,6 +25,9 @@
                         <mat-label>Nom</mat-label>
                         <input matInput placeholder="Ex. Boissons" name="f.name" [(ngModel)]="criteria.name" (keydown.enter)="search()">
                     </mat-form-field>
+                    <vex-autocomplete-select class="input" label="Affiché en caisse" placeholder="Tous"
+                        [options]="displayedOptions" [(ngModel)]="criteria.displayedInPos" (valueChange)="search()">
+                    </vex-autocomplete-select>
                 </div>
 
                 <!--  TABLE HEADER Actions -->
@@ -76,7 +79,26 @@
                     </ng-container>
 
                     <!-- Actions Column -->
-                    <ng-container matColumnDef="actions">
+                    <ng-container matColumnDef="displayedInPos">
+                    <th *matHeaderCellDef class="uppercase text-center" mat-header-cell>Affiché En Caisse</th>
+                    <td *matCellDef="let row" mat-cell class="text-center align-middle">
+                        <mat-icon *ngIf="row.displayedInPos !== false; else hiddenCat"
+                            svgIcon="mat:check_circle" class="block mx-auto text-green-600" matTooltip="Affichée en caisse"></mat-icon>
+                        <ng-template #hiddenCat>
+                            <mat-icon svgIcon="mat:cancel" class="block mx-auto text-red-500"
+                                matTooltip="Masquée : tous ses produits sont masqués en caisse"></mat-icon>
+                        </ng-template>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="createdAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Créé</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.createdByFullName" [username]="row.createdByUsername" [date]="row.createdAt"></vex-audit-cell></td>
+                </ng-container>
+                <ng-container matColumnDef="updatedAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Modifié</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
                         <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
                         <td *matCellDef="let row" mat-cell>
                             <div class="flex">

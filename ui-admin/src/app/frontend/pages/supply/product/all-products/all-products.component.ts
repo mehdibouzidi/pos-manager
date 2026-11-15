@@ -1,3 +1,4 @@
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
@@ -43,6 +44,8 @@ import { DeleteConfirmationDialogComponent } from 'src/app/frontend/common/delet
 import { AddProductComponent } from '../add-product/add-product.component';
 import { EditProductComponent } from '../edit-product/edit-product.component';
 import { ShowProductComponent } from '../show-product/show-product.component';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
+import { ProductCategoryService } from 'src/app/backend/service/business/product-category.service';
 import { ProductCriteria } from 'src/app/backend/criteria/business/productcriteria';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
 import { ProductService } from 'src/app/backend/service/business/product.service';
@@ -57,6 +60,7 @@ import { finalize } from 'rxjs/operators';
   styleUrl: './all-products.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
+    AuditCellComponent, AutocompleteSelectComponent,
     VexPageLayoutComponent,
     VexPageLayoutHeaderDirective,
     VexBreadcrumbsComponent,
@@ -86,11 +90,17 @@ import { finalize } from 'rxjs/operators';
 })
 export class AllProductsComponent {
   criteria = new ProductCriteria();
+  categoryOptions: AutocompleteOption[] = [];
+  displayedOptions: AutocompleteOption[] = [
+    { value: true, label: 'Oui' },
+    { value: false, label: 'Non' }
+  ];
   globalPayload = new GlobalPayload<ProductPayload>();
 
   /******************************************************GLOBAL INITIALIZATION*********************************************************************/
   constructor(
     private service: ProductService,
+    private categoryService: ProductCategoryService,
     private router: Router,
     private liveAnnouncer: LiveAnnouncer,
     public dialog: MatDialog,
@@ -112,7 +122,16 @@ export class AllProductsComponent {
 
   ngOnInit(): void {
     this.setupTable();
+    this.loadCategories();
     this.search();
+  }
+
+  loadCategories() {
+    this.categoryService.findAll().subscribe({
+      next: (data: any) => {
+        this.categoryOptions = (data || []).map((c: any) => ({ value: c.id, label: c.name, hint: c.code }));
+      }
+    });
   }
 
   setupTable() {
@@ -197,6 +216,8 @@ export class AllProductsComponent {
       type: 'text',
       visible: true
     },
+    { label: 'Catégorie', property: 'categoryName', type: 'badge', visible: true },
+    { label: 'Affiché En Caisse', property: 'displayedInPos', type: 'badge', visible: true },
     {
       label: 'Stock Min',
       property: 'minStock',
@@ -218,7 +239,7 @@ export class AllProductsComponent {
     {
       label: 'Prix Détail',
       property: 'retailPrice',
-      type: 'text',
+      type: 'badge',
       visible: true
     },
     {
@@ -253,6 +274,8 @@ export class AllProductsComponent {
       type: 'text',
       visible: false,
     },
+    { label: 'Créé', property: 'createdAudit', type: 'audit', visible: true },
+    { label: 'Modifié', property: 'updatedAudit', type: 'audit', visible: true },
     {
       label: 'Actions',
       property: 'actions',

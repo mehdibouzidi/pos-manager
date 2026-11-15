@@ -29,6 +29,8 @@ import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { AdminConstants } from 'src/app/backend/service/util/AdminConstants';
 import { finalize } from 'rxjs/operators';
 import { DeleteConfirmationDialogComponent } from 'src/app/frontend/common/delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { StockMovementCriteria } from 'src/app/backend/criteria/business/stock-movement-criteria';
 import { StockMovementPayload } from 'src/app/backend/payloads/business/stock-movement-payload';
 import { StockMovementService } from 'src/app/backend/service/business/stock-movement.service';
@@ -52,11 +54,17 @@ import { ProductCategoryService } from 'src/app/backend/service/business/product
     NgIf, MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule,
     MatTableModule, MatSortModule, NgFor, NgClass, MatPaginatorModule,
     FormsModule, MatDialogModule, MatCheckboxModule, MatInputModule,
-    MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule
+    MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule,
+    AutocompleteSelectComponent, AuditCellComponent
   ]
 })
 export class AllStockMovementsComponent implements OnInit {
   criteria = new StockMovementCriteria();
+  movementTypeOptions: AutocompleteOption[] = [
+    { value: 'ENTRY', label: 'Entrée' },
+    { value: 'LOSS', label: 'Perte' },
+    { value: 'SALE', label: 'Vente' }
+  ];
   globalPayload = new GlobalPayload<StockMovementPayload>();
 
   allProducts: ProductPayload[] = [];
@@ -167,6 +175,8 @@ export class AllStockMovementsComponent implements OnInit {
   }
 
   search() {
+    this.criteria.fromDate = this.criteria.fromDate || null;
+    this.criteria.toDate = this.criteria.toDate || null;
     this.criteria.reason = this.criteria.reason || null;
     this.findByCriteria();
   }
@@ -232,6 +242,8 @@ export class AllStockMovementsComponent implements OnInit {
     { label: 'Quantité',  property: 'quantity',     type: 'text',   visible: true },
     { label: 'Motif',     property: 'reason',       type: 'text',   visible: true },
     { label: 'Date',      property: 'movementDate', type: 'text',   visible: true },
+    { label: 'Créé',      property: 'createdAudit', type: 'audit',  visible: true },
+    { label: 'Modifié',   property: 'updatedAudit', type: 'audit',  visible: true },
     { label: 'Actions',   property: 'actions',      type: 'button', visible: true }
   ];
 

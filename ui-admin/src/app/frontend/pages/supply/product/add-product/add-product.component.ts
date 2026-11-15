@@ -1,3 +1,4 @@
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CommonModule, NgIf } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import {
@@ -22,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
 import { Observable } from 'rxjs';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
 import { ProductCategoryPayload } from 'src/app/backend/payloads/business/product-category-payload';
@@ -34,6 +36,7 @@ import { ProductCategoryService } from 'src/app/backend/service/business/product
   templateUrl: './add-product.component.html',
   styleUrl: './add-product.component.scss',
   imports: [
+    MatSlideToggleModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatDialogModule,
@@ -47,6 +50,7 @@ import { ProductCategoryService } from 'src/app/backend/service/business/product
     MatDatepickerModule,
     MatCommonModule,
     MatSelectModule,
+    AutocompleteSelectComponent,
     CommonModule
   ]
 })
@@ -56,6 +60,7 @@ export class AddProductComponent {
 
   payload = new ProductPayload();
   categories: ProductCategoryPayload[] = [];
+  categoryOptions: AutocompleteOption[] = [];
   photoPreview: string | null = null;
 
   constructor(
@@ -73,6 +78,7 @@ export class AddProductComponent {
   add(): void {
     this.payload.name = this.f['name'].value;
     this.payload.code = this.f['code'].value;
+    this.payload.displayedInPos = this.f['displayedInPos'].value;
     this.payload.maxStock = this.f['maxStock'].value;
     this.payload.minStock = this.f['minStock'].value;
     this.payload.retailPrice = this.f['retailPrice'].value;
@@ -103,7 +109,10 @@ export class AddProductComponent {
 
   initData() {
     this.categoryService.findAll().subscribe({
-      next: (res: any) => { this.categories = res as ProductCategoryPayload[]; }
+      next: (res: any) => {
+        this.categories = res as ProductCategoryPayload[];
+        this.categoryOptions = this.categories.map(c => ({ value: c.id, label: c.name, hint: c.code }));
+      }
     });
   }
 
@@ -120,7 +129,8 @@ export class AddProductComponent {
       maxStock: [this.payload.maxStock],
       minStock: [this.payload.minStock],
       retailPrice: [this.payload.retailPrice],
-      categoryId: [this.payload.categoryId]
+      categoryId: [this.payload.categoryId],
+      displayedInPos: [this.payload.displayedInPos ?? true]
     });
   }
 

@@ -1,3 +1,4 @@
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import {
@@ -50,6 +51,7 @@ import { finalize } from 'rxjs/operators';
   styleUrl: './all-pos.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
+    AuditCellComponent,
     VexPageLayoutComponent,
     VexPageLayoutHeaderDirective,
     VexBreadcrumbsComponent,
@@ -90,7 +92,7 @@ export class AllPosComponent implements OnInit {
   selection = new SelectionModel<PosPayload>(true, []);
   isLoading = false;
 
-  displayedColumns: string[] = ['code', 'name', 'address', 'phone', 'email', 'active', 'actions'];
+  displayedColumns: string[] = ['code', 'name', 'address', 'phone', 'email', 'active', 'createdAudit', 'updatedAudit', 'actions'];
 
   columns: TableColumn<PosPayload>[] = [
     { label: 'Code', property: 'code', type: 'text', visible: true },
@@ -99,6 +101,8 @@ export class AllPosComponent implements OnInit {
     { label: 'Téléphone', property: 'phone', type: 'text', visible: true },
     { label: 'Email', property: 'email', type: 'text', visible: true },
     { label: 'Actif', property: 'active', type: 'text', visible: true },
+    { label: 'Créé', property: 'createdAudit', type: 'audit', visible: true },
+    { label: 'Modifié', property: 'updatedAudit', type: 'audit', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
 

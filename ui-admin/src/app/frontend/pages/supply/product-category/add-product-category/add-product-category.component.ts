@@ -1,3 +1,4 @@
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CommonModule, NgIf } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -17,6 +18,7 @@ import { ProductCategoryService } from 'src/app/backend/service/business/product
   templateUrl: './add-product-category.component.html',
   styleUrl: './add-product-category.component.scss',
   imports: [
+    MatSlideToggleModule,
     ReactiveFormsModule,
     MatDialogModule,
     NgIf,
@@ -65,6 +67,7 @@ export class AddProductCategoryComponent {
   add(): void {
     this.payload.name = this.f['name'].value;
     this.payload.code = this.f['code'].value;
+    this.payload.displayedInPos = this.f['displayedInPos'].value;
     this.service.add(this.payload).subscribe({
       next: (response: ProductCategoryPayload) => {
         if (response != null) {
@@ -78,7 +81,8 @@ export class AddProductCategoryComponent {
   initForm() {
     this.generalForm = this.fb.group({
       name: [this.payload.name, [Validators.required, Validators.maxLength(100)]],
-      code: [this.payload.code, [Validators.required, Validators.maxLength(30)]]
+      code: [this.payload.code, [Validators.required, Validators.maxLength(30)]],
+      displayedInPos: [this.payload.displayedInPos ?? true]
     });
   }
 }

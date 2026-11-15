@@ -71,6 +71,7 @@ th{
 }
 
 .table-filter mat-form-field,
+.table-filter vex-autocomplete-select,
 .table-filter mat-checkbox,
 .table-filter button {
   margin-right: 16px !important; /* Add space to the right of each component */
@@ -83,8 +84,22 @@ th{
   align-items: center !important;
 }
 
-.table-filter mat-form-field {
+.table-filter mat-form-field,
+.table-filter vex-autocomplete-select {
   min-width: 200px !important; /* Minimum width for form fields */
+}
+
+/* Date filters (Du / Au): narrower so a full filter row fits on one line */
+.table-filter mat-form-field.date-filter {
+  flex: 0 1 165px !important;
+  min-width: 150px !important;
+}
+
+/* Autocomplete select wrapper: the inner field fills the slot, without its own extra spacing */
+.table-filter vex-autocomplete-select mat-form-field {
+  margin-right: 0 !important;
+  flex: 1 1 auto !important;
+  width: 100%;
 }
 
 .table-filter mat-checkbox {
@@ -109,6 +124,7 @@ th{
   }
 
   .table-filter mat-form-field,
+  .table-filter vex-autocomplete-select,
   .table-filter mat-checkbox,
   .table-filter button {
     margin-right: 0 !important; /* Remove right margin on small screens */
@@ -233,4 +249,12 @@ form h5, .component-header h5{
 
 .signature{
   margin-bottom: 300px !important;
+}
+
+/* Sticky table columns (actions / selection) need an opaque background to cover scrolled cells */
+.mat-mdc-table .mat-mdc-table-sticky {
+  background-color: var(--mat-table-background-color, #fff);
+}
+.mat-mdc-table .mat-mdc-table-sticky-border-elem-right {
+  box-shadow: -6px 0 6px -6px rgba(0, 0, 0, 0.15);
 }

@@ -93,4 +93,5 @@ export class RequestsConstants {
     // BUSINESS - Caisse Session
     static readonly CAISSE_SESSION_REQ = RequestsConstants.API_SOURCE + BusinessConstants.CAISSE_SESSION;
     static readonly CAISSE_SESSION_FINDALL_CRITERIA_REQ = RequestsConstants.CAISSE_SESSION_REQ + UtilStatic.SLASH + UtilStatic.FIND_ALL_BY_CRITERIA;
+    static readonly CAISSE_SESSION_ADMIN_CLOSE_REQ = RequestsConstants.CAISSE_SESSION_REQ + UtilStatic.SLASH + 'admin-close';
 }

@@ -18,6 +18,7 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TableColumn } from '@vex/interfaces/table-column.interface';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { stagger40ms } from '@vex/animations/stagger.animation';
@@ -27,9 +28,12 @@ import { GlobalPayload } from 'src/app/backend/payloads/global/globalpayload';
 import { AuthService } from 'src/app/backend/service/admin/auth.service';
 import { AdminConstants } from 'src/app/backend/service/util/AdminConstants';
 import { finalize } from 'rxjs/operators';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { CaisseSessionCriteria } from 'src/app/backend/criteria/business/caisse-session-criteria';
 import { CaisseSessionPayload } from 'src/app/backend/payloads/business/caisse-session-payload';
 import { CaisseSessionService } from 'src/app/backend/service/business/caisse-session.service';
+import { AdminCloseCaisseComponent, AdminCloseCaisseData } from '../admin-close-caisse/admin-close-caisse.component';
 import { ShowCaisseSessionComponent } from '../show-caisse-session/show-caisse-session.component';
 
 @Component({
@@ -43,20 +47,31 @@ import { ShowCaisseSessionComponent } from '../show-caisse-session/show-caisse-s
     MatButtonToggleModule, ReactiveFormsModule, VexPageLayoutContentDirective,
     NgIf, MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule,
     MatTableModule, MatSortModule, NgFor, NgClass, MatPaginatorModule,
-    FormsModule, MatDialogModule, MatCheckboxModule, MatInputModule,
-    MatProgressBarModule, CommonModule, MatSelectModule
+    FormsModule, MatDialogModule, MatCheckboxModule, MatInputModule, MatSnackBarModule,
+    MatProgressBarModule, CommonModule, MatSelectModule,
+    AutocompleteSelectComponent, AuditCellComponent
   ]
 })
 export class AllCaisseSessionsComponent implements OnInit {
   criteria = new CaisseSessionCriteria();
+  statusOptions: AutocompleteOption[] = [
+    { value: 'OPEN', label: 'Ouverte' },
+    { value: 'CLOSED', label: 'Clôturée' }
+  ];
   globalPayload = new GlobalPayload<CaisseSessionPayload>();
 
   constructor(
     private service: CaisseSessionService,
     private liveAnnouncer: LiveAnnouncer,
     public dialog: MatDialog,
-    public authService: AuthService
+    public authService: AuthService,
+    private snackBar: MatSnackBar
   ) {}
+
+  /** Closing caisses from the admin is reserved to administrators (same rule as the API). */
+  canClose(): boolean {
+    return this.authService.hasRoles(Array.of(AdminConstants.ADMIN));
+  }
 
   canRead(): boolean {
     return this.authService.hasRoles(Array.of(AdminConstants.CAISSE_SESSION_READ, AdminConstants.ADMIN));
@@ -88,6 +103,8 @@ export class AllCaisseSessionsComponent implements OnInit {
 
   findByCriteria() {
     if (this.isLoading) return;
+    // Rows change: a selection made on other rows/filters must not be closed by mistake
+    this.selection.clear();
     this.isLoading = true;
     this.service.findAllByCriteria(this.criteria)
       .pipe(finalize(() => (this.isLoading = false)))
@@ -102,8 +119,64 @@ export class AllCaisseSessionsComponent implements OnInit {
       });
   }
 
+  // ---------- Closing caisses left open ----------
+
+  isOpen(row: CaisseSessionPayload): boolean {
+    return row?.status === 'OPEN';
+  }
+
+  get openRows(): CaisseSessionPayload[] {
+    return (this.dataSource.data ?? []).filter(r => this.isOpen(r));
+  }
+
+  isAllOpenSelected(): boolean {
+    const open = this.openRows;
+    return open.length > 0 && open.every(r => this.selection.isSelected(r));
+  }
+
+  toggleAllOpen(): void {
+    this.isAllOpenSelected() ? this.selection.clear() : this.selection.select(...this.openRows);
+  }
+
+  closeOne(row: CaisseSessionPayload): void {
+    this.openCloseDialog({ sessions: [row] });
+  }
+
+  closeSelection(): void {
+    if (this.selection.isEmpty()) return;
+    this.openCloseDialog({ sessions: this.selection.selected });
+  }
+
+  /** Counts every open caisse (all pages, ignoring filters) before asking for confirmation. */
+  closeAllOpen(): void {
+    const countCriteria = new CaisseSessionCriteria();
+    countCriteria.status = 'OPEN';
+    countCriteria.size = 1;
+    this.service.findAllByCriteria(countCriteria).subscribe({
+      next: (res: GlobalPayload<CaisseSessionPayload>) => {
+        const openCount = res?.totalNumberOfElements ?? 0;
+        if (openCount === 0) {
+          this.snackBar.open('Aucune caisse ouverte.', 'OK', { duration: 3000 });
+          return;
+        }
+        this.openCloseDialog({ sessions: [], all: true, openCount });
+      }
+    });
+  }
+
+  private openCloseDialog(data: AdminCloseCaisseData): void {
+    this.dialog.open(AdminCloseCaisseComponent, { width: '560px', data })
+      .afterClosed()
+      .subscribe((closed: CaisseSessionPayload[] | null) => {
+        if (!closed) return;
+        const n = closed.length;
+        this.snackBar.open(`${n} caisse${n > 1 ? 's' : ''} clôturée${n > 1 ? 's' : ''}.`, 'OK', { duration: 3000 });
+        this.search();
+      });
+  }
+
   goToShow(element: CaisseSessionPayload) {
-    this.dialog.open(ShowCaisseSessionComponent, { width: '700px', data: { element } });
+    this.dialog.open(ShowCaisseSessionComponent, { width: '960px', maxWidth: '95vw', data: { element } });
   }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -112,10 +185,12 @@ export class AllCaisseSessionsComponent implements OnInit {
   layoutCtrl = new UntypedFormControl('fullwidth');
   isLoading = false;
   dataSource = new MatTableDataSource<CaisseSessionPayload>();
-  selection = new SelectionModel<CaisseSessionPayload>(true, []);
+  // compareWith on id: rows are new objects after each reload
+  selection = new SelectionModel<CaisseSessionPayload>(true, [], true, (a, b) => a?.id === b?.id);
 
   @Input()
   columns: TableColumn<CaisseSessionPayload>[] = [
+    { label: '',             property: 'select',            type: 'checkbox', visible: true },
     { label: 'Terminal',     property: 'posName',           type: 'text',   visible: true },
     { label: 'Caissier',     property: 'createdByFullName', type: 'text',   visible: true },
     { label: 'Ouverture',    property: 'openedAt',          type: 'text',   visible: true },
@@ -126,6 +201,7 @@ export class AllCaisseSessionsComponent implements OnInit {
     { label: 'Compté',       property: 'closingBalance',    type: 'text',   visible: false },
     { label: 'Écart',        property: 'variance',          type: 'text',   visible: true },
     { label: 'Statut',       property: 'status',            type: 'text',   visible: true },
+    { label: 'Dernière modif.', property: 'updatedAudit', type: 'audit', visible: true },
     { label: 'Actions',      property: 'actions',           type: 'button', visible: true }
   ];
 

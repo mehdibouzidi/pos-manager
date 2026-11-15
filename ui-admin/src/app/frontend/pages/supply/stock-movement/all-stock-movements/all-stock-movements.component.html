@@ -42,6 +42,20 @@
           </mat-autocomplete>
         </mat-form-field>
 
+        <mat-form-field class="input date-filter">
+          <mat-label>Du</mat-label>
+          <input matInput type="date" [(ngModel)]="criteria.fromDate" (change)="search()" />
+        </mat-form-field>
+
+        <mat-form-field class="input date-filter">
+          <mat-label>Au</mat-label>
+          <input matInput type="date" [(ngModel)]="criteria.toDate" (change)="search()" />
+        </mat-form-field>
+
+        <vex-autocomplete-select class="input" label="Type" placeholder="Tous les types"
+          [options]="movementTypeOptions" [(ngModel)]="criteria.movementType" (valueChange)="search()">
+        </vex-autocomplete-select>
+
       </div>
 
       <!-- Actions bar -->
@@ -79,7 +93,7 @@
         <ng-container matColumnDef="movementType">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
           <td mat-cell *matCellDef="let row">
-            <span class="text-xs font-semibold px-2 py-1 rounded-full" [ngClass]="getMovementTypeClass(row.movementType)">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap" [ngClass]="getMovementTypeClass(row.movementType)">
               {{ getMovementTypeLabel(row.movementType) }}
             </span>
           </td>
@@ -98,6 +112,16 @@
         <ng-container matColumnDef="movementDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
           <td mat-cell *matCellDef="let row">{{ row.movementDate | date:'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAudit">
+          <th mat-header-cell *matHeaderCellDef>Créé</th>
+          <td mat-cell *matCellDef="let row"><vex-audit-cell [name]="row.createdByFullName" [username]="row.createdByUsername" [date]="row.createdAt"></vex-audit-cell></td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAudit">
+          <th mat-header-cell *matHeaderCellDef>Modifié</th>
+          <td mat-cell *matCellDef="let row"><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
         </ng-container>
 
         <ng-container matColumnDef="actions">

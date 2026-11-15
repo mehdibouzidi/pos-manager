@@ -1,3 +1,5 @@
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
@@ -44,6 +46,8 @@ import { ShowProductCategoryComponent } from '../show-product-category/show-prod
   styleUrl: './all-product-categories.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
+    AutocompleteSelectComponent,
+    AuditCellComponent,
     VexPageLayoutComponent,
     VexPageLayoutHeaderDirective,
     VexBreadcrumbsComponent,
@@ -73,6 +77,10 @@ import { ShowProductCategoryComponent } from '../show-product-category/show-prod
 })
 export class AllProductCategoriesComponent {
   criteria = new ProductCategoryCriteria();
+  displayedOptions: AutocompleteOption[] = [
+    { value: true, label: 'Oui' },
+    { value: false, label: 'Non' }
+  ];
   globalPayload = new GlobalPayload<ProductCategoryPayload>();
 
   /******************************************************GLOBAL INITIALIZATION*********************************************************************/
@@ -168,10 +176,13 @@ export class AllProductCategoriesComponent {
     { label: 'Photo', property: 'photo', type: 'image' as any, visible: true },
     { label: 'Code', property: 'code', type: 'text', visible: true },
     { label: 'Nom', property: 'name', type: 'text', visible: true },
+    { label: 'Affiché En Caisse', property: 'displayedInPos', type: 'badge', visible: true },
     { label: 'Créé le', property: 'createdAt', type: 'text', visible: false, cssClasses: ['font-medium'] },
     { label: 'Modifié le', property: 'updatedAt', type: 'text', visible: false, cssClasses: ['font-medium'] },
     { label: 'Créé par', property: 'createdByFullName', type: 'text', visible: false },
     { label: 'Modifié par', property: 'updatedByFullName', type: 'text', visible: false },
+    { label: 'Créé', property: 'createdAudit', type: 'audit', visible: true },
+    { label: 'Modifié', property: 'updatedAudit', type: 'audit', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
 

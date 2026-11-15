@@ -15,6 +15,7 @@ export class CaisseSessionPayload {
     posCode: string;
     posName: string;
     createdByFullName: string;
+    createdByUsername: string;
     createdAt: string;
     updatedAt: string;
 

@@ -10,6 +10,8 @@ export class ProductCriteria extends CommonCriteria{
     categoryId: number;
     categoryName: string;
     categories: Array<string>;
+    /** null = all; true = shown in the till; false = hidden (by itself or by its category). */
+    displayedInPos: boolean;
     subCategoryId: number;
     subCategoryName: string;
     unitId: number;
@@ -28,6 +30,7 @@ export class ProductCriteria extends CommonCriteria{
         this.categoryId = null;
         this.categoryName = null;
         this.categories = null;
+        this.displayedInPos = null;
         this.subCategoryId = null;
         this.subCategoryName = null;
         this.unitId = null;

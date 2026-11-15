@@ -30,6 +30,14 @@
                           <mat-label>Nom</mat-label>
                           <input matInput placeholder="Ex. Poulet" name="f.name" [(ngModel)]="criteria.name"  (keydown.enter)="search()" >
                       </mat-form-field>
+
+                      <vex-autocomplete-select class="input" label="Catégorie" placeholder="Toutes les catégories"
+                          [options]="categoryOptions" [(ngModel)]="criteria.categoryId" (valueChange)="search()">
+                      </vex-autocomplete-select>
+
+                      <vex-autocomplete-select class="input" label="Affiché en caisse" placeholder="Tous"
+                          [options]="displayedOptions" [(ngModel)]="criteria.displayedInPos" (valueChange)="search()">
+                      </vex-autocomplete-select>
                 </div>
 
                 <!--  TABLE HEADER Actions -->
@@ -138,7 +146,38 @@
                         </ng-container>
                     </ng-container>
 
-                    <ng-container matColumnDef="actions">
+                    <ng-container matColumnDef="categoryName">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Catégorie</th>
+                    <td *matCellDef="let row" mat-cell>
+                        <span *ngIf="row.categoryName; else noCat" class="text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap text-primary-600 bg-primary-600/10">{{ row.categoryName }}</span>
+                        <ng-template #noCat><span class="text-secondary">—</span></ng-template>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="retailPrice">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>Prix Détail</th>
+                    <td *matCellDef="let row" mat-cell class="whitespace-nowrap">{{ row.retailPrice != null ? (row.retailPrice | number:'1.2-2') + ' Da' : '' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="displayedInPos">
+                    <th *matHeaderCellDef class="uppercase text-center" mat-header-cell>Affiché En Caisse</th>
+                    <td *matCellDef="let row" mat-cell class="text-center align-middle">
+                        <mat-icon *ngIf="row.displayedInPos !== false && row.categoryDisplayedInPos !== false"
+                            svgIcon="mat:check_circle" class="block mx-auto text-green-600" matTooltip="Affiché en caisse"></mat-icon>
+                        <mat-icon *ngIf="row.displayedInPos === false"
+                            svgIcon="mat:cancel" class="block mx-auto text-red-500" matTooltip="Masqué en caisse"></mat-icon>
+                        <mat-icon *ngIf="row.displayedInPos !== false && row.categoryDisplayedInPos === false"
+                            svgIcon="mat:cancel" class="block mx-auto text-orange-500" matTooltip="Masqué : sa catégorie est masquée en caisse"></mat-icon>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="createdAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Créé</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.createdByFullName" [username]="row.createdByUsername" [date]="row.createdAt"></vex-audit-cell></td>
+                </ng-container>
+                <ng-container matColumnDef="updatedAudit">
+                    <th *matHeaderCellDef class="uppercase" mat-header-cell>Modifié</th>
+                    <td *matCellDef="let row" mat-cell><vex-audit-cell [name]="row.updatedByFullName" [username]="row.updatedByUsername" [date]="row.updatedAt"></vex-audit-cell></td>
+                </ng-container>
+                <!-- stickyEnd: actions stay visible when the table scrolls horizontally -->
+                    <ng-container matColumnDef="actions" stickyEnd>
                         <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
                         <td *matCellDef="let row" mat-cell>
                             <div class="flex">

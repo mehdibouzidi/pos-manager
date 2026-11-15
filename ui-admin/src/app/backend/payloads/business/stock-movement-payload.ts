@@ -17,6 +17,12 @@ export class StockMovementPayload {
     updatedAt: string;
     createdByFullName: string;
     updatedByFullName: string;
+    // SALE movements: originating sale and its caisse session (read-only)
+    saleId: number;
+    saleOrderNumber: number;
+    caisseSessionId: number;
+    caisseSessionOpenedAt: string;
+    caisseSessionStatus: string;
 
     constructor() {
         this.id = null;
@@ -36,5 +42,10 @@ export class StockMovementPayload {
         this.updatedAt = null;
         this.createdByFullName = null;
         this.updatedByFullName = null;
+        this.saleId = null;
+        this.saleOrderNumber = null;
+        this.caisseSessionId = null;
+        this.caisseSessionOpenedAt = null;
+        this.caisseSessionStatus = null;
     }
 }

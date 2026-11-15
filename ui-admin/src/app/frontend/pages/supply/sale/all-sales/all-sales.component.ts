@@ -29,6 +29,11 @@ import { ProductPayload } from 'src/app/backend/payloads/business/productpayload
 import { ProductService } from 'src/app/backend/service/business/product.service';
 import { ProductCategoryPayload } from 'src/app/backend/payloads/business/product-category-payload';
 import { ProductCategoryService } from 'src/app/backend/service/business/product-category.service';
+import { CaisseSessionService } from 'src/app/backend/service/business/caisse-session.service';
+import { CaisseSessionCriteria } from 'src/app/backend/criteria/business/caisse-session-criteria';
+import { CaisseSessionPayload } from 'src/app/backend/payloads/business/caisse-session-payload';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { stagger40ms } from '@vex/animations/stagger.animation';
 import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
 
@@ -44,7 +49,8 @@ import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
     NgIf, MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule,
     MatTableModule, MatSortModule, NgFor, NgClass, MatPaginatorModule,
     FormsModule, MatInputModule,
-    MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule
+    MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule,
+    AutocompleteSelectComponent, AuditCellComponent
   ]
 })
 export class AllSalesComponent implements OnInit {
@@ -59,10 +65,13 @@ export class AllSalesComponent implements OnInit {
   filteredCategories: ProductCategoryPayload[] = [];
   categoryCtrl = new FormControl('');
 
+  caisseOptions: AutocompleteOption[] = [];
+
   constructor(
     private service: StockMovementService,
     private productService: ProductService,
     private categoryService: ProductCategoryService,
+    private caisseSessionService: CaisseSessionService,
     private liveAnnouncer: LiveAnnouncer
   ) {}
 
@@ -71,6 +80,7 @@ export class AllSalesComponent implements OnInit {
     this.setupTable();
     this.loadProducts();
     this.loadCategories();
+    this.loadCaisses();
     this.search();
   }
 
@@ -90,6 +100,48 @@ export class AllSalesComponent implements OnInit {
         this.filteredCategories = this.allCategories;
       }
     });
+  }
+
+  loadCaisses() {
+    const criteria = new CaisseSessionCriteria();
+    criteria.size = 1000;
+    criteria.sortColumn = 'openedAt';
+    criteria.sort = 'DESC';
+    this.caisseSessionService.findAllByCriteria(criteria).subscribe({
+      next: (res: GlobalPayload<CaisseSessionPayload>) => {
+        this.caisseOptions = (res?.elements ?? []).map(c => AllSalesComponent.caisseOption(c));
+      }
+    });
+  }
+
+  /**
+   * Option of the Caisse filter:
+   *   Caisse #17 · 27/10 14:27 → 28/10 22:10      [Clôturée]
+   *   Mehdi B · Caisse 1 · 12 ventes · 3 450,00 Da
+   */
+  static caisseOption(c: CaisseSessionPayload): AutocompleteOption {
+    const open = c.status === 'OPEN';
+    const period = `${AllSalesComponent.shortDate(c.openedAt)} → ${open ? 'en cours' : AllSalesComponent.shortDate(c.closedAt)}`;
+    const amount = (c.totalSalesAmount ?? 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const count = c.totalSalesCount ?? 0;
+    return {
+      value: c.id,
+      label: `Caisse #${c.id} · ${period}`,
+      sublabel: [c.createdByFullName, c.posName, `${count} vente${count > 1 ? 's' : ''}`, `${amount} Da`].filter(Boolean).join(' · '),
+      badge: open
+        ? { text: 'Ouverte', cssClass: 'text-green-600 bg-green-50' }
+        : { text: 'Clôturée', cssClass: 'text-gray-600 bg-gray-100' }
+    };
+  }
+
+  /** "2026-10-27 14:27:14" → "27/10/2026 14:27" */
+  static shortDate(value: string): string {
+    const m = value?.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : '—';
+  }
+
+  shortDate(value: string): string {
+    return AllSalesComponent.shortDate(value);
   }
 
   onProductInput(value: string) {
@@ -148,6 +200,8 @@ export class AllSalesComponent implements OnInit {
   }
 
   search() {
+    this.criteria.fromDate = this.criteria.fromDate || null;
+    this.criteria.toDate = this.criteria.toDate || null;
     this.criteria.movementType = 'SALE';
     this.findByCriteria();
   }
@@ -182,7 +236,9 @@ export class AllSalesComponent implements OnInit {
     { label: 'Prix',      property: 'retailPrice',  type: 'text', visible: true },
     { label: 'Quantité',  property: 'quantity',     type: 'text', visible: true },
     { label: 'Total',     property: 'total',        type: 'text', visible: true },
-    { label: 'Date',      property: 'movementDate', type: 'text', visible: true }
+    { label: 'Date',      property: 'movementDate', type: 'text', visible: true },
+    { label: 'Caisse',    property: 'caisse',       type: 'text', visible: true },
+    { label: 'Vendeur',   property: 'createdAudit', type: 'audit', visible: true }
   ];
 
   pageSize = 10;

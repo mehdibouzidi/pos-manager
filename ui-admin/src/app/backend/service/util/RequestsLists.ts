@@ -92,5 +92,6 @@ export class RequestsLists {
 
         // BUSINESS - Caisse Session
         new Request(RequestsLists.POST, RequestsConstants.CAISSE_SESSION_FINDALL_CRITERIA_REQ),
+        new Request(RequestsLists.PUT, RequestsConstants.CAISSE_SESSION_ADMIN_CLOSE_REQ),
     ];
 }

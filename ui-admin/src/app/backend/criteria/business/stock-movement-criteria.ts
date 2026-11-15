@@ -7,6 +7,9 @@ export class StockMovementCriteria extends CommonCriteria {
     posId: number;
     movementType: string;
     reason: string;
+    caisseSessionId: number;
+    fromDate: string;
+    toDate: string;
 
     constructor() {
         super();
@@ -16,5 +19,8 @@ export class StockMovementCriteria extends CommonCriteria {
         this.posId = null;
         this.movementType = null;
         this.reason = null;
+        this.caisseSessionId = null;
+        this.fromDate = null;
+        this.toDate = null;
     }
 }

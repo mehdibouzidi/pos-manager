@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/frontend/common/autocomplete-select/autocomplete-select.component';
 import { MatOptionModule } from '@angular/material/core';
 import { StockMovementPayload } from 'src/app/backend/payloads/business/stock-movement-payload';
 import { StockMovementService } from 'src/app/backend/service/business/stock-movement.service';
@@ -23,15 +24,16 @@ import { ProductService } from 'src/app/backend/service/business/product.service
   imports: [
     ReactiveFormsModule, MatDialogModule, NgIf, NgFor, MatButtonModule,
     MatIconModule, MatDividerModule, MatFormFieldModule, MatInputModule,
-    MatCommonModule, MatSelectModule, MatOptionModule, CommonModule
+    MatCommonModule, MatSelectModule, MatOptionModule, CommonModule, AutocompleteSelectComponent
   ]
 })
 export class AddStockMovementComponent implements OnInit {
   generalForm: FormGroup;
   payload = new StockMovementPayload();
   products: ProductPayload[] = [];
+  productOptions: AutocompleteOption[] = [];
 
-  movementTypes = [
+  movementTypes: AutocompleteOption[] = [
     { value: 'ENTRY', label: 'Entrée' },
     { value: 'LOSS', label: 'Perte' }
   ];
@@ -55,6 +57,7 @@ export class AddStockMovementComponent implements OnInit {
     this.productService.findAll().subscribe({
       next: (response: any) => {
         this.products = response || [];
+        this.productOptions = this.products.map(p => ({ value: p.id, label: p.name, hint: p.code }));
       },
       error: () => {}
     });

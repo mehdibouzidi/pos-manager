@@ -1,3 +1,4 @@
+import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
@@ -42,6 +43,7 @@ import { ShowApiKeyComponent } from '../show-api-key/show-api-key.component';
   styleUrl: './all-api-keys.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
+    AuditCellComponent,
     VexPageLayoutComponent,
     VexPageLayoutHeaderDirective,
     VexBreadcrumbsComponent,
@@ -149,6 +151,8 @@ export class AllApiKeysComponent {
     { label: 'Actif', property: 'active', type: 'text', visible: true },
     { label: 'Créé le', property: 'createdAt', type: 'text', visible: false },
     { label: 'Créé par', property: 'createdByFullName', type: 'text', visible: false },
+    { label: 'Créé', property: 'createdAudit', type: 'audit', visible: true },
+    { label: 'Modifié', property: 'updatedAudit', type: 'audit', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
 

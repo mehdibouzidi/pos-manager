@@ -22,6 +22,10 @@
             </mat-form-field>
         </div>
 
+                <mat-slide-toggle formControlName="displayedInPos" color="primary" class="mt-2 mb-3">
+            Afficher en caisse
+        </mat-slide-toggle>
+        <p class="text-xs text-secondary mt-1">Masquer une catégorie masque aussi tous ses produits dans la caisse.</p>
         <div class="flex flex-col gap-2 mt-2">
             <div class="upload-zone" (click)="photoInput.click()">
                 <mat-icon svgIcon="mat:add_photo_alternate" class="upload-icon"></mat-icon>
