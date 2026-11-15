@@ -23,7 +23,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
             <span class="session-dot"></span>
             Ouverte{{ s.openedAt ? ' à ' + (s.openedAt | date:'HH:mm') : '' }}
             · {{ s.totalSalesCount ?? 0 }} vente{{ (s.totalSalesCount ?? 0) > 1 ? 's' : '' }}
-            · {{ (s.totalSalesAmount ?? 0) | number:'1.2-2' }} DA
+            · {{ (s.totalSalesAmount ?? 0) | number:'1.2-2' }} Da
           </span>
         } @else {
           <span class="session-info session-info--closed">Caisse fermée</span>

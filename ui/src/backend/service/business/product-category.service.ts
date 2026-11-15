@@ -9,7 +9,8 @@ export class ProductCategoryService {
 
   constructor(private http: HttpClient) {}
 
+  /** Categories shown in the till only (hidden ones are filtered out by the API). */
   findAll(): Observable<ProductCategory[]> {
-    return this.http.get<ProductCategory[]>(RequestsConstants.PRODUCT_CATEGORY_FINDALL_REQ);
+    return this.http.get<ProductCategory[]>(RequestsConstants.PRODUCT_CATEGORY_FINDALL_REQ, { params: { displayedOnly: true } });
   }
 }

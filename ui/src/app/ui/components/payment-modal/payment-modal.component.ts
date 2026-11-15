@@ -28,7 +28,7 @@ const NOTES = [200, 500, 1000, 2000];
 
         <div class="due">
           <span>À payer</span>
-          <strong class="num">{{ cartService.total() | number:'1.2-2' }}<small> DA</small></strong>
+          <strong class="num">{{ cartService.total() | number:'1.2-2' }}<small> Da</small></strong>
           <span class="meta num">{{ cartService.itemCount() }} article{{ cartService.itemCount() > 1 ? 's' : '' }} · espèces</span>
         </div>
 
@@ -40,7 +40,7 @@ const NOTES = [200, 500, 1000, 2000];
                    [value]="received() ?? ''"
                    (input)="setReceived(receivedInput.value)"
                    (keydown.enter)="confirmAndPrint()" />
-            <span class="suffix">DA</span>
+            <span class="suffix">Da</span>
           </div>
         </label>
 
@@ -56,10 +56,10 @@ const NOTES = [200, 500, 1000, 2000];
         <div class="change" [class.short]="missing() > 0">
           @if (missing() > 0) {
             <span>Manque</span>
-            <strong class="num">{{ missing() | number:'1.2-2' }} DA</strong>
+            <strong class="num">{{ missing() | number:'1.2-2' }} Da</strong>
           } @else {
             <span>À rendre</span>
-            <strong class="num">{{ change() | number:'1.2-2' }} DA</strong>
+            <strong class="num">{{ change() | number:'1.2-2' }} Da</strong>
           }
         </div>
 
@@ -593,9 +593,9 @@ export class PaymentModalComponent {
 
 const daFormat = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** Amount formatted for the printed ticket: "1 450,00 DA". */
+/** Amount formatted for the printed ticket: "1 450,00 Da". */
 function da(value: number): string {
-  return `${daFormat.format(value)} DA`;
+  return `${daFormat.format(value)} Da`;
 }
 
 /** Product names come from the back-office: never inject them as raw HTML in the ticket window. */

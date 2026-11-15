@@ -27,7 +27,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
           <div class="line">
             <div class="line-main">
               <span class="line-name">{{ item.product.name }}</span>
-              <span class="line-unit num">{{ item.product.retailPrice | number:'1.2-2' }} DA / u</span>
+              <span class="line-unit num">{{ item.product.retailPrice | number:'1.2-2' }} Da / u</span>
             </div>
             <div class="line-side">
               <span class="line-total num">{{ item.product.retailPrice * item.quantity | number:'1.2-2' }}</span>
@@ -61,7 +61,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       <footer class="foot">
         <div class="total">
           <span>Total</span>
-          <span class="total-value num">{{ cartService.total() | number:'1.2-2' }}<small> DA</small></span>
+          <span class="total-value num">{{ cartService.total() | number:'1.2-2' }}<small> Da</small></span>
         </div>
         @if (!caisseSessionService.currentSession()) {
           <button class="pay" (click)="caisseSessionService.showOpenModal()">Ouvrir la caisse</button>

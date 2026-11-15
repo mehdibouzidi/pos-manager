@@ -24,7 +24,7 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
           <div class="modal-body">
             <div class="field-group">
-              <label>Fond d'ouverture (DA)</label>
+              <label>Fond d'ouverture (Da)</label>
               <input
                 type="number"
                 [(ngModel)]="openingBalance"

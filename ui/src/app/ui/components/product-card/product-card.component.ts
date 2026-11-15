@@ -29,7 +29,7 @@ import { CartService } from '../../../back/services/cart.service';
       <span class="name">{{ product.name }}</span>
 
       <span class="footer">
-        <span class="price num">{{ product.retailPrice | number:'1.2-2' }}<small> DA</small></span>
+        <span class="price num">{{ product.retailPrice | number:'1.2-2' }}<small> Da</small></span>
         <span class="stock num" [class.low]="stock() > 0 && stock() <= 5" [class.none]="stock() <= 0">
           @if (stock() <= 0) { Épuisé } @else { {{ stock() }} en stock }
         </span>

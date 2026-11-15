@@ -21,8 +21,9 @@ export class ProductService {
     return this.http.post( `${RequestsConstants.PRODUCT_FINDALL_CRITERIA_REQ}`, criteria);
   }
 
+  /** Products shown in the till only: hidden products and products of hidden categories are filtered out by the API. */
   findAll(): Observable<Product[]> {
-    return this.http.get<Product[]>( `${RequestsConstants.PRODUCT_FINDALL_REQ}`);
+    return this.http.get<Product[]>(RequestsConstants.PRODUCT_FINDALL_REQ, { params: { displayedOnly: true } });
   }
 
   add(payload: ProductPayload){
