@@ -57,10 +57,10 @@ import { MenuService } from '../../../back/services/menu.service';
       flex: none;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      align-items: stretch;
       min-height: 124px;
-      padding: 14px 10px 14px;
+      padding: 0;
+      overflow: hidden;
       background: var(--surface);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
@@ -103,19 +103,18 @@ import { MenuService } from '../../../back/services/menu.service';
       box-shadow: 0 0 0 1px var(--accent), 0 6px 16px -10px rgba(196, 82, 15, 0.5);
     }
 
+    /* The photo fills the top of the tile, edge to edge: no box inside the box */
     .thumb {
-      width: 68px;
-      height: 68px;
-      padding: 4px;
-      border-radius: var(--radius-md);
-      background: #fdf1e8;
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
       object-fit: cover;
-      transition: background-color var(--m-out) var(--m-ease);
+      background: #fdf1e8;
     }
 
-    .category.active .thumb { background: var(--surface); }
-
     .label {
+      display: block;
+      padding: 10px 8px 12px;
       font-size: 14px;
       font-weight: 650;
       line-height: 1.25;
@@ -139,7 +138,7 @@ import { MenuService } from '../../../back/services/menu.service';
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .category, .thumb { transition: none; }
+      .category { transition: none; }
       .category:active { transform: none; }
       .skeleton { animation: none; }
     }
