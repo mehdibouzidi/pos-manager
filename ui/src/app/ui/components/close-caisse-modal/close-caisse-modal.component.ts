@@ -172,12 +172,12 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       position: absolute;
       right: 0;
       top: 0;
-      width: 32px;
-      height: 32px;
+      width: var(--tap);
+      height: var(--tap);
       border-radius: 50%;
       background: var(--bg-light);
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -245,10 +245,11 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .balance-input {
       width: 100%;
-      padding: 12px 16px;
+      height: 60px;
+      padding: 0 16px;
       border: 2px solid var(--border-color);
       border-radius: 10px;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 600;
       text-align: center;
       color: var(--text-dark);
@@ -262,11 +263,11 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .notes-input {
       width: 100%;
-      padding: 10px 14px;
+      padding: 12px 14px;
       border: 1.5px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      resize: vertical;
+      border-radius: 10px;
+      font-size: 16px;
+      resize: none;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -313,15 +314,16 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .btn-cancel {
       flex: 1;
-      padding: 12px;
+      height: var(--tap-lg);
+      padding: 0 12px;
       border-radius: 10px;
       background: var(--bg-light);
       color: var(--text-dark);
-      font-size: 0.95rem;
+      font-size: 16px;
       font-weight: 600;
     }
 
-    .btn-cancel:hover {
+    .btn-cancel:active {
       background: var(--border-color);
     }
 
@@ -331,18 +333,18 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px;
+      height: var(--tap-lg);
+      padding: 0 12px;
       border-radius: 10px;
       background: var(--danger);
       color: white;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      font-size: 16px;
+      font-weight: 700;
+      transition: background-color 0.2s;
     }
 
-    .btn-confirm:hover:not(:disabled) {
+    .btn-confirm:active:not(:disabled) {
       background: #93291f;
-      transform: translateY(-1px);
     }
 
     .btn-confirm:disabled {

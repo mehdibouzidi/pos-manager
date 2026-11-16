@@ -48,7 +48,7 @@ import { MenuService } from '../back/services/menu.service';
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) clamp(300px, 28vw, 380px);
+      grid-template-columns: auto minmax(0, 1fr) clamp(340px, 30vw, 420px);
       gap: 16px;
       padding: 16px 16px 16px 12px;
     }
