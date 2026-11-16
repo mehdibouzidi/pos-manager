@@ -102,6 +102,8 @@ public class UserService implements IUserService {
                     posRepository.findByCode(payload.getPosCode()).ifPresent(userEntity::setPos);
                 }
 
+                userEntity.setSuperAdmin(payload.isSuperAdmin());
+
                 byte[] newPicture = CommonUtil.multipartFileToBytes(payload.getPictureIn());
                 if (userEntity.getPicture() != newPicture) {
                     userEntity.setPicture(newPicture);
