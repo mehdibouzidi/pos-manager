@@ -28,66 +28,106 @@ import { MenuService } from '../../../back/services/menu.service';
     </nav>
   `,
   styles: [`
+    /* Touchscreen first: big tiles, clear pressed and active states, hover only as a bonus. */
     :host {
       display: block;
       height: 100%;
       min-height: 0;
+      --m-out: 200ms;
+      --m-press: 90ms;
+      --m-ease: cubic-bezier(.2, .8, .2, 1);
     }
 
     .rail {
-      width: 112px;
+      width: 136px;
       height: 100%;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      padding: 4px 2px 12px;
+      gap: 10px;
+      padding: 2px 2px 16px;
       scrollbar-width: none;
+      overscroll-behavior: contain;
     }
 
     .rail::-webkit-scrollbar { display: none; }
 
     .category {
+      position: relative;
+      flex: none;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 12px 8px 14px;
+      gap: 10px;
+      min-height: 124px;
+      padding: 14px 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
       border-radius: var(--radius-lg);
       color: var(--ink-soft);
       text-align: center;
-      transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      transition:
+        transform 180ms var(--m-ease),
+        background-color var(--m-out) var(--m-ease),
+        border-color var(--m-out) var(--m-ease),
+        color var(--m-out) var(--m-ease),
+        box-shadow var(--m-out) var(--m-ease);
     }
 
-    .category:hover {
-      background: var(--surface);
-      color: var(--ink);
+    .category:active {
+      transform: scale(0.96);
+      border-color: var(--accent);
+      transition-duration: var(--m-press);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .category:hover:not(.active) {
+        border-color: #d3cdc6;
+        color: var(--ink);
+      }
+    }
+
+    .category:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .category.active {
-      background: var(--surface);
-      color: var(--ink);
-      box-shadow: var(--shadow-md), inset 3px 0 0 var(--accent);
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+      box-shadow: 0 0 0 1px var(--accent), 0 6px 16px -10px rgba(196, 82, 15, 0.5);
     }
 
     .thumb {
-      width: 44px;
-      height: 44px;
+      width: 68px;
+      height: 68px;
+      padding: 4px;
       border-radius: var(--radius-md);
+      background: #fdf1e8;
       object-fit: cover;
+      transition: background-color var(--m-out) var(--m-ease);
     }
 
-
+    .category.active .thumb { background: var(--surface); }
 
     .label {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 650;
       line-height: 1.25;
       text-wrap: balance;
+      overflow-wrap: anywhere;
     }
 
+    .category.active .label { font-weight: 750; }
+
     .skeleton {
-      height: 88px;
+      flex: none;
+      height: 124px;
       border-radius: var(--radius-lg);
       background: linear-gradient(90deg, var(--surface-sunken), var(--surface-muted), var(--surface-sunken));
       background-size: 200% 100%;
@@ -96,6 +136,12 @@ import { MenuService } from '../../../back/services/menu.service';
 
     @keyframes shimmer {
       to { background-position: -200% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .category, .thumb { transition: none; }
+      .category:active { transform: none; }
+      .skeleton { animation: none; }
     }
   `]
 })
