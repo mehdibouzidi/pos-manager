@@ -34,9 +34,24 @@ export class AuthService {
     setInterval(() => this.logoutIfSessionExpired(), 60_000);
   }
 
+  /**
+   * Session expiry (epoch ms) saved at login, or null when absent/unreadable. It is written via
+   * LocalStorageService (JSON-encoded, i.e. with quotes), so it must be read back the same way.
+   */
+  getSessionExpiry(): number | null {
+    const raw = this.ls.getItem(UtilStatic.SESSION_EXP) ?? localStorage.getItem(UtilStatic.SESSION_EXP);
+    const exp = Number(raw);
+    return raw != null && Number.isFinite(exp) && exp > 0 ? exp : null;
+  }
+
+  isSessionExpired(): boolean {
+    const exp = this.getSessionExpiry();
+    return exp == null || Date.now() > exp;
+  }
+
   private logoutIfSessionExpired(): void {
-    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-    if (!expStr || Date.now() <= parseInt(expStr, 10)) return;
+    const exp = this.getSessionExpiry();
+    if (exp == null || Date.now() <= exp) return;
     if (!this.injector.get(ConnectivityService).isOnline()) return;
     this.logout();
   }
@@ -150,9 +165,9 @@ export class AuthService {
     
 
   checkIsLoggedIn(): boolean {
-    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-    if (!expStr) return false;
-    if (Date.now() > parseInt(expStr, 10)) {
+    const exp = this.getSessionExpiry();
+    if (exp == null) return false;
+    if (Date.now() > exp) {
       // Offline the login page is unusable: keep the till working (sales are queued and synced
       // with the terminal API key). The next authenticated request once back online logs out.
       if (!this.injector.get(ConnectivityService).isOnline()) return true;

@@ -2,7 +2,6 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { Injectable } from "@angular/core";
 import { Observable, catchError, throwError } from "rxjs";
 import { AuthService } from "../service/admin/auth.service";
-import { UtilStatic } from "../service/util/UtilStatic";
 import { RequestsConstants } from "../service/util/RequestsConstants";
 
 @Injectable()
@@ -14,9 +13,8 @@ export class TokenInterceptor implements HttpInterceptor{
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         const needsAuth = this.authService.checkIfNeedBearer(req);
 
-        if (needsAuth) {
-            const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-            if (!expStr || Date.now() > parseInt(expStr, 10)) {
+        if (needsAuth && req.url !== RequestsConstants.LOGOUT_REQ) {
+            if (this.authService.isSessionExpired()) {
                 this.authService.logout();
                 console.warn('Session expirée, veuillez vous reconnecter.');
                 return throwError(() => new Error('Session expired'));
