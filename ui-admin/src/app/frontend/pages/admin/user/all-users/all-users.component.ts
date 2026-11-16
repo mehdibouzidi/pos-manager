@@ -213,6 +213,12 @@ export class AllUsersComponent {
       visible: true
     },
     {
+      label: 'Super Admin',
+      property: 'superAdmin',
+      type: 'boolean',
+      visible: true
+    },
+    {
       label: 'Créé le',
       property: 'createdAt',
       type: 'text',
