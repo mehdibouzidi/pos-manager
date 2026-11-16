@@ -11,9 +11,13 @@ export interface SaleItemRequest {
   unitPrice: number;
 }
 
+/** Chosen at checkout and printed on the ticket. */
+export type OrderType = 'DINE_IN' | 'TAKEAWAY';
+
 export interface SaleRequest {
   totalAmount: number;
   paymentMethod: string;
+  orderType: OrderType;
   items: SaleItemRequest[];
 }
 

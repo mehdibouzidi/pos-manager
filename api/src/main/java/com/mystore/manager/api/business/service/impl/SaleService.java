@@ -80,6 +80,12 @@ public class SaleService implements ISaleService {
         if (payload.getPaymentMethod() != null && !"CASH".equalsIgnoreCase(payload.getPaymentMethod())) {
             throw new CRUDException("Seul le paiement en espèces est accepté.");
         }
+        // Optional so that a till still running an older version keeps selling
+        String orderType = payload.getOrderType() == null || payload.getOrderType().isBlank()
+                ? null : payload.getOrderType().trim().toUpperCase();
+        if (orderType != null && !"DINE_IN".equals(orderType) && !"TAKEAWAY".equals(orderType)) {
+            throw new CRUDException("Type de commande invalide.");
+        }
         List<SaleItemPayload> items = payload.getItems() != null ? payload.getItems() : List.of();
         if (items.isEmpty()) {
             throw new CRUDException("Vente sans article.");
@@ -130,6 +136,7 @@ public class SaleService implements ISaleService {
         sale.setTotalAmount(total.setScale(2, RoundingMode.HALF_UP).doubleValue());
         // Business rule: the shop only accepts cash
         sale.setPaymentMethod("CASH");
+        sale.setOrderType(orderType);
         sale.setCaisseSession(session);
         sale = saleRepository.save(sale);
 

@@ -132,7 +132,12 @@ class StockMovementIT {
         assertThrows(CRUDException.class, () -> saleService.save(sale));
 
         sale.setPaymentMethod(null);
+        sale.setOrderType("SUR_PLACE");
+        assertThrows(CRUDException.class, () -> saleService.save(sale));
+
+        sale.setOrderType("takeaway");
         saleService.save(sale);
+        assertEquals("TAKEAWAY", jdbc.queryForObject("SELECT order_type FROM business.data_sale", String.class));
         assertEquals(9, stock(), 1e-9);
         assertEquals("CASH", jdbc.queryForObject("SELECT payment_method FROM business.data_sale", String.class));
 

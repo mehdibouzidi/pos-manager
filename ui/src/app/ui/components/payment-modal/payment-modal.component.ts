@@ -2,11 +2,16 @@ import { Component, ElementRef, ViewChild, computed, effect, inject, signal } fr
 import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../../back/services/cart.service';
 import { MenuService } from '../../../back/services/menu.service';
-import { SaleService, SaleRequest } from '../../../../backend/service/business/sale.service';
+import { SaleService, SaleRequest, OrderType } from '../../../../backend/service/business/sale.service';
 import { CaisseSessionService } from '../../../../backend/service/business/caisse-session.service';
 
 /** Algerian banknotes, used for the quick "received" buttons */
 const NOTES = [200, 500, 1000, 2000];
+
+const ORDER_TYPES: { value: OrderType; label: string }[] = [
+  { value: 'DINE_IN', label: 'À table' },
+  { value: 'TAKEAWAY', label: 'À emporter' }
+];
 
 @Component({
   selector: 'app-payment-modal',
@@ -30,6 +35,15 @@ const NOTES = [200, 500, 1000, 2000];
           <span>À payer</span>
           <strong class="num">{{ cartService.total() | number:'1.2-2' }}<small> Da</small></strong>
           <span class="meta num">{{ cartService.itemCount() }} article{{ cartService.itemCount() > 1 ? 's' : '' }} · espèces</span>
+        </div>
+
+        <div class="order-type" role="radiogroup" aria-label="Type de commande">
+          @for (type of orderTypes; track type.value) {
+            <button type="button" role="radio" [attr.aria-checked]="orderType() === type.value"
+                    [class.on]="orderType() === type.value" (click)="chooseOrderType(type.value)">
+              {{ type.label }}
+            </button>
+          }
         </div>
 
         <label class="field">
@@ -67,7 +81,7 @@ const NOTES = [200, 500, 1000, 2000];
           <div class="error" role="alert">{{ saleError() }}</div>
         }
 
-        <button class="confirm" (click)="confirmAndPrint()" [disabled]="submitting() || missing() > 0">
+        <button class="confirm" (click)="confirmAndPrint()" [disabled]="submitting() || missing() > 0 || !orderType()">
           {{ submitting() ? 'Enregistrement…' : 'Valider et imprimer le ticket' }}
         </button>
       </div>
@@ -182,6 +196,31 @@ const NOTES = [200, 500, 1000, 2000];
       font-size: 12px;
       color: var(--ink-faint);
       font-weight: 600;
+    }
+
+    .order-type {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .order-type button {
+      height: 52px;
+      border-radius: var(--radius-md);
+      background: var(--surface-muted);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .order-type button:hover { background: var(--surface-sunken); color: var(--ink); }
+
+    .order-type button.on {
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+      box-shadow: inset 0 0 0 2px var(--accent);
     }
 
     .field > span {
@@ -320,6 +359,9 @@ export class PaymentModalComponent {
   saleError = signal<string | null>(null);
   /** Cash handed over by the customer; null = exact amount */
   received = signal<number | null>(null);
+  /** Asked for every ticket: no default, so a wrong mention is never printed by omission. */
+  orderType = signal<OrderType | null>(null);
+  readonly orderTypes = ORDER_TYPES;
 
   change = computed(() => {
     const r = this.received();
@@ -359,6 +401,7 @@ export class PaymentModalComponent {
     effect(() => {
       if (this.cartService.isPaymentOpen()) {
         this.received.set(null);
+        this.orderType.set(null);
         this.saleError.set(null);
         setTimeout(() => this.receivedInput?.nativeElement.focus());
       }
@@ -370,6 +413,11 @@ export class PaymentModalComponent {
     this.received.set(Number.isFinite(n) && n > 0 ? n : null);
   }
 
+  chooseOrderType(type: OrderType): void {
+    this.orderType.set(type);
+    this.saleError.set(null);
+  }
+
   close(): void {
     if (this.submitting()) return;
     this.cartService.closePayment();
@@ -377,6 +425,12 @@ export class PaymentModalComponent {
 
   confirmAndPrint(): void {
     if (this.submitting() || this.missing() > 0) return;
+    const orderType = this.orderType();
+    if (!orderType) {
+      // Reached with the Enter key, the button being disabled
+      this.saleError.set('Choisissez « À table » ou « À emporter ».');
+      return;
+    }
     if (!this.caisseSessionService.currentSession()) {
       this.cartService.showSnack('Ouvrez d\'abord la caisse pour effectuer une vente.');
       return;
@@ -395,6 +449,7 @@ export class PaymentModalComponent {
     const saleRequest: SaleRequest = {
       totalAmount: total,
       paymentMethod: 'CASH',
+      orderType,
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -416,7 +471,7 @@ export class PaymentModalComponent {
           this.menuService.reloadProducts();
           this.cartService.showSnack(`Vente n° ${response.orderNumber} enregistrée`);
         }
-        this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false, this.received());
+        this.printAndClose(response.orderNumber, now, items, total, response.offline ?? false, this.received(), orderType);
       },
       // Sale rejected by the server (network failures are already queued offline by SaleService):
       // no ticket, cart kept so the cashier can fix and retry.
@@ -428,8 +483,9 @@ export class PaymentModalComponent {
   }
 
   private printAndClose(orderNumber: number, now: Date, items: any[], total: number, offline = false,
-                        received: number | null = null): void {
+                        received: number | null = null, orderType: OrderType | null = null): void {
     const orderLabel = `${orderNumber}`;
+    const orderTypeLabel = ORDER_TYPES.find(t => t.value === orderType)?.label.toUpperCase() ?? '';
     const change = received !== null ? Math.max(0, received - total) : null;
 
     const receiptHtml = `
@@ -471,6 +527,7 @@ export class PaymentModalComponent {
       border-bottom: 1px dashed #000;
     }
     .order-number { font-size: 12px; font-weight: bold; }
+    .order-type { font-size: 14px; font-weight: bold; margin-top: 4px; }
     .date-time { font-size: 9px; margin-top: 3px; }
     .items { margin: 8px 0; }
     .item {
@@ -536,6 +593,7 @@ export class PaymentModalComponent {
     <div class="order-info">
       ${offline ? '<div style="background:#fef3c7;color:#92400e;text-align:center;padding:3px 6px;font-size:9px;font-weight:bold;border-radius:3px;margin-bottom:4px;">MODE HORS LIGNE — BON DE CAISSE</div>' : ''}
       <div class="order-number">COMMANDE #${orderLabel}</div>
+      ${orderTypeLabel ? `<div class="order-type">${orderTypeLabel}</div>` : ''}
       <div class="date-time">${now.toLocaleDateString('fr-FR', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</div>
       <div class="date-time">${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
     </div>

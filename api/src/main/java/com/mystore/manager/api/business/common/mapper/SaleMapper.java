@@ -34,6 +34,7 @@ public class SaleMapper {
             }
             payload.setTotalAmount(entity.getTotalAmount());
             payload.setPaymentMethod(entity.getPaymentMethod());
+            payload.setOrderType(entity.getOrderType());
             if (Objects.nonNull(entity.getItems())) {
                 payload.setItems(entity.getItems().stream()
                         .map(this::itemEntityToPayload)

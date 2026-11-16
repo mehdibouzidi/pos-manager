@@ -15,5 +15,6 @@ public class SalePayload extends GlobalUserDatePayload {
     private String saleDate;
     private Double totalAmount;
     private String paymentMethod;
+    private String orderType;
     private List<SaleItemPayload> items;
 }

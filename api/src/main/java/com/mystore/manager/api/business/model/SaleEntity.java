@@ -30,6 +30,10 @@ public class SaleEntity extends AbstractBusinessAudit {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
+    /** DINE_IN (à table) or TAKEAWAY (à emporter), chosen at checkout; null for older sales. */
+    @Column(name = "order_type", length = 20)
+    private String orderType;
+
     /** Client-generated id, used to make offline sync idempotent. */
     @Column(name = "local_id", length = 64)
     private String localId;
