@@ -148,9 +148,9 @@ import { ProductCardComponent } from '../product-card/product-card.component';
       min-height: 0;
       overflow-y: auto;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       grid-auto-rows: min-content;
-      gap: 12px;
+      gap: 14px;
       padding: 2px 2px 24px;
       align-content: start;
     }
@@ -159,7 +159,7 @@ import { ProductCardComponent } from '../product-card/product-card.component';
     .grid::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 
     .skeleton {
-      height: 212px;
+      height: 300px;
       border-radius: var(--radius-lg);
       background: linear-gradient(90deg, var(--surface-sunken), var(--surface-muted), var(--surface-sunken));
       background-size: 200% 100%;

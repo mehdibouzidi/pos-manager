@@ -44,8 +44,8 @@ import { CartService } from '../../../back/services/cart.service';
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 10px 10px 12px;
+      gap: 12px;
+      padding: 12px 12px 14px;
       background: var(--surface);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
@@ -70,7 +70,7 @@ import { CartService } from '../../../back/services/cart.service';
 
     .media {
       position: relative;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 1 / 1;
       border-radius: var(--radius-md);
       background: var(--surface-muted);
       display: grid;
@@ -82,7 +82,7 @@ import { CartService } from '../../../back/services/cart.service';
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 8%;
+      padding: 4%;
     }
 
     /* Default image when the product has no photo: fills the frame like a real picture */
@@ -112,7 +112,7 @@ import { CartService } from '../../../back/services/cart.service';
     }
 
     .name {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       line-height: 1.3;
       color: var(--ink);
@@ -120,7 +120,7 @@ import { CartService } from '../../../back/services/cart.service';
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: calc(14px * 1.3 * 2);
+      min-height: calc(15px * 1.3 * 2);
     }
 
     .card.out .name { color: var(--ink-faint); }
@@ -134,7 +134,7 @@ import { CartService } from '../../../back/services/cart.service';
     }
 
     .price {
-      font-size: 17px;
+      font-size: 19px;
       font-weight: 800;
       color: var(--ink);
     }
@@ -146,7 +146,7 @@ import { CartService } from '../../../back/services/cart.service';
     }
 
     .stock {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--ink-faint);
       white-space: nowrap;
