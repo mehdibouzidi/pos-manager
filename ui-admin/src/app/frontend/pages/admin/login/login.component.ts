@@ -94,10 +94,14 @@ export class LoginComponent {
           localStorage.setItem(UtilStatic.LASTNAME, JSON.stringify(response.lastName));
           
           // Store info
-          if (response.storeId) {
-            localStorage.setItem(UtilStatic.STORE_ID, response.storeId.toString());
-            localStorage.setItem(UtilStatic.STORE_CODE, response.storeCode);
-            localStorage.setItem(UtilStatic.STORE_NAME, response.storeName);
+          if (response.posId) {
+            localStorage.setItem(UtilStatic.STORE_ID, response.posId.toString());
+            localStorage.setItem(UtilStatic.STORE_CODE, response.posCode);
+            localStorage.setItem(UtilStatic.STORE_NAME, response.posName);
+          } else {
+            localStorage.removeItem(UtilStatic.STORE_ID);
+            localStorage.removeItem(UtilStatic.STORE_CODE);
+            localStorage.removeItem(UtilStatic.STORE_NAME);
           }
           
           // Super admin flag

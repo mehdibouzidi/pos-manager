@@ -17,6 +17,10 @@ export class LoginPayload{
     storeId: number;
     storeCode: string;
     storeName: string;
+    // Sent by the API (LoginPayload.posId / posCode / posName)
+    posId: number;
+    posCode: string;
+    posName: string;
     
     // Error handling
     errorCode: string;
@@ -34,6 +38,9 @@ export class LoginPayload{
         this.storeId = null;
         this.storeCode = null;
         this.storeName = null;
+        this.posId = null;
+        this.posCode = null;
+        this.posName = null;
         this.errorCode = null;
         this.errorMessage = null;
     }
