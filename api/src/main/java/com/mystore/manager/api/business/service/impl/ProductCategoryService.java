@@ -79,14 +79,14 @@ public class ProductCategoryService implements IProductCategoryService {
     @Override
     public List<ProductCategoryPayload> findAll(boolean displayedOnly) {
         List<ProductCategoryEntity> entities;
-        if (PosContext.isSuperAdmin()) {
+        if (displayedOnly) {
+            // Till catalogue: shared by every POS, driven only by the "displayed in POS" flag
+            entities = repository.findAll(Sort.by("id")).stream().filter(ProductCategoryEntity::isDisplayedInPos).toList();
+        } else if (PosContext.isSuperAdmin()) {
             entities = repository.findAll(Sort.by("id"));
         } else {
             Integer posId = PosContext.getPosId();
             entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
-        }
-        if (displayedOnly) {
-            entities = entities.stream().filter(ProductCategoryEntity::isDisplayedInPos).toList();
         }
         return mapper.entityListToPayload(entities, false);
     }

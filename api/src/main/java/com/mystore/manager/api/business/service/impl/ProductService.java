@@ -7,6 +7,7 @@ import com.mystore.manager.api.business.payload.ProductPayload;
 import com.mystore.manager.api.common.context.PosContext;
 import com.mystore.manager.api.common.payload.GlobalPayload;
 import com.mystore.manager.api.business.repository.ProductRepository;
+import com.mystore.manager.api.business.repository.StockMovementRepository;
 import com.mystore.manager.api.common.util.CommonUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -20,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -28,12 +31,14 @@ public class ProductService implements com.mystore.manager.api.business.service.
 
     private ProductRepository repository;
     private ProductMapper mapper;
+    private StockMovementRepository stockMovementRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ProductService(ProductRepository repository, ProductMapper mapper) {
+    public ProductService(ProductRepository repository, ProductMapper mapper, StockMovementRepository stockMovementRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     @Override
@@ -124,6 +129,9 @@ public class ProductService implements com.mystore.manager.api.business.service.
 
     @Override
     public List<ProductPayload> findAll(boolean displayedOnly) {
+        if (displayedOnly) {
+            return findAllForTill();
+        }
         List<ProductEntity> entities;
         if (PosContext.isSuperAdmin()) {
             entities = repository.findAll(Sort.by("id"));
@@ -131,13 +139,43 @@ public class ProductService implements com.mystore.manager.api.business.service.
             Integer posId = PosContext.getPosId();
             entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
         }
-        if (displayedOnly) {
-            // A hidden category hides all its products
-            entities = entities.stream()
-                    .filter(p -> p.isDisplayedInPos() && (p.getCategory() == null || p.getCategory().isDisplayedInPos()))
-                    .toList();
-        }
         return mapper.entityListToPayload(entities, false);
+    }
+
+    /**
+     * Till catalogue: shared by every POS, driven only by the "displayed in POS" flags
+     * (a hidden category hides all its products). Stock is the one of the current POS.
+     */
+    private List<ProductPayload> findAllForTill() {
+        List<ProductEntity> entities = repository.findAll(Sort.by("id")).stream()
+                .filter(p -> p.isDisplayedInPos() && (p.getCategory() == null || p.getCategory().isDisplayedInPos()))
+                .toList();
+        List<ProductPayload> payloads = mapper.entityListToPayload(entities, false);
+
+        Integer posId = PosContext.getPosId();
+        if (posId == null) return payloads;
+
+        // product.currentStock is the total over all POS. The stock of one POS is what its own movements made;
+        // the POS that created the product also keeps whatever stock predates the movements.
+        Map<Integer, Double> own = toMap(stockMovementRepository.sumByProductForPos(posId));
+        Map<Integer, Double> others = toMap(stockMovementRepository.sumByProductForOtherPos(posId));
+        for (int i = 0; i < entities.size(); i++) {
+            ProductEntity product = entities.get(i);
+            boolean createdHere = product.getPos() != null && posId.equals(product.getPos().getId());
+            double stock = createdHere
+                    ? (product.getCurrentStock() != null ? product.getCurrentStock() : 0) - others.getOrDefault(product.getId(), 0.0)
+                    : own.getOrDefault(product.getId(), 0.0);
+            payloads.get(i).setCurrentStock(BigDecimal.valueOf(stock));
+        }
+        return payloads;
+    }
+
+    private static Map<Integer, Double> toMap(List<Object[]> rows) {
+        Map<Integer, Double> result = new HashMap<>();
+        for (Object[] row : rows) {
+            if (row[0] != null && row[1] != null) result.put(((Number) row[0]).intValue(), ((Number) row[1]).doubleValue());
+        }
+        return result;
     }
 
     @Override
