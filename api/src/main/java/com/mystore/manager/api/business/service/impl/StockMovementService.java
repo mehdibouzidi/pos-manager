@@ -58,7 +58,7 @@ public class StockMovementService implements IStockMovementService {
         ProductEntity product = productRepository.findById(payload.getProductId())
                 .orElseThrow(() -> new CRUDException("Produit introuvable (id " + payload.getProductId() + ")."));
         entity.setProduct(product);
-        entity.setPos(resolvePos(payload.getPosId()));
+        entity.setPos(resolvePos(payload.getPosId(), !isSale(payload.getMovementType())));
         if (payload.getSaleId() != null) entity.setSale(entityManager.getReference(SaleEntity.class, payload.getSaleId()));
         entity = repository.save(entity);
         applyToStock(product.getId(), entity.getMovementType(), entity.getQuantity(), 1);
@@ -81,7 +81,7 @@ public class StockMovementService implements IStockMovementService {
         entity = mapper.payloadToEntity(payload, entity);
         Integer oldPosId = entity.getPos() != null ? entity.getPos().getId() : null;
         if (payload.getPosId() != null && !payload.getPosId().equals(oldPosId)) {
-            entity.setPos(resolvePos(payload.getPosId()));
+            entity.setPos(resolvePos(payload.getPosId(), true));
         }
         if (payload.getProductId() != null && !payload.getProductId().equals(oldProductId)) {
             entity.setProduct(productRepository.findById(payload.getProductId())
@@ -200,14 +200,18 @@ public class StockMovementService implements IStockMovementService {
     /**
      * POS the movement belongs to: it decides which till sees the stock. A super admin chooses any POS,
      * other users only their own; without a choice, the POS of the connected user.
+     * A SALE movement follows its sale and, like it, may have no POS (posRequired = false).
      */
-    private PosEntity resolvePos(Integer requestedPosId) {
+    private PosEntity resolvePos(Integer requestedPosId, boolean posRequired) {
         Integer ownPosId = PosContext.getPosId();
         if (requestedPosId != null && !requestedPosId.equals(ownPosId) && !PosContext.isSuperAdmin()) {
             throw new CRUDException("Vous ne pouvez enregistrer un mouvement que pour votre point de vente.");
         }
         Integer posId = requestedPosId != null ? requestedPosId : ownPosId;
-        if (posId == null) throw new CRUDException("Point de vente obligatoire.");
+        if (posId == null) {
+            if (posRequired) throw new CRUDException("Point de vente obligatoire.");
+            return null;
+        }
         PosEntity pos = entityManager.find(PosEntity.class, posId);
         if (pos == null) throw new CRUDException("Point de vente introuvable (id " + posId + ").");
         return pos;
