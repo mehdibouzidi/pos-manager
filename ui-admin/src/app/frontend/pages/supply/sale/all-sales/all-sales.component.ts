@@ -36,6 +36,10 @@ import { AutocompleteOption, AutocompleteSelectComponent } from 'src/app/fronten
 import { AuditCellComponent } from 'src/app/frontend/common/audit-cell/audit-cell.component';
 import { stagger40ms } from '@vex/animations/stagger.animation';
 import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
+import { SaleTicketFilters, SaleTicketsComponent } from '../sale-tickets/sale-tickets.component';
+
+type SalesView = 'tickets' | 'products';
+const VIEW_KEY = 'sales-view';
 
 @Component({
   selector: 'vex-all-sales',
@@ -50,7 +54,7 @@ import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
     MatTableModule, MatSortModule, NgFor, NgClass, MatPaginatorModule,
     FormsModule, MatInputModule,
     MatProgressBarModule, CommonModule, MatAutocompleteModule, MatOptionModule,
-    AutocompleteSelectComponent, AuditCellComponent
+    AutocompleteSelectComponent, AuditCellComponent, SaleTicketsComponent
   ]
 })
 export class AllSalesComponent implements OnInit {
@@ -66,6 +70,12 @@ export class AllSalesComponent implements OnInit {
   categoryCtrl = new FormControl('');
 
   caisseOptions: AutocompleteOption[] = [];
+
+  /** One row per ticket (default) or one row per product sold; the choice is remembered on this browser. */
+  view: SalesView = AllSalesComponent.savedView();
+  /** "Par ticket" only: DINE_IN, TAKEAWAY or null for both */
+  orderType: string | null = null;
+  ticketFilters: SaleTicketFilters;
 
   constructor(
     private service: StockMovementService,
@@ -203,7 +213,35 @@ export class AllSalesComponent implements OnInit {
     this.criteria.fromDate = this.criteria.fromDate || null;
     this.criteria.toDate = this.criteria.toDate || null;
     this.criteria.movementType = 'SALE';
-    this.findByCriteria();
+    if (this.view === 'tickets') {
+      // A new object: the ticket table reloads from its first page
+      this.ticketFilters = {
+        productId: this.criteria.productId,
+        categoryId: this.criteria.categoryId,
+        fromDate: this.criteria.fromDate,
+        toDate: this.criteria.toDate,
+        caisseSessionId: this.criteria.caisseSessionId,
+        orderType: this.orderType
+      };
+    } else {
+      this.findByCriteria();
+    }
+  }
+
+  setView(view: SalesView) {
+    if (view === this.view) return;
+    this.view = view;
+    try { localStorage.setItem(VIEW_KEY, view); } catch { /* private mode: not remembered */ }
+    this.search();
+  }
+
+  setOrderType(orderType: string | null) {
+    this.orderType = orderType || null;
+    this.search();
+  }
+
+  private static savedView(): SalesView {
+    try { return localStorage.getItem(VIEW_KEY) === 'products' ? 'products' : 'tickets'; } catch { return 'tickets'; }
   }
 
   findByCriteria() {

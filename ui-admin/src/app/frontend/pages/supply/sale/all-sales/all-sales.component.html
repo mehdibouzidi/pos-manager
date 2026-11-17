@@ -56,6 +56,13 @@
           [options]="caisseOptions" [(ngModel)]="criteria.caisseSessionId" (valueChange)="search()">
         </vex-autocomplete-select>
 
+        <mat-button-toggle-group *ngIf="view === 'tickets'" class="ml-2 flex-none" aria-label="Type de commande"
+          [value]="orderType ?? ''" (change)="setOrderType($event.value)">
+          <mat-button-toggle value="">Tous</mat-button-toggle>
+          <mat-button-toggle value="DINE_IN">À table</mat-button-toggle>
+          <mat-button-toggle value="TAKEAWAY">À emporter</mat-button-toggle>
+        </mat-button-toggle-group>
+
       </div>
 
       <!-- Actions bar -->
@@ -63,9 +70,17 @@
         <h2 class="title my-0 ltr:pr-4 rtl:pl-4 ltr:mr-4 rtl:ml-4 ltr:border-r rtl:border-l hidden sm:block flex-none">
           <span>Ventes</span>
         </h2>
+        <mat-button-toggle-group class="flex-none" aria-label="Affichage des ventes"
+          [value]="view" (change)="setView($event.value)">
+          <mat-button-toggle value="tickets">Par ticket</mat-button-toggle>
+          <mat-button-toggle value="products">Par produit</mat-button-toggle>
+        </mat-button-toggle-group>
         <span class="flex-1"></span>
       </div>
 
+      <vex-sale-tickets *ngIf="view === 'tickets'" [filters]="ticketFilters"></vex-sale-tickets>
+
+      <ng-container *ngIf="view === 'products'">
       <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="primary"></mat-progress-bar>
 
       <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort (matSortChange)="announceSortChange($event)">
@@ -132,6 +147,7 @@
         [length]="globalPayload.totalNumberOfElements"
         (page)="onPaginationChange($event)" showFirstLastButtons>
       </mat-paginator>
+      </ng-container>
     </div>
   </vex-page-layout-content>
 </vex-page-layout>

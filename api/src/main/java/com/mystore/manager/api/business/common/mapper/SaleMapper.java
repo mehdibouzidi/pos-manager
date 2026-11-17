@@ -35,6 +35,13 @@ public class SaleMapper {
             payload.setTotalAmount(entity.getTotalAmount());
             payload.setPaymentMethod(entity.getPaymentMethod());
             payload.setOrderType(entity.getOrderType());
+            if (Objects.nonNull(entity.getCaisseSession())) {
+                payload.setCaisseSessionId(entity.getCaisseSession().getId());
+                payload.setCaisseSessionStatus(entity.getCaisseSession().getStatus());
+                if (Objects.nonNull(entity.getCaisseSession().getOpenedAt())) {
+                    payload.setCaisseSessionOpenedAt(CommonUtil.instantToDateTime(entity.getCaisseSession().getOpenedAt()));
+                }
+            }
             if (Objects.nonNull(entity.getItems())) {
                 payload.setItems(entity.getItems().stream()
                         .map(this::itemEntityToPayload)

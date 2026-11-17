@@ -16,5 +16,9 @@ public class SalePayload extends GlobalUserDatePayload {
     private Double totalAmount;
     private String paymentMethod;
     private String orderType;
+    // Caisse session of the ticket (read-only)
+    private Integer caisseSessionId;
+    private String caisseSessionStatus;
+    private String caisseSessionOpenedAt;
     private List<SaleItemPayload> items;
 }

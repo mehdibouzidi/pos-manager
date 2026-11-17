@@ -157,6 +157,8 @@ public class SecurityConfig {
             // SaleController
             auth.requestMatchers(HttpMethod.POST, SLASH + SALE_CONTROLLER + SLASH + ADD_EP).hasAnyAuthority(SALE_CREATE, ADMIN);
             auth.requestMatchers(HttpMethod.GET, SLASH + SALE_CONTROLLER + ID_PARAM).hasAnyAuthority(SALE_READ, ADMIN);
+            // Ticket list of the admin "Ventes" page, also open to whoever can read that page (stock movements)
+            auth.requestMatchers(HttpMethod.POST, SLASH + SALE_CONTROLLER + SLASH + FIND_ALL_BY_CRITERIA_EP).hasAnyAuthority(SALE_READ, STOCK_MOVEMENT_READ, ADMIN);
 
             // CaisseSessionController
             auth.requestMatchers(HttpMethod.POST, SLASH + CAISSE_SESSION_CONTROLLER + "/open").hasAnyAuthority(CAISSE_SESSION_CREATE, ADMIN);

@@ -17,7 +17,16 @@ import com.mystore.manager.api.business.repository.SaleRepository;
 import com.mystore.manager.api.business.service.inter.ISaleService;
 import com.mystore.manager.api.business.service.inter.IStockMovementService;
 import com.mystore.manager.api.common.context.PosContext;
+import com.mystore.manager.api.business.common.criteria.SaleCriteria;
 import com.mystore.manager.api.common.exception.CRUDException;
+import com.mystore.manager.api.common.payload.GlobalPayload;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +34,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +52,12 @@ public class SaleService implements ISaleService {
     private final IStockMovementService stockMovementService;
     private final CaisseSessionRepository caisseSessionRepository;
     private final PosRepository posRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /** Columns the ticket list may be sorted on (anything else falls back to the sale date). */
+    private static final List<String> SORTABLE = List.of("saleDate", "orderNumber", "totalAmount", "orderType");
 
     @Autowired
     public SaleService(SaleRepository saleRepository,
@@ -168,5 +185,83 @@ public class SaleService implements ISaleService {
         return saleRepository.findById(id)
                 .map(saleMapper::entityToPayload)
                 .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public GlobalPayload<SalePayload> findAllByCriteria(SaleCriteria criteria) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<SaleEntity> cq = cb.createQuery(SaleEntity.class);
+        Root<SaleEntity> root = cq.from(SaleEntity.class);
+        cq.where(predicates(cb, cq, root, criteria).toArray(new Predicate[0]));
+        String column = criteria.getSortColumn() != null && SORTABLE.contains(criteria.getSortColumn()) ? criteria.getSortColumn() : "saleDate";
+        boolean asc = "ASC".equalsIgnoreCase(criteria.getSort());
+        cq.orderBy(asc ? cb.asc(root.get(column)) : cb.desc(root.get(column)),
+                asc ? cb.asc(root.get("id")) : cb.desc(root.get("id")));
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<SaleEntity> countRoot = countQuery.from(SaleEntity.class);
+        countQuery.select(cb.count(countRoot)).where(predicates(cb, countQuery, countRoot, criteria).toArray(new Predicate[0]));
+        long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        int size = criteria.getSize() != null && criteria.getSize() > 0 ? Math.min(criteria.getSize(), 200) : 10;
+        int page = criteria.getPages() != null && criteria.getPages() > 0 ? criteria.getPages() : 0;
+        List<SaleEntity> entities = entityManager.createQuery(cq)
+                .setFirstResult(page * size)
+                .setMaxResults(size)
+                .getResultList();
+
+        GlobalPayload<SalePayload> result = new GlobalPayload<>();
+        result.setElements(saleMapper.entityListToPayload(entities));
+        result.setTotalNumberOfElements((int) total);
+        result.setTotalNumberOfPages((int) ((total + size - 1) / size));
+        return result;
+    }
+
+    private List<Predicate> predicates(CriteriaBuilder cb, CriteriaQuery<?> query, Root<SaleEntity> root, SaleCriteria criteria) {
+        List<Predicate> predicates = new ArrayList<>();
+        // Sales are operational data: a user only sees the tickets of their own POS (super admin: all of them)
+        if (criteria.getPosId() != null) {
+            predicates.add(cb.equal(root.get("pos").get("id"), criteria.getPosId()));
+        }
+        if (!PosContext.isSuperAdmin()) {
+            Integer posId = PosContext.getPosId();
+            predicates.add(posId != null ? cb.equal(root.get("pos").get("id"), posId) : cb.disjunction());
+        }
+        if (criteria.getCaisseSessionId() != null) {
+            predicates.add(cb.equal(root.get("caisseSession").get("id"), criteria.getCaisseSessionId()));
+        }
+        if (criteria.getOrderType() != null && !criteria.getOrderType().isBlank()) {
+            predicates.add(cb.equal(root.get("orderType"), criteria.getOrderType().trim().toUpperCase()));
+        }
+        if (criteria.getOrderNumber() != null) {
+            predicates.add(cb.or(cb.equal(root.get("orderNumber"), criteria.getOrderNumber()),
+                    cb.equal(root.get("localOrderNumber"), criteria.getOrderNumber())));
+        }
+        if (criteria.getProductId() != null || criteria.getCategoryId() != null) {
+            Subquery<Integer> items = query.subquery(Integer.class);
+            Root<SaleItemEntity> item = items.from(SaleItemEntity.class);
+            List<Predicate> itemPredicates = new ArrayList<>();
+            itemPredicates.add(cb.equal(item.get("sale"), root));
+            if (criteria.getProductId() != null) {
+                itemPredicates.add(cb.equal(item.get("product").get("id"), criteria.getProductId()));
+            }
+            if (criteria.getCategoryId() != null) {
+                itemPredicates.add(cb.equal(item.get("product").get("category").get("id"), criteria.getCategoryId()));
+            }
+            items.select(item.get("id")).where(itemPredicates.toArray(new Predicate[0]));
+            predicates.add(cb.exists(items));
+        }
+        // Whole local days (Algiers time), both bounds inclusive
+        if (criteria.getFromDate() != null && !criteria.getFromDate().isBlank()) {
+            Instant from = LocalDate.parse(criteria.getFromDate()).atStartOfDay(BusinessConstants.BUSINESS_ZONE).toInstant();
+            predicates.add(cb.greaterThanOrEqualTo(root.get("saleDate"), from));
+        }
+        if (criteria.getToDate() != null && !criteria.getToDate().isBlank()) {
+            Instant to = LocalDate.parse(criteria.getToDate()).plusDays(1).atStartOfDay(BusinessConstants.BUSINESS_ZONE).toInstant();
+            predicates.add(cb.lessThan(root.get("saleDate"), to));
+        }
+        return predicates;
     }
 }

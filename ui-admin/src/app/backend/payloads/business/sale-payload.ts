@@ -15,7 +15,13 @@ export interface SalePayload {
     saleDate: string;
     totalAmount: number;
     paymentMethod: string;
+    /** DINE_IN (à table) or TAKEAWAY (à emporter); null for sales made before the choice existed */
+    orderType: string;
     items: SaleItemPayload[];
+    posName: string;
+    caisseSessionId: number;
+    caisseSessionStatus: string;
+    caisseSessionOpenedAt: string;
     createdByFullName: string;
     createdByUsername: string;
     createdAt: string;

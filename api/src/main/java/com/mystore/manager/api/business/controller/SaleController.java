@@ -1,6 +1,8 @@
 package com.mystore.manager.api.business.controller;
 
+import com.mystore.manager.api.business.common.criteria.SaleCriteria;
 import com.mystore.manager.api.business.payload.SalePayload;
+import com.mystore.manager.api.common.payload.GlobalPayload;
 import com.mystore.manager.api.business.service.inter.ISaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,11 @@ public class SaleController {
     @PostMapping(path = ADD_EP, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SalePayload> add(@RequestBody SalePayload payload) {
         return new ResponseEntity<>(service.save(payload), HttpStatus.OK);
+    }
+
+    @PostMapping(path = FIND_ALL_BY_CRITERIA_EP, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GlobalPayload<SalePayload>> findAllByCriteria(@RequestBody SaleCriteria criteria) {
+        return new ResponseEntity<>(service.findAllByCriteria(criteria), HttpStatus.OK);
     }
 
     @GetMapping(value = ID_PARAM, produces = MediaType.APPLICATION_JSON_VALUE)
