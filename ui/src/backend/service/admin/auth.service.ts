@@ -34,9 +34,20 @@ export class AuthService {
     setInterval(() => this.logoutIfSessionExpired(), 60_000);
   }
 
+  /**
+   * End of the session (epoch ms), or null when not logged in. The value is stored JSON-encoded
+   * (with quotes) by LocalStorageService: a bare parseInt on it gives NaN.
+   */
+  sessionExpiry(): number | null {
+    const raw = localStorage.getItem(UtilStatic.SESSION_EXP);
+    if (!raw) return null;
+    const exp = parseInt(raw.replace(/"/g, ''), 10);
+    return Number.isFinite(exp) ? exp : null;
+  }
+
   private logoutIfSessionExpired(): void {
-    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-    if (!expStr || Date.now() <= parseInt(expStr, 10)) return;
+    const exp = this.sessionExpiry();
+    if (exp === null || Date.now() <= exp) return;
     if (!this.injector.get(ConnectivityService).isOnline()) return;
     this.logout();
   }
@@ -150,9 +161,9 @@ export class AuthService {
     
 
   checkIsLoggedIn(): boolean {
-    const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-    if (!expStr) return false;
-    if (Date.now() > parseInt(expStr, 10)) {
+    const exp = this.sessionExpiry();
+    if (exp === null) return false;
+    if (Date.now() > exp) {
       // Offline the login page is unusable: keep the till working (sales are queued and synced
       // with the terminal API key). The next authenticated request once back online logs out.
       if (!this.injector.get(ConnectivityService).isOnline()) return true;

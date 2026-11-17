@@ -15,8 +15,8 @@ export class TokenInterceptor implements HttpInterceptor{
         const needsAuth = this.authService.checkIfNeedBearer(req);
 
         if (needsAuth) {
-            const expStr = localStorage.getItem(UtilStatic.SESSION_EXP);
-            if (!expStr || Date.now() > parseInt(expStr, 10)) {
+            const exp = this.authService.sessionExpiry();
+            if (exp === null || Date.now() > exp) {
                 this.authService.logout();
                 console.warn('Session expirée, veuillez vous reconnecter.');
                 return throwError(() => new Error('Session expired'));

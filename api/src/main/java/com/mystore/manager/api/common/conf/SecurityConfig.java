@@ -219,6 +219,9 @@ public class SecurityConfig {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(auth -> {
+            // The error page is rendered in a second (ERROR) dispatch where the JWT filter does not run:
+            // without this, every failure (400, 500…) reached the client as a 401 and logged the till out.
+            auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll();
             adminRules().accept(auth);
             businessSupplyRules().accept(auth);
             auth.anyRequest().authenticated();
