@@ -87,7 +87,9 @@ export class ToolbarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.storeName = localStorage.getItem(UtilStatic.STORE_NAME) || '';
+    // A super admin works across every point of sale: no point of sale label in the top bar
+    const superAdmin = localStorage.getItem(UtilStatic.SUPER_ADMIN) === 'true';
+    this.storeName = superAdmin ? '' : localStorage.getItem(UtilStatic.STORE_NAME) || '';
     
     this.router.events
       .pipe(
