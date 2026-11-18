@@ -27,7 +27,7 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
         <header class="head">
           <h2 id="pay-title">Encaissement</h2>
           <button class="icon-btn" (click)="close()" aria-label="Fermer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </header>
 
@@ -124,14 +124,14 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: min(440px, calc(100vw - 32px));
+      width: min(500px, calc(100vw - 32px));
       max-height: calc(100dvh - 32px);
       overflow-y: auto;
       z-index: var(--z-modal);
       background: var(--surface);
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-lg);
-      padding: 20px 24px 24px;
+      padding: 16px 24px 24px;
       animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
     }
 
@@ -152,8 +152,9 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
     }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
+      width: var(--tap);
+      height: var(--tap);
+      margin-right: -8px;
       display: grid;
       place-items: center;
       border-radius: 50%;
@@ -161,7 +162,7 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
       transition: background-color 0.2s;
     }
 
-    .icon-btn:hover { background: var(--surface-muted); }
+    .icon-btn:active { background: var(--surface-muted); }
 
     .due {
       display: flex;
@@ -201,21 +202,21 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
     .order-type {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 16px;
     }
 
     .order-type button {
-      height: 52px;
+      height: 64px;
       border-radius: var(--radius-md);
       background: var(--surface-muted);
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--ink-soft);
       transition: background-color 0.15s, color 0.15s;
     }
 
-    .order-type button:hover { background: var(--surface-sunken); color: var(--ink); }
+    .order-type button:active { background: var(--surface-sunken); color: var(--ink); }
 
     .order-type button.on {
       background: var(--accent-soft);
@@ -234,8 +235,8 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
     .input-wrap {
       display: flex;
       align-items: center;
-      height: 52px;
-      padding: 0 14px;
+      height: 60px;
+      padding: 0 16px;
       border-radius: var(--radius-md);
       background: var(--surface);
       box-shadow: inset 0 0 0 1.5px var(--line);
@@ -250,7 +251,7 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
       border: none;
       outline: none;
       background: transparent;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--ink);
     }
@@ -268,22 +269,22 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
 
     .quick {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-      gap: 8px;
-      margin: 10px 0 16px;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 10px;
+      margin: 12px 0 16px;
     }
 
     .quick button {
-      height: 42px;
-      border-radius: var(--radius-sm);
+      height: var(--tap-lg);
+      border-radius: var(--radius-md);
       background: var(--surface-muted);
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 750;
+      font-size: 17px;
       color: var(--ink-soft);
       transition: background-color 0.15s, color 0.15s;
     }
 
-    .quick button:hover { background: var(--surface-sunken); color: var(--ink); }
+    .quick button:active { background: var(--surface-sunken); color: var(--ink); }
 
     .quick button.on {
       background: var(--accent-soft);
@@ -325,17 +326,17 @@ const ORDER_TYPES: { value: OrderType; label: string }[] = [
 
     .confirm {
       width: 100%;
-      height: 56px;
+      height: 64px;
       border-radius: var(--radius-md);
       background: var(--accent);
       color: #fff;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       box-shadow: 0 10px 20px -10px rgba(196, 82, 15, 0.7);
       transition: background-color 0.2s;
     }
 
-    .confirm:hover:not(:disabled) { background: var(--accent-strong); }
+    .confirm:active:not(:disabled) { background: var(--accent-strong); }
 
     .confirm:disabled {
       background: var(--surface-sunken);

@@ -14,6 +14,9 @@ import { StockMovementPayload } from 'src/app/backend/payloads/business/stock-mo
 import { StockMovementService } from 'src/app/backend/service/business/stock-movement.service';
 import { ProductPayload } from 'src/app/backend/payloads/business/productpayload';
 import { ProductService } from 'src/app/backend/service/business/product.service';
+import { PosPayload } from 'src/app/backend/payloads/admin/pospayload';
+import { PosService } from 'src/app/backend/service/admin/pos.service';
+import { UtilStatic } from 'src/app/backend/service/util/UtilStatic';
 
 @Component({
   selector: 'vex-edit-stock-movement',
@@ -31,6 +34,9 @@ export class EditStockMovementComponent implements OnInit {
   payload = new StockMovementPayload();
   products: ProductPayload[] = [];
   productOptions: AutocompleteOption[] = [];
+  posOptions: AutocompleteOption[] = [];
+  /** Only a super admin chooses the POS; other users record movements for their own POS. */
+  readonly superAdmin = localStorage.getItem(UtilStatic.SUPER_ADMIN) === 'true';
 
   movementTypes: AutocompleteOption[] = [
     { value: 'ENTRY', label: 'Entrée' },
@@ -42,13 +48,15 @@ export class EditStockMovementComponent implements OnInit {
     public dialogRef: MatDialogRef<EditStockMovementComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { element: StockMovementPayload },
     private service: StockMovementService,
-    private productService: ProductService
+    private productService: ProductService,
+    private posService: PosService
   ) {
     this.payload = this.data.element;
   }
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadPoses();
     this.service.get(this.payload.id).subscribe({
       next: (response: StockMovementPayload) => {
         if (response != null) {
@@ -58,6 +66,25 @@ export class EditStockMovementComponent implements OnInit {
       }
     });
     this.initForm();
+  }
+
+  /** The POS decides which till sees the stock: it is chosen on every movement. */
+  loadPoses() {
+    const ownId = Number(localStorage.getItem(UtilStatic.STORE_ID)) || null;
+    if (!this.superAdmin) {
+      const name = localStorage.getItem(UtilStatic.STORE_NAME) ?? '';
+      const code = localStorage.getItem(UtilStatic.STORE_CODE) ?? '';
+      this.posOptions = ownId ? [{ value: ownId, label: name || code, hint: code }] : [];
+      return;
+    }
+    this.posService.findAll().subscribe({
+      next: (response: any) => {
+        this.posOptions = ((response || []) as PosPayload[])
+          .filter(p => p.active || p.id === this.f['posId']?.value)
+          .map(p => ({ value: p.id, label: p.name, hint: p.code, sublabel: p.code }));
+      },
+      error: () => {}
+    });
   }
 
   loadProducts() {
@@ -78,6 +105,7 @@ export class EditStockMovementComponent implements OnInit {
 
   edit(): void {
     if (this.generalForm.invalid) return;
+    this.payload.posId = this.f['posId'].value;
     this.payload.productId = this.f['productId'].value;
     this.payload.movementType = this.f['movementType'].value;
     this.payload.quantity = this.f['quantity'].value;
@@ -94,6 +122,7 @@ export class EditStockMovementComponent implements OnInit {
 
   initForm() {
     this.generalForm = this.fb.group({
+      posId: [{ value: this.payload.posId, disabled: !this.superAdmin }, [Validators.required]],
       productId: [this.payload.productId, [Validators.required]],
       movementType: [this.payload.movementType, [Validators.required]],
       quantity: [this.payload.quantity, [Validators.required, Validators.min(0.01)]],

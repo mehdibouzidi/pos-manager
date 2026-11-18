@@ -18,31 +18,35 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
           </span>
         </div>
         @if (cartService.items().length > 0) {
-          <button class="clear" (click)="cartService.clearCart()">Vider</button>
+          <button class="clear" (click)="cartService.clearCart()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+            Vider
+          </button>
         }
       </header>
 
       <div class="lines">
         @for (item of cartService.items(); track item.product.id) {
           <div class="line">
-            <div class="line-main">
+            <div class="line-top">
               <span class="line-name">{{ item.product.name }}</span>
-              <span class="line-unit num">{{ item.product.retailPrice | number:'1.2-2' }} Da / u</span>
-            </div>
-            <div class="line-side">
               <span class="line-total num">{{ item.product.retailPrice * item.quantity | number:'1.2-2' }}</span>
-              <div class="stepper">
-                <button (click)="cartService.decrementQuantity(item.product.id)"
-                        [attr.aria-label]="item.quantity > 1 ? 'Retirer une unité' : 'Supprimer la ligne'">
-                  @if (item.quantity > 1) {
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>
-                  } @else {
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
-                  }
-                </button>
-                <span class="qty num">{{ item.quantity }}</span>
-                <button (click)="cartService.incrementQuantity(item.product.id)" aria-label="Ajouter une unité">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <div class="line-bottom">
+              <span class="line-unit num">{{ item.product.retailPrice | number:'1.2-2' }} Da / u</span>
+              <div class="line-actions">
+                <div class="stepper">
+                  <button class="step" (click)="cartService.decrementQuantity(item.product.id)"
+                          [disabled]="item.quantity <= 1" aria-label="Retirer une unité">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                  </button>
+                  <span class="qty num">{{ item.quantity }}</span>
+                  <button class="step" (click)="cartService.incrementQuantity(item.product.id)" aria-label="Ajouter une unité">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                </div>
+                <button class="remove" (click)="cartService.removeFromCart(item.product.id)" aria-label="Supprimer la ligne">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg>
                 </button>
               </div>
             </div>
@@ -92,118 +96,160 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      padding: 18px 20px 14px;
+      gap: 12px;
+      padding: 14px 14px 14px 20px;
       border-bottom: 1px solid var(--line);
     }
 
     h2 {
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 750;
       letter-spacing: -0.01em;
     }
 
     .count {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--ink-faint);
       font-weight: 600;
     }
 
     .clear {
-      font-size: 13px;
-      font-weight: 600;
+      height: var(--tap);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface-muted);
+      font-size: 15px;
+      font-weight: 700;
       color: var(--ink-soft);
-      padding: 6px 10px;
-      border-radius: var(--radius-sm);
-      transition: background-color 0.2s, color 0.2s;
+      transition: background-color 0.15s, color 0.15s;
     }
 
-    .clear:hover {
-      background: var(--danger-soft);
-      color: var(--danger);
-    }
+    .clear:active { background: var(--danger-soft); color: var(--danger); }
 
     .lines {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 6px 12px;
+      overscroll-behavior: contain;
+      padding: 4px 12px;
     }
 
     .line {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 8px;
-      border-bottom: 1px dashed var(--line);
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 4px;
+      border-bottom: 1px dashed #ddd5cc;
       animation: line-in 0.2s ease-out;
     }
+
+    .line:last-child { border-bottom: none; }
 
     @keyframes line-in {
       from { opacity: 0; transform: translateY(-4px); }
     }
 
-    .line-main {
+    .line-top {
       display: flex;
-      flex-direction: column;
-      gap: 3px;
-      min-width: 0;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
     }
 
     .line-name {
-      font-size: 14px;
-      font-weight: 600;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 650;
       line-height: 1.3;
     }
 
-    .line-unit {
-      font-size: 12px;
-      color: var(--ink-faint);
-    }
-
-    .line-side {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
     .line-total {
-      font-size: 14px;
-      font-weight: 700;
+      flex: none;
+      font-size: 16px;
+      font-weight: 800;
     }
 
+    .line-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .line-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-faint);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .line-actions {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Quantity: finger-sized − / + with the count between them */
     .stepper {
       display: flex;
       align-items: center;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 14px;
       background: var(--surface-muted);
-      border-radius: 10px;
-      padding: 2px;
     }
 
-    .stepper button {
-      width: 34px;
-      height: 32px;
+    .step {
+      width: var(--tap);
+      height: var(--tap);
       display: grid;
       place-items: center;
-      border-radius: 8px;
-      color: var(--ink-soft);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(31, 27, 23, 0.1);
       transition: background-color 0.15s, color 0.15s;
     }
 
-    .stepper button:hover {
-      background: var(--surface);
-      color: var(--ink);
+    .step:active:not(:disabled) { background: var(--accent-soft); color: var(--accent-ink); }
+
+    .step:disabled {
+      background: transparent;
+      color: var(--ink-faint);
+      box-shadow: none;
+      cursor: default;
     }
 
     .qty {
-      min-width: 28px;
+      min-width: 40px;
       text-align: center;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
     }
+
+    /* Delete: its own button, red, apart from the stepper so it is never hit by mistake */
+    .remove {
+      width: var(--tap);
+      height: var(--tap);
+      margin-left: 4px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--danger-soft);
+      color: var(--danger);
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .remove:active { background: var(--danger); color: #fff; }
 
     .empty {
       height: 100%;
@@ -262,17 +308,17 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .pay {
       width: 100%;
-      height: 56px;
+      height: 64px;
       border-radius: var(--radius-md);
       background: var(--accent);
       color: #fff;
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 750;
       box-shadow: 0 10px 20px -10px rgba(196, 82, 15, 0.7);
       transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
     }
 
-    .pay:hover:not(:disabled) {
+    .pay:active:not(:disabled) {
       background: var(--accent-strong);
     }
 

@@ -11,6 +11,11 @@
 <mat-dialog-content>
   <form [formGroup]="generalForm" class="flex flex-col gap-4 pt-4">
 
+    <vex-autocomplete-select appearance="outline" label="Point de vente" formControlName="posId" [required]="true"
+      placeholder="Rechercher un point de vente..." [options]="posOptions"
+      [error]="f['posId'].touched && f['posId'].hasError('required') ? 'Le point de vente est obligatoire' : null">
+    </vex-autocomplete-select>
+
     <vex-autocomplete-select appearance="outline" label="Produit" formControlName="productId" [required]="true"
       placeholder="Rechercher un produit..." [options]="productOptions"
       [error]="f['productId'].touched && f['productId'].hasError('required') ? 'Le produit est obligatoire' : null">

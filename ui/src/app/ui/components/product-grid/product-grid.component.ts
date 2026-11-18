@@ -101,8 +101,8 @@ import { ProductCardComponent } from '../product-card/product-card.component';
 
     .search {
       margin-left: auto;
-      width: min(420px, 100%);
-      height: 44px;
+      width: min(460px, 100%);
+      height: 52px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -125,7 +125,7 @@ import { ProductCardComponent } from '../product-card/product-card.component';
       border: none;
       outline: none;
       background: transparent;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 500;
       color: var(--ink);
     }
@@ -135,10 +135,12 @@ import { ProductCardComponent } from '../product-card/product-card.component';
     .search input::placeholder { color: var(--ink-faint); }
 
     .search .clear {
-      width: 26px;
-      height: 26px;
+      width: 40px;
+      height: 40px;
+      margin-right: -6px;
+      flex: none;
       border-radius: 50%;
-      font-size: 12px;
+      font-size: 15px;
       color: var(--ink-soft);
       background: var(--surface-muted);
     }
@@ -148,9 +150,9 @@ import { ProductCardComponent } from '../product-card/product-card.component';
       min-height: 0;
       overflow-y: auto;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       grid-auto-rows: min-content;
-      gap: 12px;
+      gap: 16px;
       padding: 2px 2px 24px;
       align-content: start;
     }
@@ -159,7 +161,7 @@ import { ProductCardComponent } from '../product-card/product-card.component';
     .grid::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 
     .skeleton {
-      height: 212px;
+      height: 330px;
       border-radius: var(--radius-lg);
       background: linear-gradient(90deg, var(--surface-sunken), var(--surface-muted), var(--surface-sunken));
       background-size: 200% 100%;
@@ -182,7 +184,8 @@ import { ProductCardComponent } from '../product-card/product-card.component';
     }
 
     .empty button {
-      padding: 10px 16px;
+      height: var(--tap);
+      padding: 0 20px;
       border-radius: var(--radius-md);
       background: var(--surface);
       box-shadow: var(--shadow-sm);

@@ -71,16 +71,28 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Touchscreen: the caisse is used with a finger, not a cursor.
+   --tap is the minimum size of anything that can be touched. */
+:root {
+  --tap: 48px;
+  --tap-lg: 56px;
+}
+
 button {
   font-family: inherit;
   color: inherit;
   cursor: pointer;
   border: none;
   background: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 input, textarea {
   font-family: inherit;
+  font-size: 16px;
+  touch-action: manipulation;
 }
 
 /* Visible focus for keyboard users only */
@@ -89,8 +101,9 @@ input, textarea {
   outline-offset: 2px;
 }
 
+/* Press feedback: the finger hides the button, so the answer must be visible around it */
 button:not(:disabled):active {
-  transform: translateY(1px) scale(0.99);
+  transform: scale(0.97);
 }
 
 /* Money and counters: figures of equal width so columns line up */

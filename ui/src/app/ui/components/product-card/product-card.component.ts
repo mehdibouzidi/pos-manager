@@ -11,55 +11,112 @@ import { CartService } from '../../../back/services/cart.service';
     <button
       class="card"
       [class.out]="stock() <= 0"
+      [class.picked]="inCart() > 0"
       [disabled]="stock() <= 0"
       [attr.aria-label]="'Ajouter ' + product.name"
       (click)="add()"
     >
-      <div class="media">
+      <span class="media">
         @if (product.photo) {
-          <img [src]="'data:image/jpeg;base64,' + product.photo" [alt]="''">
+          <img [src]="'data:image/jpeg;base64,' + product.photo" alt="">
         } @else {
-          <img class="default" src="assets/img/placeholder-product.svg" [alt]="''">
+          <img class="default" src="assets/img/placeholder-product.svg" alt="">
         }
         @if (inCart() > 0) {
-          <span class="in-cart num" aria-label="Quantité dans le ticket">{{ inCart() }}</span>
+          <span class="in-cart num" aria-label="Quantité dans le ticket">×{{ inCart() }}</span>
         }
-      </div>
+      </span>
 
-      <span class="name">{{ product.name }}</span>
+      <span class="body">
+        <span class="name">{{ product.name }}</span>
+        @if (stock() <= 0) {
+          <span class="chip chip--none">Épuisé</span>
+        } @else {
+          <span class="chip num" [class.chip--low]="stock() <= 5">{{ stock() }} en stock</span>
+        }
+      </span>
 
       <span class="footer">
-        <span class="price num">{{ product.retailPrice | number:'1.2-2' }}<small> Da</small></span>
-        <span class="stock num" [class.low]="stock() > 0 && stock() <= 5" [class.none]="stock() <= 0">
-          @if (stock() <= 0) { Épuisé } @else { {{ stock() }} en stock }
+        <span class="price num">{{ product.retailPrice | number:'1.2-2' }}<small>Da</small></span>
+        <span class="add" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
         </span>
       </span>
     </button>
   `,
   styles: [`
-    :host { display: block; }
+    /* Touchscreen first: the whole card is the tap target, feedback comes from the press,
+       hover is only a bonus for a mouse. */
+    :host {
+      display: block;
+      --m-in: 140ms;
+      --m-out: 200ms;
+      --m-press: 90ms;
+      --m-image: 600ms;
+      --m-ease: cubic-bezier(.2, .8, .2, 1);
+      --card-tint: #fdf1e8;
+    }
 
     .card {
+      position: relative;
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 10px 10px 12px;
+      padding: 0;
+      overflow: hidden;
       background: var(--surface);
+      border: 1px solid var(--line);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 4px 12px -8px rgba(60, 40, 20, 0.12);
       text-align: left;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: 2px solid transparent;
+      outline-offset: 6px;
+      transition:
+        transform 180ms var(--m-ease),
+        border-color var(--m-out) var(--m-ease),
+        box-shadow var(--m-out) var(--m-ease),
+        outline-offset var(--m-out) var(--m-ease);
     }
 
-    .card:hover:not(:disabled) {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-
+    /* Press: the finger needs a clear answer, on every pointer */
     .card:active:not(:disabled) {
-      transform: translateY(0) scale(0.98);
+      transform: scale(0.97);
+      border-color: var(--accent);
+      transition-duration: var(--m-press);
+    }
+
+    .card:active:not(:disabled) .add {
+      background: var(--accent-strong);
+      transform: scale(0.92);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .card:hover:not(:disabled) {
+        transform: translateY(-2px);
+        border-color: #d3cdc6;
+        box-shadow: 0 14px 24px -14px rgba(31, 27, 23, 0.22);
+        transition-duration: 180ms, var(--m-in), var(--m-in), var(--m-out);
+      }
+      .card:hover:not(:disabled) .media img { transform: scale(1.03); }
+      .card:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
+    }
+
+    .card:focus-visible {
+      outline-color: var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Already in the ticket */
+    .card.picked {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 6px 16px -10px rgba(196, 82, 15, 0.5);
     }
 
     .card.out {
@@ -68,92 +125,162 @@ import { CartService } from '../../../back/services/cart.service';
       box-shadow: none;
     }
 
+    /* Photo */
     .media {
       position: relative;
-      aspect-ratio: 4 / 3;
-      border-radius: var(--radius-md);
-      background: var(--surface-muted);
-      display: grid;
-      place-items: center;
+      display: block;
+      aspect-ratio: 1 / 1;
+      background: var(--card-tint);
       overflow: hidden;
     }
 
     .media img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 8%;
+      padding: 5%;
+      transition: transform var(--m-image) var(--m-ease);
     }
 
-    /* Default image when the product has no photo: fills the frame like a real picture */
     .media img.default {
       object-fit: cover;
       padding: 0;
     }
 
+    .card.out .media { background: var(--surface-sunken); }
 
-    .card.out .media { opacity: 0.55; }
+    .card.out .media img {
+      filter: grayscale(1);
+      opacity: 0.45;
+    }
+
+    /* Title + stock */
+    .body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px 14px 12px;
+    }
+
+    /* Stock: green, amber when low, red when gone */
+    .chip {
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px 0 9px;
+      border-radius: 13px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chip::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .chip--low { background: var(--warn-soft); color: var(--warn); }
+    .chip--none { background: var(--danger-soft); color: var(--danger); }
 
     .in-cart {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      min-width: 26px;
-      height: 26px;
-      padding: 0 7px;
-      border-radius: 13px;
+      top: 8px;
+      right: 8px;
+      min-width: 40px;
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 16px;
       background: var(--accent);
       color: #fff;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       display: grid;
       place-items: center;
-      box-shadow: 0 4px 10px -2px rgba(196, 82, 15, 0.45);
+      box-shadow: 0 4px 10px -3px rgba(196, 82, 15, 0.55);
     }
 
+    /* Title */
     .name {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 650;
       line-height: 1.3;
       color: var(--ink);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: calc(14px * 1.3 * 2);
+      height: calc(16px * 1.3 * 2);
     }
 
     .card.out .name { color: var(--ink-faint); }
 
+    /* Price band, set apart from the title by a ticket-like dashed rule */
     .footer {
       margin-top: auto;
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
+      padding: 10px 10px 10px 14px;
+      border-top: 1.5px dashed #ddd5cc;
+      background: var(--surface);
     }
+
+    .card.picked .footer { background: var(--accent-soft); border-top-color: #f3cfb6; }
+    .card.out .footer { background: transparent; }
 
     .price {
-      font-size: 17px;
+      font-size: 21px;
       font-weight: 800;
+      letter-spacing: -0.02em;
       color: var(--ink);
-    }
-
-    .price small {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--ink-soft);
-    }
-
-    .stock {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--ink-faint);
       white-space: nowrap;
     }
 
-    .stock.low { color: var(--warn); }
-    .stock.none { color: var(--danger); }
+    .price small {
+      margin-left: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--ink-soft);
+    }
+
+    .card.picked .price { color: var(--accent-ink); }
+    .card.out .price { color: var(--ink-faint); }
+
+    /* The add affordance: big enough to read as a button under a finger */
+    .add {
+      flex: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 10px -4px rgba(196, 82, 15, 0.6);
+      transition: transform var(--m-press) var(--m-ease), background var(--m-out) var(--m-ease);
+    }
+
+    .card.out .add {
+      background: var(--surface-sunken);
+      color: var(--ink-faint);
+      box-shadow: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .media img, .add { transition: none; }
+      .card:hover:not(:disabled), .card:active:not(:disabled) { transform: none; }
+      .card:hover:not(:disabled) .media img, .card:active:not(:disabled) .add { transform: none; }
+    }
   `]
 })
 export class ProductCardComponent {

@@ -187,8 +187,8 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 0 16px 0 20px;
-      height: 60px;
+      padding: 0 12px 0 20px;
+      height: 68px;
       background: var(--surface);
       border-bottom: 1px solid var(--line);
       position: relative;
@@ -296,19 +296,19 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 0 14px;
-      height: 36px;
-      border-radius: var(--radius-sm);
+      padding: 0 18px;
+      height: var(--tap);
+      border-radius: var(--radius-md);
       background: var(--surface);
       color: var(--ink);
       box-shadow: inset 0 0 0 1.5px var(--line);
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
       white-space: nowrap;
       transition: box-shadow 0.15s, color 0.15s, background-color 0.15s;
     }
 
-    .close-caisse-btn:hover {
+    .close-caisse-btn:active {
       color: var(--danger);
       background: var(--danger-soft);
       box-shadow: inset 0 0 0 1.5px transparent;
@@ -332,21 +332,21 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-sm);
+      gap: 4px;
+      width: var(--tap);
+      height: var(--tap);
+      border-radius: var(--radius-md);
       transition: background-color 0.2s;
     }
 
-    .menu-btn:hover,
+    .menu-btn:active,
     .menu-btn.active {
       background: var(--surface-muted);
     }
 
     .menu-dot {
-      width: 4px;
-      height: 4px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: var(--ink-soft);
     }
@@ -359,8 +359,8 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       background: var(--surface);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-lg);
-      min-width: 230px;
-      padding: 6px;
+      min-width: 280px;
+      padding: 8px;
       animation: fadeIn 0.15s ease;
       z-index: var(--z-dropdown);
     }
@@ -376,15 +376,16 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       gap: 10px;
       width: 100%;
       text-align: left;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
+      min-height: var(--tap-lg);
+      padding: 0 16px;
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      font-weight: 600;
       color: var(--ink);
       transition: background-color 0.15s;
     }
 
-    .dropdown-item:hover {
+    .dropdown-item:active {
       background: var(--surface-muted);
     }
 
@@ -396,7 +397,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
 
     .dropdown-item--danger { color: var(--danger); }
 
-    .dropdown-item--danger:hover { background: var(--danger-soft); }
+    .dropdown-item--danger:active { background: var(--danger-soft); }
 
     /* ── Modal ───────────────────────────────────────── */
     .modal-backdrop {
@@ -412,7 +413,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     .modal {
       background: white;
       border-radius: var(--radius-lg);
-      width: 420px;
+      width: 460px;
       max-width: 95vw;
       box-shadow: var(--shadow-lg);
       animation: fadeIn 0.2s ease;
@@ -422,30 +423,30 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 24px 16px;
+      padding: 12px 12px 12px 24px;
       border-bottom: 1px solid var(--border-color);
     }
 
     .modal-header h3 {
-      font-size: 1rem;
+      font-size: 18px;
       font-weight: 600;
       color: var(--text-dark);
     }
 
     .close-btn {
-      width: 28px;
-      height: 28px;
+      width: var(--tap);
+      height: var(--tap);
       border-radius: 50%;
       background: transparent;
       color: var(--text-gray);
-      font-size: 0.85rem;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: background 0.15s;
     }
 
-    .close-btn:hover { background: var(--border-color); }
+    .close-btn:active { background: var(--border-color); }
 
     .modal-body {
       padding: 20px 24px;
@@ -461,8 +462,8 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     }
 
     .field-group label {
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       color: var(--text-gray);
     }
 
@@ -474,10 +475,11 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
 
     .pwd-wrapper input {
       width: 100%;
-      padding: 10px 40px 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      font-size: 0.9rem;
+      height: var(--tap-lg);
+      padding: 0 60px 0 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 17px;
       font-family: inherit;
       outline: none;
       transition: border-color 0.2s;
@@ -487,10 +489,14 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
 
     .eye-btn {
       position: absolute;
-      right: 10px;
+      right: 4px;
+      width: var(--tap);
+      height: var(--tap);
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
       background: transparent;
-      font-size: 1rem;
-      padding: 0;
+      font-size: 20px;
       line-height: 1;
     }
 
@@ -512,23 +518,27 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     }
 
     .btn-cancel {
-      padding: 10px 20px;
-      border-radius: var(--radius-sm);
+      flex: 1;
+      height: var(--tap-lg);
+      padding: 0 20px;
+      border-radius: var(--radius-md);
       background: var(--border-color);
       color: var(--text-dark);
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 650;
       transition: background 0.15s;
     }
 
-    .btn-cancel:hover { background: #d1d5db; }
+    .btn-cancel:active { background: #d1d5db; }
 
     .btn-confirm {
-      padding: 10px 22px;
-      border-radius: var(--radius-sm);
+      flex: 2;
+      height: var(--tap-lg);
+      padding: 0 22px;
+      border-radius: var(--radius-md);
       background: var(--primary-orange);
       color: white;
-      font-size: 0.9rem;
+      font-size: 16px;
       font-weight: 600;
       min-width: 100px;
       display: flex;
@@ -537,7 +547,7 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       transition: background 0.15s;
     }
 
-    .btn-confirm:hover:not(:disabled) { background: var(--primary-orange-dark); }
+    .btn-confirm:active:not(:disabled) { background: var(--primary-orange-dark); }
     .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .spinner {
@@ -556,10 +566,10 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 30px;
-      padding: 0 10px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
       font-weight: 700;
       white-space: nowrap;
     }
@@ -617,12 +627,15 @@ import { SyncService } from '../../../../backend/service/offline/sync.service';
     }
 
     .sync-btn {
+      height: var(--tap);
+      padding: 0 16px;
+      font-size: 14px;
       background: var(--surface-muted);
       color: var(--ink);
       transition: background-color 0.15s;
     }
 
-    .sync-btn:hover { background: var(--surface-sunken); }
+    .sync-btn:active { background: var(--surface-sunken); }
   `]
 })
 export class TopbarComponent {

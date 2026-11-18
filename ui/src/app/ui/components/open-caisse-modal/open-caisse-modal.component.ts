@@ -123,7 +123,8 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
 
     .balance-input {
       width: 100%;
-      padding: 14px 16px;
+      height: 64px;
+      padding: 0 16px;
       border: 2px solid var(--border-color);
       border-radius: 10px;
       font-size: 1.5rem;
@@ -157,19 +158,19 @@ import { CaisseSessionService } from '../../../../backend/service/business/caiss
       align-items: center;
       gap: 8px;
       width: 100%;
-      padding: 14px 24px;
+      height: 64px;
+      padding: 0 24px;
       justify-content: center;
       background: var(--primary-orange);
       color: white;
       border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      font-size: 18px;
+      font-weight: 700;
+      transition: background-color 0.2s;
     }
 
-    .btn-confirm:hover:not(:disabled) {
+    .btn-confirm:active:not(:disabled) {
       background: var(--primary-orange-dark);
-      transform: translateY(-1px);
     }
 
     .btn-confirm:disabled {
