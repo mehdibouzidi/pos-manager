@@ -61,7 +61,7 @@ export class MenuService {
         const cats = categories as ProductCategory[];
         const prods = products as Product[];
         this._categories.set(cats);
-        this._products.set(prods);
+        this._products.set(byName(prods));
         this.keepSelectedCategory(cats);
         this._loading.set(false);
         // Persist menu data (products + categories) for offline use
@@ -84,7 +84,7 @@ export class MenuService {
     if (posId === 0) return;
     this._loading.set(true);
     this.offlineStorage.getMenuData(posId).then(({ products, categories }) => {
-      this._products.set(products);
+      this._products.set(byName(products));
       this._categories.set(categories);
       this.keepSelectedCategory(categories);
       this._loading.set(false);
@@ -97,7 +97,7 @@ export class MenuService {
     this.productService.findAll().subscribe({
       next: (products) => {
         const prods = products as Product[];
-        this._products.set(prods);
+        this._products.set(byName(prods));
         // Update cache with fresh stock levels
         const posId = parseInt(localStorage.getItem(UtilStatic.POS_ID) ?? '0', 10);
         if (posId > 0) {
@@ -156,6 +156,16 @@ export class MenuService {
   getFilteredProducts(): Product[] {
     return this.filteredProducts();
   }
+}
+
+const nameCollator = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
+
+/**
+ * Products in alphabetical order, so that each category shows its products grouped by name
+ * (all the burgers, then all the sandwiches…). Accents and case are ignored, numbers sort naturally.
+ */
+function byName(products: Product[]): Product[] {
+  return [...products].sort((a, b) => nameCollator.compare(a.name ?? '', b.name ?? ''));
 }
 
 /** Case and accent insensitive comparison ("cafe" finds "Café"). */
