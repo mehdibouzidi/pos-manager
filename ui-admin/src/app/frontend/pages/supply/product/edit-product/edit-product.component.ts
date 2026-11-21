@@ -121,7 +121,8 @@ export class EditProductComponent {
     this.generalForm = this.fb.group({
       name: [
         this.payload.name,
-        [Validators.required, Validators.maxLength(30)]
+        // Same limit as at creation (add-product); the DB column allows 255
+        [Validators.required, Validators.maxLength(100)]
       ],
       code: [
         this.payload.code,
