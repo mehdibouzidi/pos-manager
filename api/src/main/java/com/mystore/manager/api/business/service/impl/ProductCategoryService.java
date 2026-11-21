@@ -21,6 +21,9 @@ import java.util.Objects;
 @Service
 public class ProductCategoryService implements IProductCategoryService {
 
+    /** Display order of the categories (till tabs, admin dropdowns): by code, e.g. 010, 020…, then id. */
+    private static final Sort DISPLAY_ORDER = Sort.by("code", "id");
+
     private final ProductCategoryRepository repository;
     private final ProductCategoryMapper mapper;
 
@@ -81,12 +84,12 @@ public class ProductCategoryService implements IProductCategoryService {
         List<ProductCategoryEntity> entities;
         if (displayedOnly) {
             // Till catalogue: shared by every POS, driven only by the "displayed in POS" flag
-            entities = repository.findAll(Sort.by("id")).stream().filter(ProductCategoryEntity::isDisplayedInPos).toList();
+            entities = repository.findAll(DISPLAY_ORDER).stream().filter(ProductCategoryEntity::isDisplayedInPos).toList();
         } else if (PosContext.isSuperAdmin()) {
-            entities = repository.findAll(Sort.by("id"));
+            entities = repository.findAll(DISPLAY_ORDER);
         } else {
             Integer posId = PosContext.getPosId();
-            entities = posId != null ? repository.findAllByPos_IdOrderByIdAsc(posId) : List.of();
+            entities = posId != null ? repository.findAllByPos_IdOrderByCodeAscIdAsc(posId) : List.of();
         }
         return mapper.entityListToPayload(entities, false);
     }

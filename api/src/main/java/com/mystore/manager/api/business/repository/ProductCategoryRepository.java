@@ -12,6 +12,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     ProductCategoryEntity findByCode(String code);
 
     // Explicit order: without it PostgreSQL returns rows in physical order, which changes
-    // every time a row is updated (e.g. stock decremented by a sale) and reshuffles the POS grid.
-    List<ProductCategoryEntity> findAllByPos_IdOrderByIdAsc(Integer posId);
+    // every time a row is updated and reshuffles the POS grid. Ordered by code (the display order
+    // set in the admin, e.g. 010, 020…), then id for categories sharing a code.
+    List<ProductCategoryEntity> findAllByPos_IdOrderByCodeAscIdAsc(Integer posId);
 }
