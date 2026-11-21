@@ -24,8 +24,10 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        # The JVM uses heap + ~150-200 MB outside it (metaspace, code cache, threads, GC).
+        # Heap 350 MB keeps the whole process under the 600Mi limit (it was OOMKilled with a 400 MB heap and 500Mi).
         - name: JAVA_TOOL_OPTIONS
-          value: "-Xmx400m -Xms400m"
+          value: "-Xms350m -Xmx350m -XX:MaxMetaspaceSize=150m -XX:ReservedCodeCacheSize=48m -Xss512k -XX:+UseSerialGC -XX:CICompilerCount=2 -XX:+ExitOnOutOfMemoryError"
         - name: SPRING_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
@@ -59,10 +61,10 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 400Mi
+            memory: 600Mi
           requests:
-            cpu: 200m
-            memory: 400Mi
+            cpu: 100m
+            memory: 600Mi
   strategy:
     type: RollingUpdate
     rollingUpdate:
