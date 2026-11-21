@@ -33,5 +33,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
+      # Not enough resources on the node for a second pod: stop the old one first, then start the new one
+      # (brief unavailability during the rollout, same as catering-manager).
+      maxUnavailable: 1
+      maxSurge: 0

@@ -57,8 +57,10 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
+          # Not enough resources for a second pod: replace the old one instead of starting the new one alongside it
+          kubectl patch deployment/pos-admin-deployment -n app-dev -p '{"spec":{"strategy":{"type":"RollingUpdate","rollingUpdate":{"maxSurge":0,"maxUnavailable":1}}}}'
           kubectl set image deployment/pos-admin-deployment pos-admin=ghcr.io/${{ github.repository_owner }}/pos-manager-admin:${{ steps.version.outputs.release_version }} -n app-dev
-          kubectl rollout status deployment/pos-admin-deployment -n app-dev
+          kubectl rollout status deployment/pos-admin-deployment -n app-dev --timeout=10m
 
       - name: Increment to next SNAPSHOT in package.json
         run: |
