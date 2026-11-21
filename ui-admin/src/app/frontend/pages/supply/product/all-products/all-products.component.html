@@ -83,6 +83,22 @@
                         </ng-container>
                     </ng-container>
 
+                    <!-- Image Columns -->
+                    <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
+                        <ng-container *ngIf="column.type === 'image'" [matColumnDef]="column.property">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell>
+                                {{ column.label }}
+                            </th>
+                            <td *matCellDef="let row" mat-cell>
+                                <img *ngIf="row[column.property]"
+                                    [src]="'data:image/jpeg;base64,' + row[column.property]"
+                                    alt="photo"
+                                    class="w-10 h-10 rounded object-cover" />
+                                <span *ngIf="!row[column.property]" class="text-secondary text-xs">—</span>
+                            </td>
+                        </ng-container>
+                    </ng-container>
+
                     <!-- Date Columns -->
                     <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
                         <ng-container *ngIf="column.type === 'date'" [matColumnDef]="column.property">

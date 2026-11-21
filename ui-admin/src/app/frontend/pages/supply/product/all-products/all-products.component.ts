@@ -204,6 +204,7 @@ export class AllProductsComponent {
 
   @Input()
   columns: TableColumn<ProductPayload>[] = [
+    { label: 'Photo', property: 'photo', type: 'image' as any, visible: true },
     {
       label: 'Code',
       property: 'code',
