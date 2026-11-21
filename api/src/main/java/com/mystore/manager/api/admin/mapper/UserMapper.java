@@ -51,6 +51,8 @@ public class UserMapper implements IMapper<UserPayload, UserEntity> {
         entity.setPassword(payload.getPassword());
         entity.setActive(payload.isActive());
         entity.setSuperAdmin(payload.isSuperAdmin());
+        entity.setPosAccess(payload.isPosAccess());
+        entity.setAdminAccess(payload.isAdminAccess());
         if(!Collections.isEmpty(payload.getProfils())){
             List<ProfilEntity> profils = payload.getProfils().stream().map(item -> profilRepository.findByCode(item.getCode())).toList();
             entity.setProfils(profils);
@@ -80,6 +82,8 @@ public class UserMapper implements IMapper<UserPayload, UserEntity> {
             payload.setUsername(entity.getUsername());
             payload.setActive(entity.isActive());
             payload.setSuperAdmin(entity.isSuperAdmin());
+            payload.setPosAccess(entity.isPosAccess());
+            payload.setAdminAccess(entity.isAdminAccess());
             payload.setProfils(profilMapper.entityListToPayload(entity.getProfils(), detailed));
             
             // Map pos info

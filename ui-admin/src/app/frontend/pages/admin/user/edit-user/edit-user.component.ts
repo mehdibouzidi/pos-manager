@@ -123,6 +123,9 @@ export class EditUserComponent {
     this.f['firstName'].setValue(this.payload.firstName);
     this.f['username'].setValue(this.payload.username);
     this.f['superAdmin'].setValue(this.payload.superAdmin || false);
+    this.f['posAccess'].setValue(this.payload.posAccess !== false);
+    this.f['adminAccess'].setValue(this.payload.adminAccess !== false);
+    this.lockAccessForSuperAdmin(!!this.payload.superAdmin);
     this.userProfils = this.payload.profils;
     this.dataSource.data = this.userProfils;
     // POS is set after filteredPoses is ready in initData()
@@ -147,6 +150,8 @@ export class EditUserComponent {
     
     // Super admin flag
     this.payload.superAdmin = this.f['superAdmin'].value || false;
+    this.payload.posAccess = !!this.f['posAccess'].value;
+    this.payload.adminAccess = !!this.f['adminAccess'].value;
 
     this.service.edit(this.payload).subscribe({
       next: (response: ProfilPayload) => {
@@ -220,12 +225,28 @@ export class EditUserComponent {
         this.payload.username,
         [Validators.required, Validators.maxLength(100)]
       ],
-      superAdmin: [false]
+      superAdmin: [false],
+      posAccess: [true],
+      adminAccess: [true]
     });
+  }
+
+  /** A super admin always has access to both apps: the two toggles are then shown checked and locked. */
+  private lockAccessForSuperAdmin(superAdmin: boolean) {
+    for (const name of ['posAccess', 'adminAccess']) {
+      const control = this.f[name];
+      if (superAdmin) {
+        control.setValue(true, { emitEvent: false });
+        control.disable({ emitEvent: false });
+      } else {
+        control.enable({ emitEvent: false });
+      }
+    }
   }
 
   ngOnInit(): void {
     this.initForm();
+    this.f['superAdmin'].valueChanges.subscribe((value: boolean) => this.lockAccessForSuperAdmin(!!value));
     this.setupTable();
     this.dataSource.data = this.userProfils;
     this.initObservables();

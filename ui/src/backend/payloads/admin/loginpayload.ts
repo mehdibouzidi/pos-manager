@@ -5,6 +5,8 @@ export class LoginPayload{
     usernameOrEmail: string | null;
     password: string | null;
     token: string | null;
+    // App the user logs into: 'POS' (till) or 'ADMIN' (back-office)
+    app: string | null = null;
     tokenExpiry: number | null;
     active: boolean | null = null;
     privileges: Array<string> = new Array<string>();

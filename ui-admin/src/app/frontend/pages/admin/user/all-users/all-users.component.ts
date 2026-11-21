@@ -219,6 +219,18 @@ export class AllUsersComponent {
       visible: true
     },
     {
+      label: 'Accès Caisse',
+      property: 'posAccess',
+      type: 'boolean',
+      visible: true
+    },
+    {
+      label: 'Accès Admin',
+      property: 'adminAccess',
+      type: 'boolean',
+      visible: true
+    },
+    {
       label: 'Créé le',
       property: 'createdAt',
       type: 'text',
@@ -267,6 +279,14 @@ export class AllUsersComponent {
     return this.columns
       .filter((column) => column.visible)
       .map((column) => column.property);
+  }
+
+  /** Value shown in a boolean column. App access is the effective one: a super admin always has both. */
+  isChecked(row: UserPayload, property: string): boolean {
+    if (property === 'posAccess' || property === 'adminAccess') {
+      return row.superAdmin || row[property] !== false;
+    }
+    return !!row[property];
   }
 
   trackByProperty<T>(index: number, column: TableColumn<T>) {

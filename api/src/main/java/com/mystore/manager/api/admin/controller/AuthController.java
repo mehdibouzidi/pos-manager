@@ -141,6 +141,16 @@ public class AuthController {
             throw new Exception("Incorrect username or password", e);
         }
 
+        // App access is checked only once the password is verified, so it reveals nothing about the account.
+        // A super admin is never locked out of either app.
+        String appDenied = appAccessDeniedMessage(userEntity, payload.getApp());
+        if (appDenied != null) {
+            LoginPayload errorResponse = new LoginPayload();
+            errorResponse.setErrorCode("APP_ACCESS_DENIED");
+            errorResponse.setErrorMessage(appDenied);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        }
+
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(payload.getUsernameOrEmail());
 
@@ -188,6 +198,20 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
+
+    /** Null when the user may log into {@code app}, otherwise the message to show. */
+    private static String appAccessDeniedMessage(UserEntity user, String app) {
+        if (user.isSuperAdmin() || app == null) {
+            return null;
+        }
+        if (APP_POS.equalsIgnoreCase(app) && !user.isPosAccess()) {
+            return "Votre compte n'a pas accès à la caisse. Veuillez contacter l'administrateur.";
+        }
+        if (APP_ADMIN.equalsIgnoreCase(app) && !user.isAdminAccess()) {
+            return "Votre compte n'a pas accès à l'administration. Veuillez contacter l'administrateur.";
+        }
+        return null;
+    }
 
     @PostMapping(path = SIGN_IN_EP, consumes = MediaType.MULTIPART_FORM_DATA_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserPayload> signin(

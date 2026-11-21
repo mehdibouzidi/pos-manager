@@ -6,6 +6,8 @@ export class LoginPayload{
     password: string;
     storeCodeInput: string; // Store code entered by user at login (for non-superadmin)
     token: string;
+    // App the user logs into: 'POS' (till) or 'ADMIN' (back-office)
+    app: string = null;
     tokenExpiry: number | null;
     active: boolean;
     privileges: Array<string> = new Array<string>();

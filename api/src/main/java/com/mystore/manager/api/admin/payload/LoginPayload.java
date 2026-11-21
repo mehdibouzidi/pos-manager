@@ -24,6 +24,9 @@ public class LoginPayload {
 
     private String token;
 
+    /** App the user is logging into: "POS" (till, ui) or "ADMIN" (back-office, ui-admin). */
+    private String app;
+
     private boolean isActive;
     
     private boolean superAdmin;

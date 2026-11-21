@@ -24,6 +24,9 @@ public class UserPayload extends GlobalDatePayload {
     private byte[] picture;
     private boolean isActive;
     private boolean superAdmin;
+    // Default true: a client that omits them must not lock the user out
+    private boolean posAccess = true;
+    private boolean adminAccess = true;
     private List<ProfilPayload> profils;
     
     // POS info

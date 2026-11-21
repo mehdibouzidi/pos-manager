@@ -141,6 +141,8 @@ export class AddUserComponent {
     
     // Super admin flag
     this.payload.superAdmin = this.f['superAdmin'].value || false;
+    this.payload.posAccess = !!this.f['posAccess'].value;
+    this.payload.adminAccess = !!this.f['adminAccess'].value;
 
     this.service.signin(this.payload).subscribe({
       next: (response: ProfilPayload) => {
@@ -198,12 +200,28 @@ export class AddUserComponent {
       firstName: [this.payload.firstName, [Validators.required, Validators.maxLength(100)]],
       username: [this.payload.username, [Validators.required, Validators.maxLength(100)]],
       password: [this.payload.password, [Validators.required, Validators.maxLength(100)]],
-      superAdmin: [false]
+      superAdmin: [false],
+      posAccess: [true],
+      adminAccess: [true]
     });
+  }
+
+  /** A super admin always has access to both apps: the two toggles are then shown checked and locked. */
+  private lockAccessForSuperAdmin(superAdmin: boolean) {
+    for (const name of ['posAccess', 'adminAccess']) {
+      const control = this.f[name];
+      if (superAdmin) {
+        control.setValue(true, { emitEvent: false });
+        control.disable({ emitEvent: false });
+      } else {
+        control.enable({ emitEvent: false });
+      }
+    }
   }
 
   ngOnInit(): void {
     this.initForm();
+    this.f['superAdmin'].valueChanges.subscribe((value: boolean) => this.lockAccessForSuperAdmin(!!value));
     this.setupTable();
     this.dataSource.data = this.userProfils;
     // Initialize filteredPoses eagerly so the dropdown isn't undefined while loading

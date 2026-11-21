@@ -50,6 +50,17 @@
                             </mat-chip>
                         </mat-chip-listbox>
                     </div>
+
+                    <div class="flex flex-col sm:flex-row sm:gap-4 items-center" *ngIf="!payload.superAdmin">
+                        <mat-chip-listbox>
+                            <mat-chip [highlighted]="payload.posAccess !== false" [disabled]="payload.posAccess === false">
+                                Caisse : {{ payload.posAccess !== false ? 'autorisé' : 'refusé' }}
+                            </mat-chip>
+                            <mat-chip [highlighted]="payload.adminAccess !== false" [disabled]="payload.adminAccess === false">
+                                Administration : {{ payload.adminAccess !== false ? 'autorisé' : 'refusé' }}
+                            </mat-chip>
+                        </mat-chip-listbox>
+                    </div>
                     <br>
 
                     <section>

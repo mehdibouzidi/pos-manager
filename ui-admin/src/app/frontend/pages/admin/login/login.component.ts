@@ -62,6 +62,7 @@ export class LoginComponent {
     let loginPayload = new LoginPayload();
     loginPayload.usernameOrEmail = this.form.value.username;
     loginPayload.storeCodeInput = null;
+    loginPayload.app = 'ADMIN';
 
     try {
       loginPayload.password = await this.authService.encryptPassword(this.form.value.password);

@@ -65,6 +65,17 @@
                     </div>
                     <br>
 
+                    <div class="flex flex-col sm:flex-row sm:gap-4 items-center">
+                        <mat-slide-toggle formControlName="posAccess" color="primary">
+                            Accès caisse
+                        </mat-slide-toggle>
+                        <mat-slide-toggle formControlName="adminAccess" color="primary">
+                            Accès administration
+                        </mat-slide-toggle>
+                        <mat-hint class="text-xs text-gray-500 ml-2">{{ f['superAdmin'].value ? 'Un super admin a toujours accès aux deux applications' : 'Applications auxquelles l\'utilisateur peut se connecter' }}</mat-hint>
+                    </div>
+                    <br>
+
                     <section>
                         <hr>
                         <div class="component-header">

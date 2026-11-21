@@ -27,6 +27,10 @@ export class UserPayload {
   // Super admin flag
   superAdmin: boolean = false;
 
+  // Apps the user may log into
+  posAccess: boolean = true;
+  adminAccess: boolean = true;
+
   constructor() {
     this.id = null;
     
@@ -47,5 +51,7 @@ export class UserPayload {
     this.posCode = null;
     this.posName = null;
     this.superAdmin = false;
+    this.posAccess = true;
+    this.adminAccess = true;
   }
 }

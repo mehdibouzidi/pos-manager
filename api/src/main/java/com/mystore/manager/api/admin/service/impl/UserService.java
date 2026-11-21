@@ -103,6 +103,8 @@ public class UserService implements IUserService {
                 }
 
                 userEntity.setSuperAdmin(payload.isSuperAdmin());
+                userEntity.setPosAccess(payload.isPosAccess());
+                userEntity.setAdminAccess(payload.isAdminAccess());
 
                 byte[] newPicture = CommonUtil.multipartFileToBytes(payload.getPictureIn());
                 if (userEntity.getPicture() != newPicture) {

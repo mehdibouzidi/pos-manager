@@ -5,6 +5,10 @@ public class AdminConstants {
     public static final String ADMIN_PROFIL_CODE = "ADMIN";
     public static final String BEARER = "Bearer ";
 
+    // Apps a user logs into (LoginPayload.app)
+    public static final String APP_POS = "POS";
+    public static final String APP_ADMIN = "ADMIN";
+
     //Schema Constants
     public static final String ADMIN_SCH = "admin";
 

@@ -64,6 +64,8 @@
     <include file="db/changelog/sql/V2056_add_displayed_in_pos.sql"/>
     <!-- "À table" / "À emporter" chosen at checkout and printed on the ticket -->
     <include file="db/changelog/sql/V2057_add_order_type_to_sale.sql"/>
+    <!-- Which apps a user may log into: till (ui) and/or back-office (ui-admin) -->
+    <include file="db/changelog/sql/V2058_add_app_access_to_user.sql"/>
 
 </databaseChangeLog>
     

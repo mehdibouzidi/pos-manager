@@ -60,6 +60,14 @@ public class UserEntity extends AbstractDateAudit implements UserDetails {
     @Column(name = "super_admin")
     private boolean superAdmin = false;
 
+    /** Can log into the till app (ui). */
+    @Column(name = "pos_access", nullable = false)
+    private boolean posAccess = true;
+
+    /** Can log into the back-office app (ui-admin). */
+    @Column(name = "admin_access", nullable = false)
+    private boolean adminAccess = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pos_fk", referencedColumnName = "id")
     private PosEntity pos;

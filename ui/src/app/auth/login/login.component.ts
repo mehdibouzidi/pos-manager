@@ -50,6 +50,7 @@ export class LoginComponent {
 
     const payload = new LoginPayload();
     payload.usernameOrEmail = this.usernameOrEmail;
+    payload.app = 'POS';
 
     try {
       payload.password = await this.authService.encryptPassword(this.password);
@@ -95,9 +96,9 @@ export class LoginComponent {
           this.errorMessage.set(res.errorMessage ?? 'Identifiants incorrects.');
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set('Identifiants incorrects ou serveur indisponible.');
+        this.errorMessage.set(err?.error?.errorMessage ?? 'Identifiants incorrects ou serveur indisponible.');
       }
     });
   }
