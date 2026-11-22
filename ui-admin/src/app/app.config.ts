@@ -10,7 +10,8 @@ import {
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { FR_DATE_FORMATS, FrDateAdapter } from './core/date/fr-date-adapter';
 import { provideIcons } from './core/icons/icons.provider';
 import { provideLuxon } from './core/luxon/luxon.provider';
 import { provideVex } from '@vex/vex.provider';
@@ -52,7 +53,9 @@ export const appConfig: ApplicationConfig = {
 
     { provide: LOCALE_ID, useValue: 'fr-DZ' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'Da' },
-    { provide: MAT_DATE_LOCALE, useValue: 'fr-Da' },
+    { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
+    { provide: DateAdapter, useClass: FrDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: FR_DATE_FORMATS },
 
     provideVex({
       /**

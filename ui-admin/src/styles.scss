@@ -89,10 +89,20 @@ th{
   min-width: 150px !important; /* Compact enough for 5 filters on one line */
 }
 
-/* Date filters (Du / Au): narrower so a full filter row fits on one line */
-.table-filter mat-form-field.date-filter {
-  flex: 0 1 150px !important;
-  min-width: 140px !important;
+/* Period filter (vex-date-range-filter): one field holding both dates */
+.table-filter vex-date-range-filter {
+  flex: 0 1 290px !important;
+  min-width: 260px !important;
+  margin-right: 16px !important;
+}
+.table-filter vex-date-range-filter mat-form-field {
+  margin-right: 0 !important;
+  min-width: 0 !important;
+  width: 100%;
+}
+.table-filter vex-date-range-filter button {
+  flex: none !important;
+  margin-right: 0 !important;
 }
 
 /* Autocomplete select wrapper: the inner field fills the slot, without its own extra spacing */

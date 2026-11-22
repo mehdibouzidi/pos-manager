@@ -1,3 +1,4 @@
+import { DateRange, DateRangeFilterComponent } from 'src/app/frontend/common/date-range-filter/date-range-filter.component';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
@@ -48,6 +49,7 @@ const VIEW_KEY = 'sales-view';
   styleUrl: './all-sales.component.scss',
   animations: [fadeInUp400ms, stagger40ms],
   imports: [
+    DateRangeFilterComponent,
     VexPageLayoutComponent, VexPageLayoutHeaderDirective, VexBreadcrumbsComponent,
     MatButtonToggleModule, ReactiveFormsModule, VexPageLayoutContentDirective,
     NgIf, MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule,
@@ -207,6 +209,12 @@ export class AllSalesComponent implements OnInit {
   setupTable() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  onDateRange(range: DateRange) {
+    this.criteria.fromDate = range.from;
+    this.criteria.toDate = range.to;
+    this.search();
   }
 
   search() {

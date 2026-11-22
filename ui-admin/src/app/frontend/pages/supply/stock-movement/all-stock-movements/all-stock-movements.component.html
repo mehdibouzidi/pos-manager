@@ -42,15 +42,8 @@
           </mat-autocomplete>
         </mat-form-field>
 
-        <mat-form-field class="input date-filter">
-          <mat-label>Du</mat-label>
-          <input matInput type="date" [(ngModel)]="criteria.fromDate" (change)="search()" />
-        </mat-form-field>
-
-        <mat-form-field class="input date-filter">
-          <mat-label>Au</mat-label>
-          <input matInput type="date" [(ngModel)]="criteria.toDate" (change)="search()" />
-        </mat-form-field>
+        <vex-date-range-filter [from]="criteria.fromDate" [to]="criteria.toDate"
+          (rangeChange)="onDateRange($event)"></vex-date-range-filter>
 
         <vex-autocomplete-select class="input" label="Type" placeholder="Tous les types"
           [options]="movementTypeOptions" [(ngModel)]="criteria.movementType" (valueChange)="search()">

@@ -14,15 +14,8 @@
       <!-- Filters -->
       <div class="bg-app-bar px-6 h-18 border-b sticky left-0 flex items-center gap-4 table-filter flex-wrap py-3">
 
-        <mat-form-field class="input" style="min-width: 160px;">
-          <mat-label>Du</mat-label>
-          <input matInput type="date" [(ngModel)]="criteria.fromDate" (change)="search()" />
-        </mat-form-field>
-
-        <mat-form-field class="input" style="min-width: 160px;">
-          <mat-label>Au</mat-label>
-          <input matInput type="date" [(ngModel)]="criteria.toDate" (change)="search()" />
-        </mat-form-field>
+        <vex-date-range-filter [from]="criteria.fromDate" [to]="criteria.toDate"
+          (rangeChange)="onDateRange($event)"></vex-date-range-filter>
 
         <vex-autocomplete-select class="input" style="min-width: 160px;" label="Statut" placeholder="Tous"
           [options]="statusOptions" [(ngModel)]="criteria.status" (valueChange)="search()">
