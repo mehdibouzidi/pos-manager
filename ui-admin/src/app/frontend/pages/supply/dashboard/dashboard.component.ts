@@ -15,6 +15,7 @@ import { fadeInUp400ms } from '@vex/animations/fade-in-up.animation';
 import { stagger40ms } from '@vex/animations/stagger.animation';
 import { DashboardService } from 'src/app/backend/service/business/dashboard.service';
 import { ApexOptions } from '@vex/components/vex-chart/vex-chart.component';
+import { DateRange, DateRangeFilterComponent } from 'src/app/frontend/common/date-range-filter/date-range-filter.component';
 
 @Component({
   selector: 'vex-dashboard',
@@ -39,13 +40,18 @@ import { ApexOptions } from '@vex/components/vex-chart/vex-chart.component';
     NgClass,
     DecimalPipe,
     CurrencyPipe,
-    VexChartComponent
+    VexChartComponent,
+    DateRangeFilterComponent
   ]
 })
 export class DashboardComponent implements OnInit {
 
+  /** DAY, WEEK, MONTH, YEAR, ALL, or CUSTOM when a range is picked in the "Période" field. */
   period: string = 'MONTH';
+  customFrom: string | null = null;
+  customTo: string | null = null;
   loading = false;
+  private request = 0;
 
   stats: any = null;
 
@@ -73,23 +79,62 @@ export class DashboardComponent implements OnInit {
   }
 
   load(): void {
+    // Period changed while a request was running: only the latest answer is shown
+    const request = ++this.request;
     this.loading = true;
-    this.dashboardService.getStats(this.period).subscribe({
+    const custom = this.period === 'CUSTOM';
+    this.dashboardService.getStats(this.period, custom ? this.customFrom : null, custom ? this.customTo : null).subscribe({
       next: (data: any) => {
+        if (request !== this.request) return;
+        this.loading = false;
         this.stats = data;
         this.buildKpiCards();
         this.buildHistoryChart();
         this.buildProductChart();
         this.buildTop3();
-        this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => { if (request === this.request) this.loading = false; }
     });
   }
 
   onPeriodChange(newPeriod: string): void {
     this.period = newPeriod;
+    this.customFrom = null;
+    this.customTo = null;
     this.load();
+  }
+
+  /** Custom range from the "Période" field; emptied → back to the last 30 days. */
+  onCustomRange(range: DateRange): void {
+    if (!range.from && !range.to) {
+      this.onPeriodChange('MONTH');
+      return;
+    }
+    this.period = 'CUSTOM';
+    this.customFrom = range.from;
+    this.customTo = range.to ?? range.from;
+    this.load();
+  }
+
+  /** "du 01/11/2026 au 22/11/2026", "le 22/11/2026" or "depuis le début", from the range the API used. */
+  get rangeLabel(): string {
+    const from = this.stats?.fromDate, to = this.stats?.toDate;
+    if (!from && !to) return 'Depuis le début';
+    const fmt = (d: string) => `${d.substring(8, 10)}/${d.substring(5, 7)}/${d.substring(0, 4)}`;
+    return from === to ? `Le ${fmt(from)}` : `Du ${fmt(from)} au ${fmt(to)}`;
+  }
+
+  get historyTitle(): string {
+    switch (this.stats?.granularity) {
+      case 'HOUR': return 'Ventes par heure';
+      case 'MONTH': return 'Ventes par mois';
+      default: return 'Ventes par jour';
+    }
+  }
+
+  /** At least one sale in the history (empty buckets come back at 0). */
+  get hasHistory(): boolean {
+    return (this.stats?.salesHistory ?? []).some((h: any) => +(h.salesCount ?? 0) > 0);
   }
 
   private buildKpiCards(): void {
@@ -139,16 +184,18 @@ export class DashboardComponent implements OnInit {
     const revenueData = history.map((h: any) => +(h.salesRevenue ?? 0));
     const countData = history.map((h: any) => +(h.salesCount ?? 0));
 
+    const hourly = this.stats?.granularity === 'HOUR';
     this.historyChartOptions = {
-      chart: { type: 'area', height: 280, toolbar: { show: false }, zoom: { enabled: false } },
+      chart: { type: hourly ? 'bar' : 'area', height: 280, toolbar: { show: false }, zoom: { enabled: false } },
+      plotOptions: { bar: { borderRadius: 3, columnWidth: '60%' } },
       stroke: { curve: 'smooth', width: 2 },
       fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
       dataLabels: { enabled: false },
       grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
       xaxis: {
         categories,
-        labels: { rotate: -30, style: { fontSize: '11px' } },
-        tickAmount: Math.min(categories.length, 10)
+        labels: { rotate: -30, style: { fontSize: '11px' }, hideOverlappingLabels: true },
+        tickAmount: hourly ? undefined : Math.min(categories.length, 12)
       },
       yaxis: [
         {
@@ -220,7 +267,7 @@ export class DashboardComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    if (value == null || isNaN(value)) return '0 FCFA';
+    if (value == null || isNaN(value)) return '0 Da';
     return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value) + ' Da';
   }
 

@@ -5,12 +5,19 @@
         <h1 class="title mt-0 mb-1">Tableau de Bord</h1>
         <vex-breadcrumbs [crumbs]="['Tableau de Bord']"></vex-breadcrumbs>
       </div>
-      <div class="mt-4 sm:mt-0 flex items-center gap-2">
-        <mat-button-toggle-group [value]="period" (change)="onPeriodChange($event.value)" class="mat-toggle-sm">
-          <mat-button-toggle value="WEEK">7 jours</mat-button-toggle>
-          <mat-button-toggle value="MONTH">30 jours</mat-button-toggle>
-          <mat-button-toggle value="YEAR">12 mois</mat-button-toggle>
-        </mat-button-toggle-group>
+      <div class="mt-4 sm:mt-0 flex flex-col items-end gap-1">
+        <div class="flex items-center gap-3 flex-wrap justify-end">
+          <mat-button-toggle-group [value]="period === 'CUSTOM' ? null : period" (change)="onPeriodChange($event.value)" class="mat-toggle-sm">
+            <mat-button-toggle value="DAY">Aujourd'hui</mat-button-toggle>
+            <mat-button-toggle value="WEEK">7 jours</mat-button-toggle>
+            <mat-button-toggle value="MONTH">30 jours</mat-button-toggle>
+            <mat-button-toggle value="YEAR">12 mois</mat-button-toggle>
+            <mat-button-toggle value="ALL">Tout</mat-button-toggle>
+          </mat-button-toggle-group>
+          <vex-date-range-filter class="dashboard-range" [from]="customFrom" [to]="customTo"
+            (rangeChange)="onCustomRange($event)"></vex-date-range-filter>
+        </div>
+        <span *ngIf="stats" class="text-sm opacity-80">{{ rangeLabel }}</span>
       </div>
     </div>
   </vex-page-layout-header>
@@ -37,13 +44,13 @@
     <div @stagger class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" *ngIf="stats">
       <!-- History chart -->
       <div @fadeInUp class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h3 class="text-base font-semibold text-gray-700 mb-4">Historique des Ventes</h3>
+        <h3 class="text-base font-semibold text-gray-700 mb-4">{{ historyTitle }}</h3>
         <vex-chart
-          *ngIf="historyChartSeries.length > 0 && (historyChartSeries[0].data?.length > 0 || historyChartSeries[1]?.data?.length > 0)"
+          *ngIf="hasHistory"
           [options]="historyChartOptions"
           [series]="historyChartSeries">
         </vex-chart>
-        <div *ngIf="historyChartSeries.length === 0 || (historyChartSeries[0].data?.length === 0)"
+        <div *ngIf="!hasHistory"
              class="flex items-center justify-center h-40 text-gray-400 text-sm">
           Aucune donnée de vente pour cette période
         </div>
@@ -59,7 +66,7 @@
         </vex-chart>
         <div *ngIf="!productChartSeries.length || !productChartSeries[0]?.data?.length"
              class="flex items-center justify-center h-40 text-gray-400 text-sm">
-          Aucune vente enregistrée
+          Aucune vente sur cette période
         </div>
       </div>
     </div>

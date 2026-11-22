@@ -13,6 +13,11 @@ public class DashboardPayload {
     private BigDecimal netBenefit;
     private List<ProductSalesStats> productStats;
     private List<SalesHistoryPoint> salesHistory;
+    /** Range actually used, as local business days (yyyy-MM-dd, inclusive); null bounds = since the beginning. */
+    private String fromDate;
+    private String toDate;
+    /** Bucket of the sales history: HOUR, DAY or MONTH. */
+    private String granularity;
 
     public Long getTotalSalesCount() { return totalSalesCount; }
     public void setTotalSalesCount(Long totalSalesCount) { this.totalSalesCount = totalSalesCount; }
@@ -34,6 +39,15 @@ public class DashboardPayload {
 
     public List<ProductSalesStats> getProductStats() { return productStats; }
     public void setProductStats(List<ProductSalesStats> productStats) { this.productStats = productStats; }
+
+    public String getFromDate() { return fromDate; }
+    public void setFromDate(String fromDate) { this.fromDate = fromDate; }
+
+    public String getToDate() { return toDate; }
+    public void setToDate(String toDate) { this.toDate = toDate; }
+
+    public String getGranularity() { return granularity; }
+    public void setGranularity(String granularity) { this.granularity = granularity; }
 
     public List<SalesHistoryPoint> getSalesHistory() { return salesHistory; }
     public void setSalesHistory(List<SalesHistoryPoint> salesHistory) { this.salesHistory = salesHistory; }

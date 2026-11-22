@@ -22,7 +22,9 @@ public class DashboardController {
 
     @GetMapping("/stats")
     public ResponseEntity<DashboardPayload> getStats(
-            @RequestParam(name = "period", defaultValue = "MONTH") String period) {
-        return ResponseEntity.ok(dashboardService.getStats(period));
+            @RequestParam(name = "period", defaultValue = "MONTH") String period,
+            @RequestParam(name = "fromDate", required = false) String fromDate,
+            @RequestParam(name = "toDate", required = false) String toDate) {
+        return ResponseEntity.ok(dashboardService.getStats(period, fromDate, toDate));
     }
 }
