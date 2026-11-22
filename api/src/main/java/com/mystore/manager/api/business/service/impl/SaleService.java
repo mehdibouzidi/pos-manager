@@ -205,6 +205,13 @@ public class SaleService implements ISaleService {
         countQuery.select(cb.count(countRoot)).where(predicates(cb, countQuery, countRoot, criteria).toArray(new Predicate[0]));
         long total = entityManager.createQuery(countQuery).getSingleResult();
 
+        // Amount of every ticket matching the filters, whatever the page shown
+        CriteriaQuery<Double> sumQuery = cb.createQuery(Double.class);
+        Root<SaleEntity> sumRoot = sumQuery.from(SaleEntity.class);
+        sumQuery.select(cb.coalesce(cb.sum(sumRoot.<Double>get("totalAmount")), 0d))
+                .where(predicates(cb, sumQuery, sumRoot, criteria).toArray(new Predicate[0]));
+        Double totalAmount = entityManager.createQuery(sumQuery).getSingleResult();
+
         int size = criteria.getSize() != null && criteria.getSize() > 0 ? Math.min(criteria.getSize(), 200) : 10;
         int page = criteria.getPages() != null && criteria.getPages() > 0 ? criteria.getPages() : 0;
         List<SaleEntity> entities = entityManager.createQuery(cq)
@@ -216,6 +223,7 @@ public class SaleService implements ISaleService {
         result.setElements(saleMapper.entityListToPayload(entities));
         result.setTotalNumberOfElements((int) total);
         result.setTotalNumberOfPages((int) ((total + size - 1) / size));
+        result.setTotalAmount(totalAmount);
         return result;
     }
 

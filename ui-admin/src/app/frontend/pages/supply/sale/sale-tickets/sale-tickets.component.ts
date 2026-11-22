@@ -110,7 +110,7 @@ const ORDER_TYPE_LABELS: Record<string, string> = { DINE_IN: 'À table', TAKEAWA
     <div class="flex items-center justify-between flex-wrap gap-2 px-6 border-t">
       <span class="text-sm text-secondary py-3">
         {{ page.totalNumberOfElements ?? 0 }} ticket{{ (page.totalNumberOfElements ?? 0) > 1 ? 's' : '' }}
-        <ng-container *ngIf="tickets.length">· total de la page {{ pageTotal | number:'1.2-2' }} Da</ng-container>
+        <ng-container *ngIf="tickets.length">· total <span class="font-semibold text-default">{{ total | number:'1.2-2' }} Da</span></ng-container>
       </span>
       <mat-paginator [pageSizeOptions]="[10, 20, 50]" [pageSize]="criteria.size" [pageIndex]="criteria.pages"
         [length]="page.totalNumberOfElements" (page)="onPage($event)" showFirstLastButtons>
@@ -128,7 +128,8 @@ export class SaleTicketsComponent implements OnChanges {
   criteria = new SaleCriteria();
   page = new GlobalPayload<SalePayload>();
   tickets: SalePayload[] = [];
-  pageTotal = 0;
+  /** Amount of all the tickets matching the filters (every page). */
+  total = 0;
   isLoading = false;
   error: string | null = null;
   private request = 0;
@@ -177,7 +178,7 @@ export class SaleTicketsComponent implements OnChanges {
           if (request !== this.request) return;
           this.page = page ?? new GlobalPayload<SalePayload>();
           this.tickets = this.page.elements ?? [];
-          this.pageTotal = this.tickets.reduce((sum, t) => sum + (t.totalAmount ?? 0), 0);
+          this.total = this.page.totalAmount ?? 0;
         },
         error: () => {
           if (request !== this.request) return;
